@@ -21,6 +21,12 @@ npm install webpack -g
 npm install babel -g
 ```
 
+## 在浏览器上运行
+```bash
+compile.bat
+```
+之后，引入 /build/index.js 或 /build/index.min.js
+
 ## 需要在根目录创建 `lib` 目录，将 `react.js` 和 `react-dom.js` 放入其中，demo才能正常运行。
 
 
