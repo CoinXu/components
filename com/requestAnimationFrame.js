@@ -8,14 +8,14 @@
 var lastTime = 0;
 var vendors = ['ms', 'moz', 'webkit', 'o'];
 var noop = require('./noop');
+var runtimeIsNode = require('./runtimeIsNode')();
 
 var exports = {
     requestAnimationFrame: noop,
     cancelAnimationFrame: noop
 };
 
-
-if (typeof process !== 'object') {
+if (!runtimeIsNode) {
     for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
         window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
         window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame']
