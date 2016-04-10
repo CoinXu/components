@@ -27,7 +27,7 @@ module.exports = {
     output: {
         path: 'build',
         filename: filename + 'js',
-        library: 'Essa',
+        library: 'EssaComponents',
         libraryTarget: 'this'
     },
 

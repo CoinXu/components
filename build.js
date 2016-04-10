@@ -5,7 +5,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var exportsFunctionString = function (libraryName, funcBody, mini) {
+var exportsFunctionString = function (libraryName, funcBody) {
     return `(function (f) {if (typeof exports === "object" && typeof module !== "undefined") {module.exports = f(require('${libraryName}'));} else if (typeof define === "function" && define.amd) {define(['${libraryName}'], f());} else {var g;if (typeof window !== "undefined") {g = window;} else if (typeof global !== "undefined") {g = global;} else if (typeof self !== "undefined") {g = self;} else {g = this;}g.${libraryName} = f();}})(function () {return ${funcBody}});`;
 };
 
