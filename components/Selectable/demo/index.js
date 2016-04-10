@@ -4,8 +4,10 @@
 
 var Selector = require('../index');
 var DropDown = require('../DropDown');
-var ReactDOM = require('react-dom');
+var Checkbox = require('../Checkbox');
+
 var React = require('react');
+var ReactDOM = require('react-dom');
 
 var log = function () {
     console.info(arguments)
@@ -65,3 +67,31 @@ ReactDOM.render(
         onSelect={log}/>,
     document.getElementById('mini-container')
 );
+
+// Checkbox
+// 模拟搜索列表中的选项
+
+var checkboxItemList = function () {
+    return new Array(10).fill(1).map(function (v, i) {
+        return {value: i, content: {name: 'name-' + i, widget: '(123' + i + ')'}}
+    })
+}();
+
+ReactDOM.render(
+    <Checkbox
+        itemList={checkboxItemList}
+        onchange={log}
+        checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>,
+    document.getElementById('checkbox-box')
+);
+
+// 单选
+ReactDOM.render(
+    <Checkbox
+        allowMulti={false}
+        itemList={checkboxItemList}
+        onchange={log}
+        checkedList={[checkboxItemList[0]]}/>,
+    document.getElementById('checkbox-box-single')
+);
+

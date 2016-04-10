@@ -1,6 +1,6 @@
 node_modules
 .idea
-lib
-dist
-build
-documents
+/lib
+/dist
+/build
+/documents
