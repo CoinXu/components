@@ -77,21 +77,67 @@ var checkboxItemList = function () {
     })
 }();
 
-ReactDOM.render(
-    <Checkbox
-        itemList={checkboxItemList}
-        onchange={log}
-        checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>,
-    document.getElementById('checkbox-box')
-);
 
+// 多选
+var CheckWrap = React.createClass({
+
+    getDefaultProps: function () {
+        return {
+            maxChecked: 1
+        }
+    },
+
+    holdCheckbox: function (checkbox) {
+        this._checkbox = checkbox;
+    },
+
+    cleanup: function () {
+        this._checkbox.cleanup()
+    },
+
+    checkAll: function () {
+        this._checkbox.checkAll()
+    },
+
+    getCheckedValue: function () {
+        console.log(this._checkbox.getCheckedValue())
+    },
+
+    render: function () {
+        return <div className="msg-condition">
+            <div className="condition-title">
+                <a className="color-green" onClick={this.checkAll}>All</a>
+                <a className="a-link" onClick={this.cleanup}>Clear</a>
+            </div>
+            <div className="condition-padding msg-common-checkbox">
+                <Checkbox
+                    maxChecked={this.props.maxChecked}
+                    onComponentMount={this.holdCheckbox}
+                    itemList={checkboxItemList}
+                    onchange={log}
+                    checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>
+            </div>
+            <button className="btn btn-default btn-xs" onClick={this.getCheckedValue}>
+                点击log当前选中的值
+            </button>
+        </div>
+    }
+});
+
+// 可全选
+ReactDOM.render(
+    <CheckWrap maxChecked={checkboxItemList.length}/>,
+    document.getElementById('multi-checkbox')
+);
 // 单选
 ReactDOM.render(
-    <Checkbox
-        allowMulti={false}
-        itemList={checkboxItemList}
-        onchange={log}
-        checkedList={[checkboxItemList[0]]}/>,
-    document.getElementById('checkbox-box-single')
+    <CheckWrap maxChecked={1}/>,
+    document.getElementById('single-checkbox')
+);
+
+// 最多选3个
+ReactDOM.render(
+    <CheckWrap maxChecked={3}/>,
+    document.getElementById('extra-checkbox')
 );
 

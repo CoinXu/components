@@ -8,7 +8,10 @@ var noop = require('../../com/noop');
 var Checkbox = React.createClass({
 
     getInitialState: function () {
-        return {checkedList: []}
+        return {
+            checkedList: [],
+            maxChecked: 1
+        }
     },
 
     getDefaultProps: function () {
@@ -16,7 +19,8 @@ var Checkbox = React.createClass({
             wrapClassName: 'list',
             checkedList: [],
             itemList: [],
-            allowMulti: true,
+            // 可选择多少个
+            maxChecked: null,
             onComponentMount: noop,
             onChange: noop,
             getContent: function (item, index, inst) {
@@ -37,31 +41,23 @@ var Checkbox = React.createClass({
         var index = checkedList.indexOf(item);
 
         // copy checkedList
-        var nextCheckedList = checkedList.slice(0, checkedList.length);
+        var nextCheckedList = checkedList.slice(0);
 
-        // 单选
-        if (!this.props.allowMulti) {
-            nextCheckedList = checked ? [item] : []
-        }
-        // 多选
-        else {
-            // 取消选中时
-            // 如果已经选中，则删除
-            // 未选中，则忽略
-            if (!checked && index !== -1) {
-                nextCheckedList.splice(index, 1);
-            }
-
-            else if (index === -1) {
-                nextCheckedList.push(item);
-            }
+        if (!checked && index !== -1) {
+            nextCheckedList.splice(index, 1);
+        } else if (index === -1) {
+            nextCheckedList.push(item);
         }
 
         this.updateCheckedList(nextCheckedList);
     },
 
+    getCheckedValue: function () {
+        return this.state.checkedList
+    },
+
     updateCheckedList: function (checkedList) {
-        this.setState({checkedList: checkedList})
+        this.setState({checkedList: checkedList.slice(0, this.state.maxChecked)})
     },
 
     cleanup: function () {
@@ -69,7 +65,7 @@ var Checkbox = React.createClass({
     },
 
     checkAll: function () {
-        this.updateCheckedList(this._checkbox)
+        this.updateCheckedList(this.props.itemList)
     },
 
     recordCheckbox: function (checkboxInst) {
@@ -78,9 +74,25 @@ var Checkbox = React.createClass({
 
     componentWillMount: function () {
         this._checkbox = [];
-        if (this.props.checkedList.length > 0) {
-            this.updateCheckedList(this.props.checkedList)
+
+        var maxChecked = this.props.maxChecked;
+
+        if (maxChecked == null) {
+            maxChecked = this.props.checkedList.length;
         }
+
+        if (typeof maxChecked !== 'number' && !this.props.maxChecked) {
+            maxChecked = 1;
+        }
+
+        this.setState({
+            maxChecked: maxChecked,
+            checkedList: this.props.checkedList.slice(0, maxChecked)
+        });
+    },
+
+    componentDidMount: function () {
+        this.props.onComponentMount(this)
     },
 
     shouldComponentUpdate: function (nextProps, nextState) {
@@ -157,6 +169,10 @@ Checkbox.Checkbox = React.createClass({
 
     componentWillMount: function () {
         this.setState({checked: this.props.checked});
+    },
+
+    componentDidMount: function () {
+        this.props.onComponentMount(this)
     },
 
     componentWillReceiveProps: function (nextProps) {
