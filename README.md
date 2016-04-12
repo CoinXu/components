@@ -23,7 +23,7 @@ npm install babel -g
 
 ## 在浏览器上运行
 ```bash
-compile.bat
+build.bat
 ```
 之后，引入 /build/index.js 或 /build/index.min.js
 

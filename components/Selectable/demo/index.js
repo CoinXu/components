@@ -112,8 +112,9 @@ var CheckWrap = React.createClass({
             <div className="condition-padding msg-common-checkbox">
                 <Checkbox
                     maxChecked={this.props.maxChecked}
-                    onComponentMount={this.holdCheckbox}
                     itemList={checkboxItemList}
+                    onComponentMount={this.holdCheckbox}
+                    onOutOfBounds={log}
                     onchange={log}
                     checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>
             </div>

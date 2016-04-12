@@ -21,6 +21,7 @@ var Checkbox = React.createClass({
             itemList: [],
             // 可选择多少个
             maxChecked: null,
+            onOutOfBounds: noop,
             onComponentMount: noop,
             onChange: noop,
             getContent: function (item, index, inst) {
@@ -49,6 +50,11 @@ var Checkbox = React.createClass({
             nextCheckedList.push(item);
         }
 
+        // 选择数量越界
+        if (nextCheckedList.length > this.state.maxChecked) {
+            this.props.onOutOfBounds(nextCheckedList)
+        }
+
         this.updateCheckedList(nextCheckedList);
     },
 
@@ -70,6 +76,18 @@ var Checkbox = React.createClass({
 
     recordCheckbox: function (checkboxInst) {
         this._checkbox.push(checkboxInst);
+    },
+
+    listHasChange: function (cur, next) {
+        return cur.length !== next.length || cur.some(function (item) {
+                return next.indexOf(item) === -1
+            })
+    },
+
+    componentWillUpdate: function (nextProps, nextState) {
+        if (this.listHasChange(this.state.checkedList, nextState.checkedList)) {
+            this.props.onChange(this.state.checkedList, nextState.checkedList)
+        }
     },
 
     componentWillMount: function () {
@@ -97,10 +115,7 @@ var Checkbox = React.createClass({
 
     shouldComponentUpdate: function (nextProps, nextState) {
         // 如果下一次要更新checkbox与上一次一样，则不用更新
-        return nextState.checkedList.length !== this.state.checkedList ||
-            nextState.checkedList.some(function (item) {
-                return this.state.checkedList.indexOf(item) === -1
-            }, this)
+        return this.listHasChange(this.state.checkedList, nextState.checkedList);
     },
 
     render: function () {
