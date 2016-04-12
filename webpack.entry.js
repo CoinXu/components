@@ -17,5 +17,6 @@ module.exports = {
     HideOnBodyClick: _path('HideOnBodyClick'),
     Message: _path('Message'),
     Selectable: _path('Selectable'),
-    Pagination: _path('Pagination')
+    Pagination: _path('Pagination'),
+    WebExcel: _path('WebExcel')
 };

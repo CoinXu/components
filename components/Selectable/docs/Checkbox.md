@@ -15,8 +15,10 @@
 + checkAll() - 全选
 + getCheckedValue() - 获取所选项
 
-## 组合。演示清除和全选。
+## 示例
+1.创建
 ```JavaScript
+var Checkbox = require('essa-components').Checkbox;
 var CheckWrap = React.createClass({
     getDefaultProps: function () {
         return {
@@ -56,5 +58,37 @@ var CheckWrap = React.createClass({
         </div>
     }
 });
+```
+
+1. 声明listItem
+```JavaScript
+var checkboxItemList = function () {
+    return new Array(10).fill(1).map(function (v, i) {
+        return {value: i, content: {name: 'name-' + i, widget: '(123' + i + ')'}}
+    })
+}();
+```
+2. 全选
+```JavaScript
+ReactDOM.render(
+    <CheckWrap maxChecked={checkboxItemList.length}/>,
+    document.getElementById('multi-checkbox')
+);
+```
+
+3. 单选
+```JavaScript
+ReactDOM.render(
+    <CheckWrap maxChecked={1}/>,
+    document.getElementById('single-checkbox')
+);
+```
+
+4. 可选3个
+```JavaScript
+ReactDOM.render(
+    <CheckWrap maxChecked={3}/>,
+    document.getElementById('extra-checkbox')
+);
 ```
 
