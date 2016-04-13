@@ -9,5 +9,6 @@ module.exports = {
     FOContainer: require('./FirstOutContainer'),
     MiniContainer: require('./MiniContainer'),
     DropDown: require('./DropDown'),
+    Custom: require('./Custom'),
     Selectable: require('./Selectable')
 };

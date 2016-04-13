@@ -37,3 +37,11 @@
 \                       /
 +---- panelContent ----+
 ```
+## 示例
+```JavaScript
+var DropDown = require('essa-components').DropDown;
+// 自定义selector
+var getSelector = function(currentSelectedValue){
+    return 
+}
+```

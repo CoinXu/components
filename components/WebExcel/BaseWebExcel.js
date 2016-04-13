@@ -4,6 +4,7 @@ var Cell = require('./cell');
 var query = require('./lib/query');
 var dom = require('./lib/dom');
 var ZeroClipboard = require('./lib/ZeroClipboard');
+
 ZeroClipboard.config({
     swfPath: '/react-components/components/WebExcel/lib/ZeroClipboard.swf'
 });

@@ -25,6 +25,8 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
     // 单元格改变事件
     // 该事件会传递到所有的cell上
     const excel = this.webExcel;
+    const self = this;
+
     excel.on('change', function (oldVal, newVal, cell) {
         console.log('cell\'s value changed: ', oldVal, newVal, cell.x, cell.y);
     });
@@ -45,32 +47,57 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
 
     // 鼠标进行选择时事件
     // 比如画出所选范围
-    excel.on('moving', function (startNode, endNode, focusCells) {
-        var start = {x: startNode.offsetLeft, y: startNode.offsetTop};
-        var end = {
-            x: endNode.offsetLeft + endNode.offsetWidth,
-            y: endNode.offsetTop + endNode.offsetHeight
-        };
+    //excel.on('moving', function (startNode, endNode, focusCells) {
+    //    var start = {x: startNode.offsetLeft, y: startNode.offsetTop};
+    //    var end = {
+    //        x: endNode.offsetLeft + endNode.offsetWidth,
+    //        y: endNode.offsetTop + endNode.offsetHeight
+    //    };
+    //
+    //    region.style.cssText = 'top:' + start.y + 'px;left:' + start.x
+    //        + 'px;width:' + (end.x - start.x) + 'px;height:'
+    //        + (end.y - start.y) + 'px';
+    //});
 
-        region.style.cssText = 'top:' + start.y + 'px;left:' + start.x
-            + 'px;width:' + (end.x - start.x) + 'px;height:'
-            + (end.y - start.y) + 'px';
+    excel.on('moving', function (startNode, endNode, focusCells) {
+        var pos = self.computePos(startNode, endNode);
+        region.style.cssText = self.styleCssText(pos.x, pos.y, pos.w, pos.h);
     });
 
     excel.on('startRegion', function (startNode) {
-        region.style.cssText = 'width:0;height:0;';
+        var pos = self.computePos(startNode, startNode);
+        region.style.cssText = self.styleCssText(pos.x, pos.y, pos.w, pos.h);
         try {
-            baseWebExcel.node.appendChild(region)
+            excel.node.appendChild(region)
         } catch (e) {
         }
     });
 
     excel.on('endRegion', function (endNode) {
         try {
-            baseWebExcel.node.removeChild(region)
+            excel.node.removeChild(region)
         } catch (e) {
         }
     });
+};
+
+WebExcelWrapper.prototype.styleCssText = function (x, y, w, h) {
+    return `width:${w}px;height:${h}px;top:${y}px;left:${x}px;`
+};
+
+WebExcelWrapper.prototype.computePos = function (startNode, endNode) {
+    var start = {x: startNode.offsetLeft, y: startNode.offsetTop};
+    var end = {
+        x: endNode.offsetLeft + endNode.offsetWidth,
+        y: endNode.offsetTop + endNode.offsetHeight
+    };
+
+    return {
+        x: start.x,
+        y: start.y,
+        w: end.x - start.x,
+        h: end.y - start.y
+    }
 };
 
 WebExcelWrapper.prototype.render = function () {

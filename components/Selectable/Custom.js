@@ -6,28 +6,8 @@ var React = require('react');
 var DropDown = require('./DropDown');
 var noop = require('../../com/noop');
 
-var getSelectorContent = function (rejectValue, onChange) {
-    return function (value) {
-        if (value === rejectValue) {
-            return <input
-                onChange={onChange}
-                className="input-default"
-                style={{width:60}}
-                placeholder="请输入..."/>
-        }
-        return <div className="comp-select-selector">
-            <span className="util-font-12">{value}</span>
-            <span className="icon-img icon-tran-black-d"/>
-        </div>
-    }
-};
 
-var getItemContent = function (value, props) {
-    var item = <li className="comp-panel-item"><strong>{value}</strong></li>;
-    return React.cloneElement(item, props);
-};
-
-var Importable = React.createClass({
+var Custom = React.createClass({
 
     getInitialState: function () {
         return {
@@ -37,13 +17,12 @@ var Importable = React.createClass({
 
     getDefaultProps: function () {
         return {
-            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, '10+'],
+            itemList: [],
             wrapClassName: null,
-            defaultSelectedValue: 1,
+            defaultSelectedValue: null,
             onSelect: noop,
-            getSelectorContent: getSelectorContent(null),
-            getItemContent: getItemContent,
-            rejectValue: '10+'
+            getSelectorContent: noop,
+            getItemContent: noop
         }
     },
 
@@ -59,10 +38,11 @@ var Importable = React.createClass({
     },
 
     componentWillMount: function () {
-        this._getSelectorContent = getSelectorContent(
-            this.props.rejectValue,
-            this.onSelect
-        );
+        this.setState({
+            currentSelectedValue: this.props.defaultSelectedValue === null ?
+                this.props.itemList[0] :
+                this.props.defaultSelectedValue
+        })
     },
 
     ensureEvent: function () {
@@ -77,12 +57,10 @@ var Importable = React.createClass({
 
         var selectorContent = <DropDown.Selector
             onSelect={self.onSelect}
-            defaultSelectedValue={self.state.currentSelectedValue !== null ?
-                    self.state.currentSelectedValue :
-                    props.defaultSelectedValue}
-            getSelectorContent={self._getSelectorContent}/>;
+            defaultSelectedValue={self.state.currentSelectedValue}
+            getSelectorContent={props.getSelectorContent}/>;
 
-        var panelContent = React.Children.map(props.itemList, function (value, index) {
+        var panelContent = props.itemList.map(function (value, index) {
             return <DropDown.Item
                 value={value}
                 key={index}
@@ -90,10 +68,11 @@ var Importable = React.createClass({
         });
 
         return <DropDown
+            wrapClassName={props.wrapClassName}
             selectorBindEvent={this.ensureEvent()}
             selectorContent={selectorContent}
             panelContent={panelContent}/>
     }
 });
 
-module.exports = Importable;
+module.exports = Custom;

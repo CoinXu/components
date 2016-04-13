@@ -11,6 +11,7 @@ var Selectable = React.createClass({
 
     getDefaultProps: function () {
         return {
+            wrapClassName: null,
             onSelect: noop,
             onComponentMount: noop,
             selectorBindEvent: true,
@@ -60,10 +61,14 @@ var Selectable = React.createClass({
 
     render: function () {
         var props = this.props;
-        var className = classNames({
+        var className = {
             'comp-custom-select': true,
             'comp-show-panel': this.state.panelStateIsShow
-        });
+        };
+
+        if (props.wrapClassName) {
+            className[props.wrapClassName] = true;
+        }
 
         var selector = null;
         if (props.selectorBindEvent) {
@@ -74,7 +79,7 @@ var Selectable = React.createClass({
             selector = props.selectorContent;
         }
 
-        return (<div className={className} ref="selectable">
+        return (<div className={classNames(className)} ref="selectable">
             <div className="comp-select-selector-pd">
                 {selector}
             </div>

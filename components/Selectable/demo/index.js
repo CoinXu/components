@@ -13,6 +13,31 @@ var log = function () {
     console.info(arguments)
 };
 
+// 自定义属性值
+// 自定义selector
+var getSelector = function (currentSelectedValue) {
+    return <div className="comp-select-selector">
+        <span className="util-font-12">{currentSelectedValue.text}</span>
+        <span className="icon-img icon-tran-black-d"/>
+    </div>
+};
+
+var getItem = function (value, props) {
+    var item = <li className="comp-panel-item" key={value.code}>
+        <strong>{value.text}</strong>
+    </li>;
+    return React.cloneElement(item, props);
+};
+
+ReactDOM.render(
+    <Selector.Custom
+        itemList={[{text:1, code:1},{text:2, code:2},{text:3, code:3}]}
+        getItemContent={getItem}
+        getSelectorContent={getSelector}
+        onSelect={log}/>,
+    document.getElementById('custom-dropdown')
+);
+
 ReactDOM.render(
     <Selector.Importable onSelect={log}/>,
     document.getElementById('demo')

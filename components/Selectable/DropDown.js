@@ -11,6 +11,7 @@ var DropDown = React.createClass({
     getDefaultProps: function () {
         return {
             onSelect: noop,
+            wrapClassName: null,
             selectorContent: null,
             selectorBindEvent: true,
             panelContent: null
@@ -41,10 +42,13 @@ var DropDown = React.createClass({
 
     render: function () {
         var props = this.props;
-        var items = React.Children.map(props.panelContent, function (item) {
-            return item.props.isItem ?
-                React.cloneElement(item, {onSelect: this.onSelect}) :
-                item;
+
+        var items = props.panelContent.map(function (item, index) {
+            var _props = {key: index};
+            if (item.props.isItem) {
+                _props.onSelect = this.onSelect
+            }
+            return React.cloneElement(item, _props)
         }, this);
 
         var panelContent = <ol className="comp-select-m-t">
@@ -56,6 +60,7 @@ var DropDown = React.createClass({
         });
 
         return <Selectable
+            wrapClassName={props.wrapClassName}
             selectorBindEvent={props.selectorBindEvent}
             onComponentMount={this.onSelectableMount}
             selectorContent={selectorContent}
