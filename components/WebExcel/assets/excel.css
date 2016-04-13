@@ -50,7 +50,7 @@
 
 .web-excel-wrapper .cell.on-focus,
 .web-excel-wrapper .cell-input {
-    background-color: rgb(160, 195, 255);
+    background-color: #d2d2d2;
     color: #f5f5f5;
 }
 
