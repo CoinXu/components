@@ -9,7 +9,7 @@
 
 .web-excel-wrapper,
 .web-excel-wrapper .cell-input {
-    font:12px/1.4 'sans-serif';
+    font: 12px/1.4 'sans-serif';
 }
 
 .web-excel-wrapper .table {
@@ -20,38 +20,45 @@
     display: table-row;
 }
 
-.web-excel-wrapper .cell {
-    display: table-cell;
-}
-
 .web-excel-wrapper .col-index-cell {
     width: 30px;
 }
 
 .web-excel-wrapper .cell {
-    cursor: pointer;
     display: table-cell;
-    border: 1px solid #f5f5f5;
+    border: 1px solid #e7e7e7;
+    vertical-align: middle;
+    cursor: pointer;
 }
 
 .web-excel-wrapper .cell > .cell-con {
     box-sizing: border-box;
-    padding: 2px 6px;
+    height: 24px;
+    line-height: 24px;
     width: 100%;
-    height: 100%;
 }
 
 .web-excel-wrapper .cell-input {
     border: 0;
     outline: none;
+    height: 24px;
     width: 100%;
+    line-height: 24px;
     text-align: center;
 }
 
-.web-excel-wrapper .cell.on-focus,
-.web-excel-wrapper .cell-input {
+.web-excel-wrapper .cell.on-focus {
     background-color: #d2d2d2;
-    color: #f5f5f5;
+}
+
+.web-excel-wrapper .web-excel-point {
+    width: 7px;
+    height: 7px;
+    background-color: #207345;
+    border: 1px solid #fff;
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
 }
 
 .agent-text-area {
@@ -60,4 +67,9 @@
     width: 0;
     height: 0;
     overflow: hidden;
+}
+
+.region {
+    position: fixed;
+    border: 2px solid #207345;
 }

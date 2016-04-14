@@ -13,12 +13,55 @@ const lang = require('./lib/lang');
 
 
 function WebExcelWrapper(options) {
+    lang.extend(this.options = {defaultSelect: [0, 0]}, options);
     this.webExcel = new BaseWebExcel({
-        parent: options.mountNode,
-        model: options.model
+        parent: this.options.mountNode,
+        model: this.options.model
     });
-    this.bindOperateUi();
 }
+
+WebExcelWrapper.prototype.createCover = function () {
+    var excel = this.webExcel;
+    var contentId = 'operate-wrap-' + lang.randomRange(10, 10, 100).join('');
+
+    excel.node.removeChild(excel.zeroClipboardNode);
+    excel.zeroClipboardNode.style.cssText = 'border:0;outline:0;background:none;height:12px;cursor:pointer;';
+
+    var region = dom.DOM.div({className: 'region'});
+    region.innerHTML = `
+    <div class="web-excel-point"></div>
+    <div class="bub bub-dir-t" style="position: absolute;
+        bottom:-58px;width:102px;right:0;margin-right:-51px;">
+        <span class="bub-symbol icon-img icon-arrow-blue-t" style="left:41px;"></span>
+        <div class="bub-con bub-all-pd">
+        <ul class="list list-inline list-st util-line-s">
+            <li id="${contentId}"></li>
+            <li>粘贴</li>
+        </ul>
+        </div>
+    </div>`;
+
+    // 默认选中第[0,0]个位置
+    var defaultCoord = this.options.defaultSelect;
+    var defaultNode = excel.getRows(defaultCoord[0])[defaultCoord[1]].node;
+
+    excel.regionStart = defaultNode;
+
+    region.style.cssText = this.styleCssText(
+        defaultNode.offsetLeft,
+        defaultNode.offsetTop,
+        defaultNode.offsetWidth,
+        defaultNode.offsetHeight
+    );
+
+    excel.node.appendChild(region);
+    query('#' + contentId)[0].appendChild(excel.zeroClipboardNode);
+
+    excel.cellOnFocus(excel.regionStart);
+    excel.cellOnEdit(excel.regionStart);
+
+    return region;
+};
 
 WebExcelWrapper.prototype.bindOperateUi = function () {
 
@@ -32,36 +75,14 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
         console.log('cell\'s value changed: ', oldVal, newVal, cell.x, cell.y);
     });
 
-    // 单元格render后事件
-    // 该事件会传递到所有的cell上
-    excel.on('cellRender', function (cell) {
-        console.log('cellRender', cell.x, cell.y);
-    });
-
-    var region = dom.DOM.div({className: 'region'});
+    var region = this.createCover();
     var $region = query(region);
-
-    excel.node.appendChild(region);
 
     $region.on('mouseup', null, function (e) {
         excel.isDragStatus = false;
         excel.agentTextArea.focus();
         excel.emit('endRegion', excel.regionEnd)
     });
-
-    // 鼠标进行选择时事件
-    // 比如画出所选范围
-    //excel.on('moving', function (startNode, endNode, focusCells) {
-    //    var start = {x: startNode.offsetLeft, y: startNode.offsetTop};
-    //    var end = {
-    //        x: endNode.offsetLeft + endNode.offsetWidth,
-    //        y: endNode.offsetTop + endNode.offsetHeight
-    //    };
-    //
-    //    region.style.cssText = 'top:' + start.y + 'px;left:' + start.x
-    //        + 'px;width:' + (end.x - start.x) + 'px;height:'
-    //        + (end.y - start.y) + 'px';
-    //});
 
     excel.on('moving', function (startNode, endNode, focusCells, coverRegion) {
         var start = coverRegion.start;
@@ -84,11 +105,12 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
     });
 
     excel.on('endRegion', function (endNode) {
+        // todo 应该将Cover写成四条边线，不然没办法用鼠标操作Input
         try {
             if (excel.regionStart === excel.regionEnd) {
                 excel.cellOnFocus(excel.regionStart);
+                excel.cellOnEdit(excel.regionStart)
             }
-            excel.cellOnEdit(excel.regionStart)
         } catch (e) {
         }
     });
@@ -100,6 +122,17 @@ WebExcelWrapper.prototype.styleCssText = function (x, y, w, h) {
 
 WebExcelWrapper.prototype.render = function () {
     this.webExcel.render();
+    this.afterRender();
+};
+
+WebExcelWrapper.prototype.afterRender = function () {
+    // 渲染完成后，计算格式的宽度
+    // 以满足自适应的需求
+    lang.forEach(this.webExcel.getRows(0), function (cell) {
+        cell.node.style.cssText = `width:${cell.node.offsetWidth}px`;
+        console.log(cell)
+    });
+    this.bindOperateUi();
 };
 
 module.exports = WebExcelWrapper;

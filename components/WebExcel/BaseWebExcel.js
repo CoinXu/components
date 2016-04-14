@@ -388,6 +388,7 @@ module.exports = Component.extend({
             return this;
         }
 
+        // 第一个选中的单元格不添加样式
         lang.forEach(this.focusCells, function (c) {
             this.getCellsWithCoords(c.x, c.y).onFocus();
         }, this);
