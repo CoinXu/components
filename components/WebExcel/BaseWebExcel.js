@@ -217,46 +217,46 @@ module.exports = Component.extend({
      * @param $node
      */
     bindEdit: function ($node) {
-        var _this = this;
+        var self = this;
         var config = this.config, dot = '.';
         this.isInputFocusStatus = false;
         // 获得焦点
         $node.on('click', dot + config.activeCellClassName, function (e, target) {
-            if (_this.isInputFocusStatus) {
+            if (self.isInputFocusStatus) {
                 return null;
             }
-            _this.isDragStatus = false;
-            _this.cellOnFocus(target);
+            self.isDragStatus = false;
+            self.cellOnFocus(target);
         });
 
         // 双击编辑
         $node.on('dblclick', dot + config.activeCellClassName, function (e, target) {
-            if (_this.isInputFocusStatus) {
+            if (self.isInputFocusStatus) {
                 return null;
             }
-            _this.isDragStatus = false;
-            _this.cellOnEdit(target);
+            self.isDragStatus = false;
+            self.cellOnEdit(target);
         });
 
         // 失去焦点
         $node.on('blur', 'input', function (e, target) {
-            _this.isDragStatus = false;
-            _this.isInputFocusStatus = false;
-            _this.cellOnBlur(target);
+            self.isDragStatus = false;
+            self.isInputFocusStatus = false;
+            self.cellOnBlur(target);
         });
 
         $node.on('focus', 'input', function (e, target) {
-            _this.isInputFocusStatus = true;
+            self.isInputFocusStatus = true;
         });
 
         // 选择整列
         $node.on('click', dot + config.indexRowCellClassName, function (e, target) {
-            _this.focusOneColumn(_this.getCoords(target).x);
+            self.focusOneColumn(self.getCoords(target).x);
         });
 
         // 选择整行
         $node.on('click', dot + config.indexColumnCellClassName, function (e, target) {
-            _this.focusOneRow(_this.getCoords(target).y);
+            self.focusOneRow(self.getCoords(target).y);
         });
     },
 
@@ -266,7 +266,7 @@ module.exports = Component.extend({
      * @param $node
      */
     bindMoveCopy: function ($node) {
-        var _this = this;
+        var self = this;
 
         var findParent = function (node) {
             return node.getAttribute('data-mark') ?
@@ -275,29 +275,34 @@ module.exports = Component.extend({
 
         var mouseDown = function (e, d) {
             // 如果处于输入状态
-            _this.isDragStatus = true;
-            _this.regionStart = findParent(e.target);
-            _this.emit('startRegion', _this.regionStart);
+            self.isDragStatus = true;
+            self.regionStart = self.regionEnd = findParent(e.target);
+            self.emit('startRegion', self.regionStart);
         };
 
         var mouseUp = function (e, d) {
-            if (_this.isDragStatus && !_this.isInputFocusStatus) {
-                _this.agentTextArea.focus();
+            if (self.isDragStatus && !self.isInputFocusStatus) {
+                self.agentTextArea.focus();
             }
-            _this.isDragStatus = false;
-            _this.regionEnd = findParent(e.target);
-            _this.emit('endRegion', _this.regionEnd);
+            self.isDragStatus = false;
+            self.regionEnd = findParent(e.target);
+            self.emit('endRegion', self.regionEnd);
         };
 
         var mouseMove = function (e, d) {
-            lang.log(_this.isInputFocusStatus, 'mouseMove');
+            lang.log(self.isInputFocusStatus, 'mouseMove');
             // 如果不是处于拖动状态，直接返回
-            if (!_this.isDragStatus || _this.isInputFocusStatus) {
+            if (!self.isDragStatus || self.isInputFocusStatus) {
                 return null;
             }
-            _this.regionEnd = findParent(e.target);
-            _this.focusSelectedCells();
-            _this.emit('moving', _this.regionStart, _this.regionEnd, _this.focusCells);
+            self.regionEnd = findParent(e.target);
+            self.focusSelectedCells();
+            self.emit('moving',
+                self.regionStart,
+                self.regionEnd,
+                self.focusCells,
+                self.computedCoverRegion(self.focusCells)
+            );
         };
 
         $node.onDrag('.' + this.config.activeCellClassName, mouseDown, mouseMove, mouseUp);
@@ -306,7 +311,7 @@ module.exports = Component.extend({
         var agentText = query(this.agentTextArea);
 
         agentText.on('change', null, function (e, target) {
-            _this.setCellsValue(target.value);
+            self.setCellsValue(target.value);
             target.value = '';
         });
 
@@ -459,6 +464,27 @@ module.exports = Component.extend({
      */
     focusOneRow: function (y) {
         this.focusSelectedCells(this.getRows(y));
+    },
+
+    /**
+     * 计算覆盖层的范围
+     * @param focusCells
+     * @returns {{start: {x: (boolean|Number|number), y: (boolean|Number|number)}, end: {x: *, y: *}}}
+     */
+    computedCoverRegion: function (focusCells) {
+        var start = focusCells[0], end = focusCells[focusCells.length - 1];
+        var startNode = this.cells[start.y][start.x].node;
+        var endNode = this.cells[end.y][end.x].node;
+        return {
+            start: {
+                x: startNode.offsetLeft,
+                y: startNode.offsetTop
+            },
+            end: {
+                x: endNode.offsetLeft + endNode.offsetWidth,
+                y: endNode.offsetTop + endNode.offsetHeight
+            }
+        }
     },
 
     /**

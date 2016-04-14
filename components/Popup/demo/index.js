@@ -172,3 +172,53 @@ ReactDOM.render(
     );
 
 })();
+
+
+// Dialog
+var Dialog = require('../Dialog');
+var MountDialog = React.createClass({
+    getInitialState: function () {
+        return {show: false, unmounted: false}
+    },
+
+    renderDialog: function () {
+        this.setState({show: true})
+    },
+
+    dialogOnMount: function (inst, wrapNode) {
+        wrapNode.innerHTML = '<h2>Dialog Content</h2>';
+    },
+
+    onHidden: function () {
+        this.setState({unmounted: true})
+    },
+
+    render: function () {
+        var Component = null;
+        if (this.state.show) {
+            Component = <Dialog
+                onComponentMount={this.dialogOnMount}
+                onHidden={this.onHidden}/>
+        }
+        var text = this.state.show && !this.state.unmounted ?
+            '再点我就关了' :
+            (!this.state.show && !this.state.unmounted) ?
+                '点我显示Dialog' :
+                (this.state.unmounted ? '现在点我也没用了' : '');
+
+        return <div>
+            <button
+                onClick={this.renderDialog}
+                className="btn btn-default btn-sm">
+                {text}
+            </button>
+            {Component}
+        </div>
+    }
+});
+
+ReactDOM.render(
+    <MountDialog/>,
+    document.getElementById('dialog-mount-node')
+);
+

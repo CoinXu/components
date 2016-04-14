@@ -6,6 +6,7 @@
 const IndexHeaderWebExcel = require('./IndexHeaderWebExcel');
 const BaseWebExcel = require('./BaseWebExcel');
 const dom = require('./lib/dom');
+const query = require('./lib/query');
 const WebExcelModel = require('./WebExcelModel');
 const css = require('./assets/excel.css');
 const lang = require('./lib/lang');
@@ -38,11 +39,14 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
     });
 
     var region = dom.DOM.div({className: 'region'});
+    var $region = query(region);
+
     excel.node.appendChild(region);
 
-    region.addEventListener('mouseup', function (e) {
+    $region.on('mouseup', null, function (e) {
         excel.isDragStatus = false;
         excel.agentTextArea.focus();
+        excel.emit('endRegion', excel.regionEnd)
     });
 
     // 鼠标进行选择时事件
@@ -59,14 +63,20 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
     //        + (end.y - start.y) + 'px';
     //});
 
-    excel.on('moving', function (startNode, endNode, focusCells) {
-        var pos = self.computePos(startNode, endNode);
-        region.style.cssText = self.styleCssText(pos.x, pos.y, pos.w, pos.h);
+    excel.on('moving', function (startNode, endNode, focusCells, coverRegion) {
+        var start = coverRegion.start;
+        var end = coverRegion.end;
+        region.style.cssText = self.styleCssText(start.x, start.y, end.x - start.x, end.y - start.y);
     });
 
     excel.on('startRegion', function (startNode) {
-        var pos = self.computePos(startNode, startNode);
-        region.style.cssText = self.styleCssText(pos.x, pos.y, pos.w, pos.h);
+        region.style.cssText = self.styleCssText(
+            startNode.offsetLeft,
+            startNode.offsetTop,
+            startNode.offsetWidth,
+            startNode.offsetHeight
+        );
+        excel.blurSelectedCells(excel.focusCells);
         try {
             excel.node.appendChild(region)
         } catch (e) {
@@ -75,7 +85,10 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
 
     excel.on('endRegion', function (endNode) {
         try {
-            excel.node.removeChild(region)
+            if (excel.regionStart === excel.regionEnd) {
+                excel.cellOnFocus(excel.regionStart);
+            }
+            excel.cellOnEdit(excel.regionStart)
         } catch (e) {
         }
     });
@@ -83,21 +96,6 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
 
 WebExcelWrapper.prototype.styleCssText = function (x, y, w, h) {
     return `width:${w}px;height:${h}px;top:${y}px;left:${x}px;`
-};
-
-WebExcelWrapper.prototype.computePos = function (startNode, endNode) {
-    var start = {x: startNode.offsetLeft, y: startNode.offsetTop};
-    var end = {
-        x: endNode.offsetLeft + endNode.offsetWidth,
-        y: endNode.offsetTop + endNode.offsetHeight
-    };
-
-    return {
-        x: start.x,
-        y: start.y,
-        w: end.x - start.x,
-        h: end.y - start.y
-    }
 };
 
 WebExcelWrapper.prototype.render = function () {

@@ -6,6 +6,7 @@ module.exports = {
     Popup: require('./Popup'),
     Bubble: require('./Bubble'),
     Bias: require('./Bias'),
+    Dialog: require('./Dialog'),
     PopupWrap: require('./PopupWrap')
 };
 
