@@ -12,54 +12,47 @@ const css = require('./assets/excel.css');
 const lang = require('./lib/lang');
 
 
+
+
 function WebExcelWrapper(options) {
-    lang.extend(this.options = {defaultSelect: [0, 0]}, options);
-    this.webExcel = new BaseWebExcel({
+    lang.extend(this.options = {defaultSelect: [1, 1]}, options);
+    this.resetCover = this._resetCover();
+
+    this.webExcel = new IndexHeaderWebExcel({
         parent: this.options.mountNode,
-        model: this.options.model
+        model: this.options.model,
+        afterPaste: this.resetCover
     });
 }
 
 WebExcelWrapper.prototype.createCover = function () {
     var excel = this.webExcel;
     var contentId = 'operate-wrap-' + lang.randomRange(10, 10, 100).join('');
+    var copyId = 'copy-wrap-' + lang.randomRange(10, 10, 100).join('');
 
     excel.node.removeChild(excel.zeroClipboardNode);
-    excel.zeroClipboardNode.style.cssText = 'border:0;outline:0;background:none;height:12px;cursor:pointer;';
+    excel.zeroClipboardNode.className = 'zero-clipboard-node';
 
     var region = dom.DOM.div({className: 'region'});
     region.innerHTML = `
     <div class="web-excel-point"></div>
     <div class="bub bub-dir-t" style="position: absolute;
-        bottom:-58px;width:102px;right:0;margin-right:-51px;">
+        bottom:-52px;width:102px;right:0;margin-right:-51px;">
         <span class="bub-symbol icon-img icon-arrow-blue-t" style="left:41px;"></span>
         <div class="bub-con bub-all-pd">
         <ul class="list list-inline list-st util-line-s">
             <li id="${contentId}"></li>
-            <li>粘贴</li>
+            <!--<li id="${copyId}">粘贴</li>-->
         </ul>
         </div>
     </div>`;
 
-    // 默认选中第[0,0]个位置
-    var defaultCoord = this.options.defaultSelect;
-    var defaultNode = excel.getRows(defaultCoord[0])[defaultCoord[1]].node;
-
-    excel.regionStart = defaultNode;
-
-    region.style.cssText = this.styleCssText(
-        defaultNode.offsetLeft,
-        defaultNode.offsetTop,
-        defaultNode.offsetWidth,
-        defaultNode.offsetHeight
-    );
-
-    excel.node.appendChild(region);
+    document.body.appendChild(region);
     query('#' + contentId)[0].appendChild(excel.zeroClipboardNode);
-
-    excel.cellOnFocus(excel.regionStart);
-    excel.cellOnEdit(excel.regionStart);
-
+    // todo 粘贴按钮，暂时用ctrl+v代替
+    //query('#' + copyId).on('click', null, function (e, target) {
+    //    excel.setCellsValueFromClipboard();
+    //});
     return region;
 };
 
@@ -71,12 +64,21 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
     const excel = this.webExcel;
     const self = this;
 
+    var region = this.region = this.createCover();
+    var $region = query(region);
+
+    // 默认选中第[0,0]个位置
+    var defaultCoord = this.options.defaultSelect;
+    var defaultCell = excel.getCellsWithCoords(defaultCoord[0], defaultCoord[1]);
+    excel.regionStart = defaultCell.node;
+    excel.focusCells = [defaultCell];
+    excel.cellOnFocus(excel.regionStart);
+    excel.cellOnEdit(excel.regionStart);
+    this.resetCover();
+
     excel.on('change', function (oldVal, newVal, cell) {
         console.log('cell\'s value changed: ', oldVal, newVal, cell.x, cell.y);
     });
-
-    var region = this.createCover();
-    var $region = query(region);
 
     $region.on('mouseup', null, function (e) {
         excel.isDragStatus = false;
@@ -84,20 +86,16 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
         excel.emit('endRegion', excel.regionEnd)
     });
 
-    excel.on('moving', function (startNode, endNode, focusCells, coverRegion) {
-        var start = coverRegion.start;
-        var end = coverRegion.end;
-        region.style.cssText = self.styleCssText(start.x, start.y, end.x - start.x, end.y - start.y);
+    //excel.on('moving', function (startNode, endNode, focusCells, coverRegion) {
+    //    self.resetCover(coverRegion);
+    //});
+
+    excel.on('focusCells', function () {
+        self.resetCover();
     });
 
     excel.on('startRegion', function (startNode) {
-        region.style.cssText = self.styleCssText(
-            startNode.offsetLeft,
-            startNode.offsetTop,
-            startNode.offsetWidth,
-            startNode.offsetHeight
-        );
-        excel.blurSelectedCells(excel.focusCells);
+        self.resetCover();
         try {
             excel.node.appendChild(region)
         } catch (e) {
@@ -111,13 +109,28 @@ WebExcelWrapper.prototype.bindOperateUi = function () {
                 excel.cellOnFocus(excel.regionStart);
                 excel.cellOnEdit(excel.regionStart)
             }
+            self.resetCover();
         } catch (e) {
         }
     });
 };
 
+WebExcelWrapper.prototype._resetCover = function () {
+    var self = this;
+    return function (coverRegion) {
+        var excel = self.webExcel;
+        coverRegion = coverRegion || excel.computedCoverRegion(excel.focusCells);
+        var start = coverRegion.start;
+        var end = coverRegion.end;
+        self.region.style.cssText = self.styleCssText(
+            start.x, start.y,
+            end.x - start.x, end.y - start.y
+        );
+    }
+};
+
 WebExcelWrapper.prototype.styleCssText = function (x, y, w, h) {
-    return `width:${w}px;height:${h}px;top:${y}px;left:${x}px;`
+    return `width:${w + 2}px;height:${h + 2}px;top:${y - 1}px;left:${x - 1}px;`
 };
 
 WebExcelWrapper.prototype.render = function () {
@@ -130,7 +143,6 @@ WebExcelWrapper.prototype.afterRender = function () {
     // 以满足自适应的需求
     lang.forEach(this.webExcel.getRows(0), function (cell) {
         cell.node.style.cssText = `width:${cell.node.offsetWidth}px`;
-        console.log(cell)
     });
     this.bindOperateUi();
 };

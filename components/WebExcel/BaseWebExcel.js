@@ -34,6 +34,7 @@ module.exports = Component.extend({
      */
     defaultsConfig: {
         hasIndex: false,
+        copyText: '复制',
         // 单元格class
         cellClassName: 'cell',
         // 激状态单元格class
@@ -43,7 +44,10 @@ module.exports = Component.extend({
         indexRowCellClassName: 'col-row-cell',
         // 索引列单元格class
         // 点击会选中当前列
-        indexColumnCellClassName: 'col-index-cell'
+        indexColumnCellClassName: 'col-index-cell',
+        // 粘贴后的回调
+        afterPaste: function () {
+        }
     },
 
     /**
@@ -102,7 +106,7 @@ module.exports = Component.extend({
 
         this.zeroClipboardNode = dom.DOM.button({
             className: 'clipboard-btn',
-            innerHTML: 'copy',
+            innerHTML: this.config.copyText,
             'data-clipboard-target': targetId
         });
 
@@ -114,10 +118,12 @@ module.exports = Component.extend({
         this.node.appendChild(this.zeroClipboardNode);
         this.node.appendChild(this.zeroClipboardTarget);
 
-        this.zeroClipboard = new ZeroClipboard(this.zeroClipboardNode);
+        var clipboard = this.zeroClipboard = new ZeroClipboard(this.zeroClipboardNode);
 
-        this.zeroClipboard.on('aftercopy', function (event) {
-            lang.log('已复制: ', event.data);
+        clipboard.on('ready', function () {
+            clipboard.on('aftercopy', function (event) {
+                lang.log('copy data: ', event.data);
+            });
         });
 
         return this;
@@ -221,22 +227,24 @@ module.exports = Component.extend({
         var config = this.config, dot = '.';
         this.isInputFocusStatus = false;
         // 获得焦点
-        $node.on('click', dot + config.activeCellClassName, function (e, target) {
-            if (self.isInputFocusStatus) {
-                return null;
-            }
-            self.isDragStatus = false;
-            self.cellOnFocus(target);
-        });
+        $node.on('click', dot + config.activeCellClassName,
+            function (e, target) {
+                if (self.isInputFocusStatus) {
+                    return null;
+                }
+                self.isDragStatus = false;
+                self.cellOnFocus(target);
+            });
 
         // 双击编辑
-        $node.on('dblclick', dot + config.activeCellClassName, function (e, target) {
-            if (self.isInputFocusStatus) {
-                return null;
-            }
-            self.isDragStatus = false;
-            self.cellOnEdit(target);
-        });
+        $node.on('dblclick', dot + config.activeCellClassName,
+            function (e, target) {
+                if (self.isInputFocusStatus) {
+                    return null;
+                }
+                self.isDragStatus = false;
+                self.cellOnEdit(target);
+            });
 
         // 失去焦点
         $node.on('blur', 'input', function (e, target) {
@@ -250,14 +258,16 @@ module.exports = Component.extend({
         });
 
         // 选择整列
-        $node.on('click', dot + config.indexRowCellClassName, function (e, target) {
-            self.focusOneColumn(self.getCoords(target).x);
-        });
+        $node.on('click', dot + config.indexRowCellClassName,
+            function (e, target) {
+                self.focusOneColumn(self.getCoords(target).x);
+            });
 
         // 选择整行
-        $node.on('click', dot + config.indexColumnCellClassName, function (e, target) {
-            self.focusOneRow(self.getCoords(target).y);
-        });
+        $node.on('click', dot + config.indexColumnCellClassName,
+            function (e, target) {
+                self.focusOneRow(self.getCoords(target).y);
+            });
     },
 
     /**
@@ -313,11 +323,17 @@ module.exports = Component.extend({
         agentText.on('change', null, function (e, target) {
             self.setCellsValue(target.value);
             target.value = '';
+            self.afterPaste();
         });
 
         agentText.on('input', null, function (e, target) {
             target.blur();
         });
+    },
+
+    setCellsValueFromClipboard: function () {
+        this.setCellsValue(this.zeroClipboardTarget.value);
+        this.agentTextArea.value = '';
     },
 
     bindDragCopy: function ($node) {
@@ -388,8 +404,7 @@ module.exports = Component.extend({
             return this;
         }
 
-        // 第一个选中的单元格不添加样式
-        lang.forEach(this.focusCells, function (c) {
+        lang.forEach(this.focusCells, function (c, i) {
             this.getCellsWithCoords(c.x, c.y).onFocus();
         }, this);
 
@@ -398,6 +413,8 @@ module.exports = Component.extend({
 
         this.zeroClipboardTarget.value =
             this.parseStringFromCopy(this.focusCells);
+
+        this.emit('focusCells', this.focusCells);
     },
 
     /**

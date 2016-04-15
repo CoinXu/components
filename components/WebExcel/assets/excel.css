@@ -29,6 +29,7 @@
     border: 1px solid #e7e7e7;
     vertical-align: middle;
     cursor: pointer;
+    white-space: nowrap;;
 }
 
 .web-excel-wrapper .cell > .cell-con {
@@ -49,9 +50,10 @@
 
 .web-excel-wrapper .cell.on-focus {
     background-color: #d2d2d2;
+    border-color: #c6c6c6;
 }
 
-.web-excel-wrapper .web-excel-point {
+.web-excel-point {
     width: 7px;
     height: 7px;
     background-color: #207345;
@@ -72,4 +74,17 @@
 .region {
     position: fixed;
     border: 2px solid #207345;
+}
+
+.zero-clipboard-node {
+    border: 0;
+    outline: 0;
+    background: none;
+    height: 12px;
+    line-height: 12px;
+    cursor: pointer;
+}
+
+.Zeroclipboard-is-active {
+    color: #207345;
 }
