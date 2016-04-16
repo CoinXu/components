@@ -14,6 +14,7 @@
 
 .web-excel-wrapper .table {
     display: table;
+    table-layout: fixed;
 }
 
 .web-excel-wrapper .row {
@@ -40,6 +41,7 @@
 }
 
 .web-excel-wrapper .cell-input {
+    display: block;
     border: 0;
     outline: none;
     height: 24px;
@@ -72,7 +74,7 @@
 }
 
 .region {
-    position: fixed;
+    position: absolute;
     border: 2px solid #207345;
 }
 

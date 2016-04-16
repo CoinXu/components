@@ -18,6 +18,7 @@ const lang = require('./lib/lang');
 // todo 输入框有必须、非填项
 // todo 自定义输入框内容【插入html】
 // todo 添加选择列功能
+// todo 定位应该依赖于父容器，而不是依赖于窗口。如果依赖于窗口，则在滚动时会发成位置异常。
 
 module.exports = BaseWebExcel.extend({
 
@@ -49,7 +50,7 @@ module.exports = BaseWebExcel.extend({
                 </div>
             </div>`;
 
-        document.body.appendChild(region);
+        this.node.appendChild(region);
         query('#' + contentId)[0].appendChild(this.zeroClipboardNode);
         // todo 粘贴按钮，暂时用ctrl+v代替
         //query('#' + copyId).on('click', null, function (e, target) {
@@ -79,13 +80,16 @@ module.exports = BaseWebExcel.extend({
         });
 
         $region.on('mouseup', null, function (e) {
-            self.isDragStatus = false;
-            self.agentTextArea.focus();
-            self.emit('endRegion')
+            // 点击复制的时候，不要乱动
+            if( (e.target || e.srcElement).className.toLowerCase() === 'region') {
+                self.isDragStatus = false;
+                self.agentTextArea.focus();
+                self.emit('endRegion')
+            }
         });
 
         this.on('focusCells', function () {
-            self.afterPaste();
+            self.resetCover();
         });
 
         this.on('endRegion', function () {
@@ -97,17 +101,17 @@ module.exports = BaseWebExcel.extend({
         self.cellOnEdit(self.regionStart);
     },
 
-    afterPaste: function (coverRegion) {
+    resetCover: function (coverRegion) {
         coverRegion = coverRegion || this.computedCoverRegion(this.focusCells);
         var start = coverRegion.start;
         var end = coverRegion.end;
-        this.region.style.cssText = this.styleCssText(
+        this.region.style.cssText = this.coverSize(
             start.x, start.y,
             end.x - start.x, end.y - start.y
         );
     },
 
-    styleCssText: function (x, y, w, h) {
+    coverSize: function (x, y, w, h) {
         return `width:${w + 2}px;height:${h + 2}px;top:${y - 1}px;left:${x - 1}px;`
     },
 

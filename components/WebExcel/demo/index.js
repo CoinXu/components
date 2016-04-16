@@ -5,6 +5,35 @@
 const ShippingMarkExcel = require('../ShippingMarkExcel');
 const WebExcelModel = require('../WebExcelModel');
 
+const ShippingMarkVitualData = {
+    "message": "测试内容g42c",
+    "model": {
+        "columnHeader": {
+            "stiMarkList": [{
+                "code": "s11",
+                "fieldList": [{"fieldId": 1, "fieldInterId": 11, "name": "",value:""}],
+                "name": "测试内容5v8g",
+                "stimarkId": "测试内容ccqv",
+                "type": "测试内容6rvr"
+            }]
+        },
+        "rows": [{
+            "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+            "id": 1,
+            "skuBarCode": "SKU条码",
+            "skuNo": "SKU编号",
+            "stiMarkList": [{
+                "code": "s11",
+                "fieldList": [{"fieldId": 1, "fieldInterId": 11, "name": "", value:""}],
+                "name": "测试内容9riw",
+                "stimarkId": "测试内容8wtt",
+                "type": "测试内容ki97"
+            }]
+        }]
+    },
+    "success": true
+};
+
 // 基础模型
 new ShippingMarkExcel({
     parent: document.querySelector('#base-web-excel'),

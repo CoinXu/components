@@ -60,16 +60,17 @@ var c = {
          * @return {boolean}
          */
         CLASS: function (node, str) {
-            var styleNames = node.classList ||
-                node.getAttribute('class').split(' ');
-            var matchStyleName = str.split('.').splice(1);
-            var match = true;
+            var classList = node.classList;
+            if (!classList) {
+                classList = node.getAttribute('class');
+                classList = classList ? classList.split(' ') : []
+            }
 
-            lang.forEach(matchStyleName, function (v) {
-                match = lang.indexOf(styleNames, v) !== -1;
+            var matchClassNames = str.split('.').splice(1);
+
+            return lang.some(matchClassNames, function (className) {
+                return lang.indexOf(classList, className) !== -1;
             });
-
-            return match;
         },
 
         /**
@@ -159,7 +160,7 @@ event.off = function (type, handle) {
 };
 
 /**
- * 查找节 node最近的匹配 selector 的父节点
+ * 查找离 node 最近的 selector 的父节点
  * @param {HTMLElement|null} node
  * @param {String|HTMLElement} selector
  * @returns {HTMLElement}
@@ -173,15 +174,16 @@ event.closest = function (node, selector) {
     if (!selector) {
         return node;
     }
+
     if (node.closest) {
         return node.closest(selector);
     }
 
-    while (node && !c.isSelector(node, selector)) {
+    while (node !== doc && !c.isSelector(node, selector)) {
         node = node.parentNode;
     }
 
-    return node;
+    return node === doc ? null : node;
 };
 
 /**
