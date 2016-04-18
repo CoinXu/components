@@ -10,5 +10,6 @@ module.exports = {
     MiniContainer: require('./MiniContainer'),
     DropDown: require('./DropDown'),
     Custom: require('./Custom'),
+    Checkbox: require('./Checkbox'),
     Selectable: require('./Selectable')
 };
