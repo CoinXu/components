@@ -13,9 +13,6 @@ var commonsChunkPlugin = new webpack.optimize.CommonsChunkPlugin({
     async: true
 });
 
-var precss = require('precss');
-var autoprefixer = require('autoprefixer');
-
 module.exports = {
 
     entry: entry,
@@ -37,14 +34,25 @@ module.exports = {
                 query: {presets: ['es2015', 'react', 'stage-0']}
             },
             {
+                test: /\.json$/,
+                exclude: /node_modules/,
+                loader: 'json-loader'
+            },
+            {
+                test: /\.less$/,
+                exclude: /node_modules/,
+                loader: ExtractTextPlugin.extract(
+                    'css?sourceMap&-minimize!' + 'postcss-loader!' + 'less?sourceMap'
+                )
+            },
+            {
                 test: /\.css$/,
-                loader: "style-loader!css-loader!postcss-loader"
+                exclude: /node_modules/,
+                loader: ExtractTextPlugin.extract(
+                    'css?sourceMap&-minimize!' + 'postcss-loader'
+                )
             }
         ]
-    },
-
-    postcss: function () {
-        return [precss, autoprefixer];
     },
 
     externals: {
