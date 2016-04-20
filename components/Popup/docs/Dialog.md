@@ -19,38 +19,51 @@
 var Dialog = require('essa-components').Popup.Dialog;
 var MountDialog = React.createClass({
     getInitialState: function () {
-        return {show: false, unmounted: false}
+        return {show: false}
     },
     renderDialog: function () {
-        this.setState({show: true})
+        // 创建一个顶层节点
+        this.__dialogNode = document.createElement('div');
+        document.body.appendChild(this.__dialogNode);
+        ReactDOM.render(<Dialog
+                onComponentMount={this.dialogOnMount}
+                onHidden={this.onHidden}/>,
+            this.__dialogNode
+        );
+        this.setState({mounted: false})
     },
     dialogOnMount: function (inst, wrapNode) {
         wrapNode.innerHTML = '<h2>Dialog Content</h2>';
     },
     onHidden: function () {
-        this.setState({unmounted: true})
+        var self = this;
+        this.setState({show: false}, function () {
+            // 组件卸载后，移除节点
+            document.body.removeChild(self.__dialogNode);
+        })
+    },
+    // 如果下一次的状态是显示，且不与上一次的状态相同
+    // 则表明上一次的状态是未显示，也就是未渲染
+    // 所以应该渲染Dialog
+    componentWillUpdate: function (nextProps, nextState) {
+        if (nextState.show !== this.state.show && nextState.show) {
+            this.renderDialog()
+        }
+    },
+    toggle: function () {
+        this.setState({show: !this.state.show})
     },
     render: function () {
-        var Component = null;
-        if (this.state.show) {
-            Component = <Dialog
-                onComponentMount={this.dialogOnMount}
-                onHidden={this.onHidden}/>
-        }
-        var text = this.state.show && !this.state.unmounted ?
-            '再点我就关了' :
-            (!this.state.show && !this.state.unmounted) ?
-                '点我显示Dialog' :
-                (this.state.unmounted ? '现在点我也没用了' : '');
+        var text = this.state.show ? '再点我就关了' : '点我显示Dialog';
         return <div>
             <button
-                onClick={this.renderDialog}
+                onClick={this.toggle}
                 className="btn btn-default btn-sm">
                 {text}
             </button>
-            {Component}
         </div>
     }
 });
 ReactDOM.render(<MountDialog/>, mountNode);
 ```
+### 注：Dialog 隐藏后会直接卸载，所以mountNode需要一个顶层的节点

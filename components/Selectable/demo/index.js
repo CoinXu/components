@@ -140,7 +140,7 @@ var CheckWrap = React.createClass({
                     itemList={checkboxItemList}
                     onComponentMount={this.holdCheckbox}
                     onOutOfBounds={log}
-                    onchange={log}
+                    onChange={log}
                     checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>
             </div>
             <button className="btn btn-default btn-xs" onClick={this.getCheckedValue}>
