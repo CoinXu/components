@@ -11,6 +11,9 @@ var assign = require('object-assign');
 var noop = require('../../com/noop');
 var DOMEvent = require('../../com/DOM/DOMEvent');
 var HideOnBodyClick = require('../HideOnBodyClick');
+var triggerHide = function () {
+    return true;
+};
 
 var PopupWrap = React.createClass({
 
@@ -25,10 +28,11 @@ var PopupWrap = React.createClass({
 
         return {
             style: {backgroundColor: '#fff'},
-            onVisible: noop,
-            refTarget: null,
             placement: 'top',
+            refTarget: null,
             isVisible: false,
+            onHide: noop,
+            triggerHide: triggerHide,
             onAnimateMount: noop
         }
     },
@@ -79,8 +83,9 @@ var PopupWrap = React.createClass({
         return (<HideOnBodyClick
             refTarget={props.refTarget}
             style={props.style}
+            triggerHide={props.triggerHide}
             onAnimateMount={props.onAnimateMount}
-            onVisible={props.onVisible}>
+            onHide={props.onHide}>
             {children}
         </HideOnBodyClick>)
     }

@@ -62,7 +62,7 @@ var Container = React.createClass({
             </div>
             <HideOnBodyClick
                 refTarget={this.refs.selectable}
-                onVisible={this.onVisible}
+                onHide={this.onHide}
                 onAnimateMount={this.onAnimateMount}
                 triggerHide={this.triggerHide}>
                 <div className="comp-select-panel comp-progress-panel">

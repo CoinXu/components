@@ -191,7 +191,6 @@ var MountDialog = React.createClass({
                 onHidden={this.onHidden}/>,
             this.__dialogNode
         );
-        this.setState({mounted: false})
     },
 
     dialogOnMount: function (inst, wrapNode) {

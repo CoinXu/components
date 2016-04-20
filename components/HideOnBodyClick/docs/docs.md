@@ -6,7 +6,7 @@
 + component - `String` - 组件 type
 + isVisible - `Boolean` - 默认是否隐藏
 + refTarget - `Node` - 当refTarget被点击是，不会触发卸载函数
-+ onVisible - `Function` - 卸载时调用的函数
++ onHide - `Function` - 卸载时调用的函数
 + onAnimateMount - `Function` - 当动画组件完成时调用，传入的参数为动画组件的实例对象
 + triggerHide - `Function` - 每调用卸载函数时，会先调用该函数，若该函数返回的值不为真值，则不会触发卸载。
 

@@ -19,16 +19,9 @@
 var Dialog = require('essa-components').Popup.Dialog;
 var MountDialog = React.createClass({
     getInitialState: function () {
-<<<<<<< HEAD
-        return {show: false, unmounted: false}
-    },
-    renderDialog: function () {
-        this.setState({show: true})
-=======
         return {show: false}
     },
     renderDialog: function () {
-        // 创建一个顶层节点
         this.__dialogNode = document.createElement('div');
         document.body.appendChild(this.__dialogNode);
         ReactDOM.render(<Dialog
@@ -36,39 +29,13 @@ var MountDialog = React.createClass({
                 onHidden={this.onHidden}/>,
             this.__dialogNode
         );
-        this.setState({mounted: false})
->>>>>>> 375ea2754640bc8a3ab3489f679015be66713500
     },
     dialogOnMount: function (inst, wrapNode) {
         wrapNode.innerHTML = '<h2>Dialog Content</h2>';
     },
     onHidden: function () {
-<<<<<<< HEAD
-        this.setState({unmounted: true})
-    },
-    render: function () {
-        var Component = null;
-        if (this.state.show) {
-            Component = <Dialog
-                onComponentMount={this.dialogOnMount}
-                onHidden={this.onHidden}/>
-        }
-        var text = this.state.show && !this.state.unmounted ?
-            '再点我就关了' :
-            (!this.state.show && !this.state.unmounted) ?
-                '点我显示Dialog' :
-                (this.state.unmounted ? '现在点我也没用了' : '');
-        return <div>
-            <button
-                onClick={this.renderDialog}
-                className="btn btn-default btn-sm">
-                {text}
-            </button>
-            {Component}
-=======
         var self = this;
         this.setState({show: false}, function () {
-            // 组件卸载后，移除节点
             document.body.removeChild(self.__dialogNode);
         })
     },
@@ -91,13 +58,8 @@ var MountDialog = React.createClass({
                 className="btn btn-default btn-sm">
                 {text}
             </button>
->>>>>>> 375ea2754640bc8a3ab3489f679015be66713500
         </div>
     }
 });
 ReactDOM.render(<MountDialog/>, mountNode);
 ```
-<<<<<<< HEAD
-=======
-### 注：Dialog 隐藏后会直接卸载，所以mountNode需要一个顶层的节点
->>>>>>> 375ea2754640bc8a3ab3489f679015be66713500

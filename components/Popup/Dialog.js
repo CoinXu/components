@@ -89,7 +89,7 @@ var Dialog = React.createClass({
             refTarget={props.refTarget}
             style={style}
             onAnimateMount={this.onAnimateMount}
-            onVisible={this.onHidden}>
+            onHide={this.onHidden}>
             <div className={props.className} ref="wrap"></div>
         </HideOnBodyClick>
     }

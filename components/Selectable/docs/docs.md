@@ -16,5 +16,5 @@
   
 ### 引用
 ```JavaScript
-var Selector = require('react-components-s').Selectable;
+var Selector = require('react-components').Selectable;
 ```

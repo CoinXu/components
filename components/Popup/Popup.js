@@ -9,6 +9,9 @@ var absolutePosition = require('../../com/absolutePosition');
 var body = require('../../com/DOM/DOMBody');
 var noop = require('../../com/noop');
 var POPUP_GAP = 5;
+var triggerHide = function () {
+    return true;
+};
 
 var Popup = React.createClass({
 
@@ -28,6 +31,8 @@ var Popup = React.createClass({
             trigger: 'click',
             content: null,
             placement: null,
+            onHide: noop,
+            triggerHide: triggerHide,
             onComponentMount: noop
         }
     },
@@ -59,11 +64,12 @@ var Popup = React.createClass({
         this.props.onComponentMount(this);
     },
 
-    onVisible: function () {
+    onHide: function () {
         if (this.__isUnmount) return;
         var self = this;
         self.setState({isVisible: true}, function () {
             ReactDOM.unmountComponentAtNode(self.__popupMountNode);
+            self.props.onHide()
         })
     },
 
@@ -79,6 +85,7 @@ var Popup = React.createClass({
             self.__animate.backToTheStart(function () {
                 self.setState({isVisible: true}, function () {
                     ReactDOM.unmountComponentAtNode(self.__popupMountNode);
+                    self.props.onHide()
                 })
             })
         }
@@ -127,7 +134,8 @@ var Popup = React.createClass({
                 style={{position:'absolute',left: this.__position.x, top: this.__position.y}}
                 placement={props.placement}
                 isVisible={this.state.isVisible}
-                onVisible={this.onVisible}
+                onHide={this.onHide}
+                triggerHide={props.triggerHide}
                 refTarget={this.refs.targetNode}>
                 {this.__content}
             </PopupWrap>,

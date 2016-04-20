@@ -24,9 +24,9 @@ var HideOnBodyClick = React.createClass({
     getDefaultProps: function () {
         return {
             component: 'div',
-            isVisible: true,
             refTarget: null,
-            onVisible: noop,
+            isVisible: true,
+            onHide: noop,
             onAnimateMount: noop,
             triggerHide: triggerHide
         }
@@ -49,7 +49,7 @@ var HideOnBodyClick = React.createClass({
 
             if (self.__animate && self.__animate.backToTheStart) {
                 self.__animate.backToTheStart(function () {
-                    props.onVisible();
+                    props.onHide();
                 });
             }
         };
@@ -75,7 +75,7 @@ var HideOnBodyClick = React.createClass({
             component={props.component}
             from={{opacity:0}}
             to={{opacity:1}}
-            during={500}
+            during={200}
             componentDidMount={this.holdAnimate}>
             {props.children}
         </Animate>

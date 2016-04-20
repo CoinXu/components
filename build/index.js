@@ -1366,9 +1366,9 @@ this["EssaComponents"] =
 	    getDefaultProps: function getDefaultProps() {
 	        return {
 	            component: 'div',
-	            isVisible: true,
 	            refTarget: null,
-	            onVisible: noop,
+	            isVisible: true,
+	            onHide: noop,
 	            onAnimateMount: noop,
 	            triggerHide: triggerHide
 	        };
@@ -1388,7 +1388,7 @@ this["EssaComponents"] =
 
 	            if (self.__animate && self.__animate.backToTheStart) {
 	                self.__animate.backToTheStart(function () {
-	                    props.onVisible();
+	                    props.onHide();
 	                });
 	            }
 	        };
@@ -1414,7 +1414,7 @@ this["EssaComponents"] =
 	            component: props.component,
 	            from: { opacity: 0 },
 	            to: { opacity: 1 },
-	            during: 500,
+	            during: 200,
 	            componentDidMount: this.holdAnimate }, props.children);
 	    }
 	});
@@ -1812,6 +1812,9 @@ this["EssaComponents"] =
 	var body = __webpack_require__(18);
 	var noop = __webpack_require__(4);
 	var POPUP_GAP = 5;
+	var triggerHide = function triggerHide() {
+	    return true;
+	};
 
 	var Popup = React.createClass({
 	    displayName: 'Popup',
@@ -1832,6 +1835,8 @@ this["EssaComponents"] =
 	            trigger: 'click',
 	            content: null,
 	            placement: null,
+	            onHide: noop,
+	            triggerHide: triggerHide,
 	            onComponentMount: noop
 	        };
 	    },
@@ -1862,11 +1867,12 @@ this["EssaComponents"] =
 	        this.props.onComponentMount(this);
 	    },
 
-	    onVisible: function onVisible() {
+	    onHide: function onHide() {
 	        if (this.__isUnmount) return;
 	        var self = this;
 	        self.setState({ isVisible: true }, function () {
 	            ReactDOM.unmountComponentAtNode(self.__popupMountNode);
+	            self.props.onHide();
 	        });
 	    },
 
@@ -1881,6 +1887,7 @@ this["EssaComponents"] =
 	            self.__animate.backToTheStart(function () {
 	                self.setState({ isVisible: true }, function () {
 	                    ReactDOM.unmountComponentAtNode(self.__popupMountNode);
+	                    self.props.onHide();
 	                });
 	            });
 	        }
@@ -1928,7 +1935,8 @@ this["EssaComponents"] =
 	            style: { position: 'absolute', left: this.__position.x, top: this.__position.y },
 	            placement: props.placement,
 	            isVisible: this.state.isVisible,
-	            onVisible: this.onVisible,
+	            onHide: this.onHide,
+	            triggerHide: props.triggerHide,
 	            refTarget: this.refs.targetNode }, this.__content), this.__popupMountNode);
 	    },
 
@@ -1979,6 +1987,9 @@ this["EssaComponents"] =
 	var noop = __webpack_require__(4);
 	var DOMEvent = __webpack_require__(17);
 	var HideOnBodyClick = __webpack_require__(14);
+	var triggerHide = function triggerHide() {
+	    return true;
+	};
 
 	var PopupWrap = React.createClass({
 	    displayName: 'PopupWrap',
@@ -1994,10 +2005,11 @@ this["EssaComponents"] =
 
 	        return {
 	            style: { backgroundColor: '#fff' },
-	            onVisible: noop,
-	            refTarget: null,
 	            placement: 'top',
+	            refTarget: null,
 	            isVisible: false,
+	            onHide: noop,
+	            triggerHide: triggerHide,
 	            onAnimateMount: noop
 	        };
 	    },
@@ -2048,8 +2060,9 @@ this["EssaComponents"] =
 	        return React.createElement(HideOnBodyClick, {
 	            refTarget: props.refTarget,
 	            style: props.style,
+	            triggerHide: props.triggerHide,
 	            onAnimateMount: props.onAnimateMount,
-	            onVisible: props.onVisible }, children);
+	            onHide: props.onHide }, children);
 	    }
 	});
 
@@ -2306,7 +2319,7 @@ this["EssaComponents"] =
 	            refTarget: props.refTarget,
 	            style: style,
 	            onAnimateMount: this.onAnimateMount,
-	            onVisible: this.onHidden }, React.createElement('div', { className: props.className, ref: 'wrap' }));
+	            onHide: this.onHidden }, React.createElement('div', { className: props.className, ref: 'wrap' }));
 	    }
 
 	});
@@ -2633,11 +2646,11 @@ this["EssaComponents"] =
 	        var self = this;
 	        self.props.onSelect(item);
 	        self.__animate.backToTheStart(function () {
-	            self.onVisible();
+	            self.onHide();
 	        });
 	    },
 
-	    onVisible: function onVisible() {
+	    onHide: function onHide() {
 	        this.setState({ panelStateIsShow: false });
 	    },
 
@@ -2665,7 +2678,7 @@ this["EssaComponents"] =
 
 	        return React.createElement('div', { className: classNames(className), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, selector), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
-	            onVisible: this.onVisible,
+	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
 	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel' }, props.panelContent)));
 	    }
@@ -2803,7 +2816,7 @@ this["EssaComponents"] =
 
 	        return React.createElement('div', { className: classNames(panelClassName), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, React.createElement('div', { className: 'comp-select-selector', onClick: this.showPanel }, React.createElement('div', { className: 'comp-select-progress' }, React.createElement('span', { className: progressClassName })), React.createElement('span', { className: 'icon-img icon-tran-black-d' }))), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
-	            onVisible: this.onVisible,
+	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
 	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel' }, React.createElement('ol', { className: 'comp-select-m-t' }, itemList, React.createElement('li', { className: 'comp-panel-title util-text-center' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.addOne }))))));
 	    }
@@ -2854,11 +2867,11 @@ this["EssaComponents"] =
 	            self.props.onSelect(value);
 	        });
 	        self.__animate.backToTheStart(function () {
-	            self.onVisible();
+	            self.onHide();
 	        });
 	    },
 
-	    onVisible: function onVisible() {
+	    onHide: function onHide() {
 	        this.setState({ panelStateIsShow: false });
 	    },
 
@@ -2996,7 +3009,7 @@ this["EssaComponents"] =
 
 	        return React.createElement('div', { className: classNames(panelClassName), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, React.createElement('div', { className: 'comp-select-selector', onClick: this.showPanel }, React.createElement('div', { className: 'comp-select-progress' }, React.createElement('span', { className: progressClassName })), React.createElement('span', { className: 'icon-img icon-tran-black-d' }))), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
-	            onVisible: this.onVisible,
+	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
 	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel' }, React.createElement('div', { className: 'bub-bd-b' }, React.createElement('div', { className: 'bub-pd-l-lg bub-pd-r-lg' }, React.createElement('span', { className: 'color-selection comp-neg-m-l comp-icon-gap' }, '先出货柜'), React.createElement('span', { className: 'icon-img icon-qa-normal util-v-text-t' })), React.createElement('div', { className: 'bub-pd-b' }, React.createElement('ol', { className: 'comp-select-m-t bub-pd-t' }, firstOutList))), React.createElement('ol', { className: 'comp-select-m-t bub-pd-t' }, React.createElement('li', { className: 'comp-panel-title util-line-14' }, React.createElement('span', { className: 'color-selection comp-neg-m-l comp-icon-gap' }, '其他货柜'), React.createElement('span', { className: 'icon-img icon-qa-normal util-v-text-t' })), itemList, React.createElement('li', { className: 'comp-panel-title util-text-center' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.addOne }))))));
 	    }
@@ -3049,7 +3062,7 @@ this["EssaComponents"] =
 
 	        return React.createElement('div', { className: classNames(panelClassName), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, React.createElement('div', { className: 'comp-select-selector', onClick: this.showPanel }, React.createElement('div', { className: 'comp-select-progress' }, React.createElement('span', { className: progressClassName })), React.createElement('span', { className: 'icon-img icon-tran-black-d' }))), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
-	            onVisible: this.onVisible,
+	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
 	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel comp-mini-progress' }, React.createElement('div', { className: 'comp-select-m-t' }, React.createElement('div', { className: 'row' }, itemList, React.createElement('div', { className: 'comp-panel-title util-text-center col-xs-12' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.addOne })))))));
 	    }

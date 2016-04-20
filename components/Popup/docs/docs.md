@@ -12,7 +12,9 @@
  + trigger - `String` 目前可选 `click` 与 `hover`
  + placement - `String` 目前可选 `top` `right` `bottom` `left`
  + content - `String | React.Element` 弹窗内容
- + onComponentMount - `Function` 组件挂载时调用，传入组件实例。
+ + onHide - `Function` 弹窗关闭后回调
+ + triggerHide - `Function` 如果该函数返回false，则弹窗不会关闭，返回true，关闭
+ + onComponentMount - `Function` 组件挂载后调用，传入组件实例。
 
 ## 最简单的调用
 目前封装性较低，所以最简单的也比较复杂~

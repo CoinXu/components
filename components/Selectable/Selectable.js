@@ -47,11 +47,11 @@ var Selectable = React.createClass({
         var self = this;
         self.props.onSelect(item);
         self.__animate.backToTheStart(function () {
-            self.onVisible();
+            self.onHide();
         })
     },
 
-    onVisible: function () {
+    onHide: function () {
         this.setState({panelStateIsShow: false});
     },
 
@@ -85,7 +85,7 @@ var Selectable = React.createClass({
             </div>
             <HideOnBodyClick
                 refTarget={this.refs.selectable}
-                onVisible={this.onVisible}
+                onHide={this.onHide}
                 onAnimateMount={this.onAnimateMount}
                 triggerHide={this.triggerHide}>
                 <div className="comp-select-panel">

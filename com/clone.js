@@ -2,7 +2,7 @@
  * Created by xcp on 2016/4/19.
  */
 
-function cloneWhithModern(obj) {
+function cloneWithModern(obj) {
     var result = null;
     try {
         result = JSON.parse(JSON.stringify(obj));
@@ -38,7 +38,7 @@ function cloneWithCompatible(obj, deep) {
 
 module.exports = function (obj, deep) {
     if (deep && JSON && JSON.parse) {
-        return cloneWhithModern(obj)
+        return cloneWithModern(obj)
     }
     return cloneWithCompatible(obj, deep)
 };

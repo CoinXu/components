@@ -34,11 +34,11 @@ module.exports = {
             self.props.onSelect(value);
         });
         self.__animate.backToTheStart(function () {
-            self.onVisible()
+            self.onHide()
         })
     },
 
-    onVisible: function () {
+    onHide: function () {
         this.setState({panelStateIsShow: false});
     },
 
