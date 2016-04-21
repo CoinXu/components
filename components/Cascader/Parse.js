@@ -10,7 +10,7 @@ function Parse(models, childrenName) {
     this.PARENT_PROP = '__parent';
     this.SIBLINGS_PROP = '__siblings';
     this.CHILDREN_PROP = '__children';
-    this.MODELS = clone(models);
+    this.MODELS = clone(models, true);
     this.CHILDREN_NAME = childrenName || 'children';
 
     this.firstCascadeIdList = null;

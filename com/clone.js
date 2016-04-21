@@ -33,12 +33,14 @@ function cloneWithCompatible(obj, deep) {
             n[k] = deep ? clone(obj[k], deep) : obj[k]
         }
     }
-
+    return n;
 }
 
-module.exports = function (obj, deep) {
+function clone(obj, deep) {
     if (deep && JSON && JSON.parse) {
         return cloneWithModern(obj)
     }
     return cloneWithCompatible(obj, deep)
-};
+}
+
+module.exports = clone;

@@ -18,5 +18,6 @@ module.exports = {
     Message: _path('Message'),
     Selectable: _path('Selectable'),
     Register: _path('register'),
+    Cascader: _path('Cascader'),
     Pagination: _path('Pagination')
 };

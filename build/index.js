@@ -2250,7 +2250,8 @@ this["EssaComponents"] =
 	            baseStyle: {
 	                position: 'fixed',
 	                left: '50%',
-	                top: '50%'
+	                top: '50%',
+	                zIndex: 999
 	            },
 	            posStyle: {}
 	        };
@@ -2278,7 +2279,7 @@ this["EssaComponents"] =
 	        this.setState({
 	            posStyle: {
 	                marginLeft: '-' + wrap.offsetWidth / 2 + 'px',
-	                marginTop: '-' + wrap.offsetTop / 2 + 'px'
+	                marginTop: '-' + wrap.offsetHeight / 2 + 'px'
 	            }
 	        });
 	    },
