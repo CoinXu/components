@@ -21,7 +21,9 @@ var Custom = React.createClass({
             wrapClassName: null,
             defaultSelectedValue: null,
             onSelect: noop,
+            getItemWrap: noop,
             getSelectorContent: noop,
+            getItemsContent: noop,
             getItemContent: noop
         }
     },
@@ -60,14 +62,16 @@ var Custom = React.createClass({
             defaultSelectedValue={self.state.currentSelectedValue}
             getSelectorContent={props.getSelectorContent}/>;
 
-        var panelContent = props.itemList.map(function (value, index) {
-            return <DropDown.Item
-                value={value}
-                key={index}
-                getItemContent={props.getItemContent}/>;
-        });
+        var panelContent = props.getItemsContent(props, state, this) ||
+            props.itemList.map(function (value, index) {
+                return <DropDown.Item
+                    value={value}
+                    key={index}
+                    getItemContent={props.getItemContent}/>;
+            });
 
         return <DropDown
+            getItemWrap={props.getItemWrap}
             wrapClassName={props.wrapClassName}
             selectorBindEvent={this.ensureEvent()}
             selectorContent={selectorContent}

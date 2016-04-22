@@ -3,8 +3,12 @@
 + wrapClassName - 外包装窗口 - null
 + defaultSelectedValue - 默认选中的值，如果不传，默认选择`itemList[0]` - null
 + onSelect - 选择事件回调 - noop
++ getItemWrap(panel, props, state, inst) - 
+  获取弹层容器函数，panel `getItemContent` 返回的所有的内容
 + getSelectorContent(currentSelectedValue) - 获取Selector区域内容函数 - noop
 + getItemContent(value, props) - 获取Item内容函数 - noop 
++ getItemsContent(props, state, inst) - 获取所有Item的函数，
+  如果该函数返回值为`undefined`，则根据`itemList`循环调用`getItemContent` - noop 
 
 ## 示例
 ```JavaScript

@@ -4,7 +4,7 @@
 ### DropDown.Item - 包含如下四个属性
 + value - null - Item的值，在 `onSelect` 执行时会将该属性传入
 + isItem - true - 是否是一个Item，如果是，会绑定对应的事件，如果不是，则不会绑定。
-+ getItemContent - noop - 获取Item内容函数；组件会优先取用 `props.children` 的内容，
++ getItemContent(value, props, inst) - noop - 获取Item内容函数；组件会优先取用 `props.children` 的内容，
   如果 `props.children` 为null，则使用该函数的返回值。
   该函数会传入两个参数：`value` 、 `{onClick: this.onSelect}`，使用时可以将属性绑定在对应的元素上。
 + onSelect - noop - Item被选择时调用该函数，传入 `value`
@@ -16,10 +16,13 @@
 + getSelectorContent - noop - 同 `DropDown.Item` 的 `getItemContent`
 
 ## DropDown Props
-
 + onSelect - noop - 选择时的回调
 + selectorContent - null - 选择器内容
 + selectorBindEvent - true - 是否绑定事件
++ getItemWrap(panel, props, state, inst) - 获取弹层容器函数，
+panel 是弹层内容`panelContent`
+  - 如果该函数返回的值为undefined，
+    则取`<ol className="comp-select-m-t">{panel}</ol>`
 + panelContent - null -面板内容
 ```
 +-----------------------+
@@ -29,7 +32,7 @@
 +-----------------------+
 |    item               |
 |    item               |
-|    item               |
+|    item               |  --------> 除 Item 之外的内容，称之为 wrap
 |    item               |
 |    item               |
 |    item               |
