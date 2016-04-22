@@ -2476,6 +2476,7 @@ this["EssaComponents"] =
 	            wrapClassName: null,
 	            selectorContent: null,
 	            selectorBindEvent: true,
+	            getItemWrap: noop,
 	            panelContent: null
 	        };
 	    },
@@ -2513,7 +2514,7 @@ this["EssaComponents"] =
 	            return React.cloneElement(item, _props);
 	        }, this);
 
-	        var panelContent = React.createElement('ol', { className: 'comp-select-m-t' }, items);
+	        var panelContent = props.getItemWrap(items, props, this.state, this) || React.createElement('ol', { className: 'comp-select-m-t' }, items);
 
 	        var selectorContent = React.cloneElement(props.selectorContent, {
 	            onComponentMount: this.onSelectorMount
@@ -2546,7 +2547,7 @@ this["EssaComponents"] =
 	    },
 
 	    render: function render() {
-	        return this.props.children ? React.cloneElement(this.props.children, { onClick: this.onSelect }) : this.props.getItemContent(this.props.value, { onClick: this.onSelect });
+	        return this.props.children ? React.cloneElement(this.props.children, { onClick: this.onSelect }) : this.props.getItemContent(this.props.value, { onClick: this.onSelect }, this);
 	    }
 	});
 
@@ -3106,7 +3107,9 @@ this["EssaComponents"] =
 	            wrapClassName: null,
 	            defaultSelectedValue: null,
 	            onSelect: noop,
+	            getItemWrap: noop,
 	            getSelectorContent: noop,
+	            getItemsContent: noop,
 	            getItemContent: noop
 	        };
 	    },
@@ -3142,7 +3145,7 @@ this["EssaComponents"] =
 	            defaultSelectedValue: self.state.currentSelectedValue,
 	            getSelectorContent: props.getSelectorContent });
 
-	        var panelContent = props.itemList.map(function (value, index) {
+	        var panelContent = props.getItemsContent(props, state, this) || props.itemList.map(function (value, index) {
 	            return React.createElement(DropDown.Item, {
 	                value: value,
 	                key: index,
@@ -3150,6 +3153,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(DropDown, {
+	            getItemWrap: props.getItemWrap,
 	            wrapClassName: props.wrapClassName,
 	            selectorBindEvent: this.ensureEvent(),
 	            selectorContent: selectorContent,
