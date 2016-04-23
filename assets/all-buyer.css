@@ -754,7 +754,7 @@ fieldset[disabled] .btn-info.focus {
 .icon-img:before {
   content: "";
   display: block;
-  background: url('../img/base/buyer-icon.png') no-repeat;
+  background: url('./img/base/buyer-icon.png') no-repeat;
 }
 .icon-up:before {
   width: 16px;
@@ -1338,10 +1338,10 @@ fieldset[disabled] .btn-info.focus {
   background: no-repeat 0 0;
 }
 .icon-loading {
-  background: url('../img/base/ld-16a.gif');
+  background: url('./img/base/ld-16a.gif');
 }
 .icon-loading-red {
-  background: url('../img/base/ld-16b.gif');
+  background: url('./img/base/ld-16b.gif');
 }
 .icon-wrapper {
   line-height: 12px;
@@ -6979,7 +6979,7 @@ fieldset .btn {
 .Bgleftshadow-lg {
   width: 30px;
   height: 100%;
-  background: url("../img/pgBg01.png") repeat-y 0 0;
+  background: url("./img/pgBg01.png") repeat-y 0 0;
   position: absolute;
   top: 0;
   left: -28px;
@@ -6987,7 +6987,7 @@ fieldset .btn {
 .Bgleftshadow-sm {
   width: 18px;
   height: 100%;
-  background: url("../img/pgBg01.png") repeat-y 0 0;
+  background: url("./img/pgBg01.png") repeat-y 0 0;
   position: absolute;
   top: 0;
   left: -19px;
@@ -7684,7 +7684,7 @@ fieldset .btn {
   display: inline-block;
   cursor: pointer;
   margin: 0 6px;
-  background: url("../img/base/buyer-icon.png") no-repeat -170px -69px;
+  background: url("./img/base/buyer-icon.png") no-repeat -170px -69px;
 }
 .jdt-btn li.curr {
   background-position: -150px -69px;

@@ -62,7 +62,7 @@ var Custom = React.createClass({
             defaultSelectedValue={self.state.currentSelectedValue}
             getSelectorContent={props.getSelectorContent}/>;
 
-        var panelContent = props.getItemsContent(props, state, this) ||
+        var panelContent = props.getItemsContent(props, self.state, this) ||
             props.itemList.map(function (value, index) {
                 return <DropDown.Item
                     value={value}

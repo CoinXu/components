@@ -38,10 +38,22 @@ ReactDOM.render(
     document.getElementById('custom-dropdown')
 );
 
+// 输入内容验证
+var validation = function (val, input) {
+    if (!/^[0-9]+$/.test(val)) {
+        alert('请输入数字');
+        return false;
+    }
+    return true;
+};
+
 ReactDOM.render(
-    <Selector.Importable onSelect={log}/>,
+    <Selector.Importable
+        validate={validation}
+        onSelect={log}/>,
     document.getElementById('demo')
 );
+
 
 // 自定义内容
 var itemList = ['全部时间', '3天内', '7天内', '30天内', '其他'];

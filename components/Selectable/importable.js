@@ -10,6 +10,7 @@ var getSelectorContent = function (rejectValue, onChange) {
     return function (value) {
         if (value === rejectValue) {
             return <input
+                ref="inputNode"
                 onChange={onChange}
                 className="input-default"
                 style={{width:60}}
@@ -27,20 +28,25 @@ var getItemContent = function (value, props) {
     return React.cloneElement(item, props);
 };
 
+var getTruth = function () {
+    return true;
+};
+
 var Importable = React.createClass({
 
     getInitialState: function () {
         return {
-            currentSelectedValue: null
+            currentSelectedValue: null,
+            fromInput: false
         }
     },
 
     getDefaultProps: function () {
         return {
-            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, '10+'],
-            wrapClassName: null,
+            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'],
             defaultSelectedValue: 1,
             onSelect: noop,
+            validate: getTruth,
             getSelectorContent: getSelectorContent(null),
             getItemContent: getItemContent,
             rejectValue: '10+'
@@ -49,23 +55,40 @@ var Importable = React.createClass({
 
     onSelect: function (value) {
         var self = this;
-        if (typeof value === 'object' && value.target) {
-            self.props.onSelect(value.target.value);
-        } else {
-            self.setState({currentSelectedValue: value}, function () {
-                self.props.onSelect(value);
-            });
+        self.setState({
+            currentSelectedValue: value,
+            fromInput: false
+        }, function () {
+            self.props.onSelect(value);
+        });
+    },
+
+    onChange: function (e) {
+        if (this.props.validate(e.target.value, this.refs.inputNode)) {
+            this.setState({
+                currentSelectedValue: e.target.value,
+                fromInput: true
+            })
         }
     },
 
-    componentWillMount: function () {
-        this._getSelectorContent = getSelectorContent(
-            this.props.rejectValue,
-            this.onSelect
-        );
+    validate: function () {
+        var inputNode = this.refs.inputNode;
+        return inputNode ?
+            this.props.validate(inputNode.value, inputNode) :
+            true;
     },
 
-    ensureEvent: function () {
+    componentWillMount: function () {
+        this.setState({currentSelectedValue: this.props.defaultSelectedValue})
+    },
+
+    // 如果是input的输入值变化，则不需要重新渲染
+    shouldComponentUpdate: function (nextProps, nextState) {
+        return !nextState.fromInput
+    },
+
+    queryBindEvent: function () {
         var value = this.state.currentSelectedValue;
         return value !== this.props.rejectValue ||
             (value && typeof value === 'object' && !value.target)
@@ -74,23 +97,27 @@ var Importable = React.createClass({
     render: function () {
         var self = this;
         var props = self.props;
+        var state = self.state;
 
         var selectorContent = <DropDown.Selector
             onSelect={self.onSelect}
-            defaultSelectedValue={self.state.currentSelectedValue !== null ?
-                    self.state.currentSelectedValue :
-                    props.defaultSelectedValue}
-            getSelectorContent={self._getSelectorContent}/>;
+            defaultSelectedValue={state.currentSelectedValue}
+            getSelectorContent={getSelectorContent(
+                props.rejectValue,
+                self.onChange)
+            }/>;
 
-        var panelContent = React.Children.map(props.itemList, function (value, index) {
-            return <DropDown.Item
-                value={value}
-                key={index}
-                getItemContent={props.getItemContent}/>;
-        });
+        var panelContent = React.Children.map(
+            props.itemList,
+            function (value, index) {
+                return <DropDown.Item
+                    value={value}
+                    key={index}
+                    getItemContent={props.getItemContent}/>;
+            });
 
         return <DropDown
-            selectorBindEvent={this.ensureEvent()}
+            selectorBindEvent={this.queryBindEvent()}
             selectorContent={selectorContent}
             panelContent={panelContent}/>
     }

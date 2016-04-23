@@ -2373,6 +2373,7 @@ this["EssaComponents"] =
 	    return function (value) {
 	        if (value === rejectValue) {
 	            return React.createElement('input', {
+	                ref: 'inputNode',
 	                onChange: onChange,
 	                className: 'input-default',
 	                style: { width: 60 },
@@ -2387,21 +2388,26 @@ this["EssaComponents"] =
 	    return React.cloneElement(item, props);
 	};
 
+	var getTruth = function getTruth() {
+	    return true;
+	};
+
 	var Importable = React.createClass({
 	    displayName: 'Importable',
 
 	    getInitialState: function getInitialState() {
 	        return {
-	            currentSelectedValue: null
+	            currentSelectedValue: null,
+	            fromInput: false
 	        };
 	    },
 
 	    getDefaultProps: function getDefaultProps() {
 	        return {
-	            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, '10+'],
-	            wrapClassName: null,
+	            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'],
 	            defaultSelectedValue: 1,
 	            onSelect: noop,
+	            validate: getTruth,
 	            getSelectorContent: getSelectorContent(null),
 	            getItemContent: getItemContent,
 	            rejectValue: '10+'
@@ -2410,20 +2416,38 @@ this["EssaComponents"] =
 
 	    onSelect: function onSelect(value) {
 	        var self = this;
-	        if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value.target) {
-	            self.props.onSelect(value.target.value);
-	        } else {
-	            self.setState({ currentSelectedValue: value }, function () {
-	                self.props.onSelect(value);
+	        self.setState({
+	            currentSelectedValue: value,
+	            fromInput: false
+	        }, function () {
+	            self.props.onSelect(value);
+	        });
+	    },
+
+	    onChange: function onChange(e) {
+	        if (this.props.validate(e.target.value, this.refs.inputNode)) {
+	            this.setState({
+	                currentSelectedValue: e.target.value,
+	                fromInput: true
 	            });
 	        }
 	    },
 
-	    componentWillMount: function componentWillMount() {
-	        this._getSelectorContent = getSelectorContent(this.props.rejectValue, this.onSelect);
+	    validate: function validate() {
+	        var inputNode = this.refs.inputNode;
+	        return inputNode ? this.props.validate(inputNode.value, inputNode) : true;
 	    },
 
-	    ensureEvent: function ensureEvent() {
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ currentSelectedValue: this.props.defaultSelectedValue });
+	    },
+
+	    // 如果是input的输入值变化，则不需要重新渲染
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        return !nextState.fromInput;
+	    },
+
+	    queryBindEvent: function queryBindEvent() {
 	        var value = this.state.currentSelectedValue;
 	        return value !== this.props.rejectValue || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !value.target;
 	    },
@@ -2431,11 +2455,12 @@ this["EssaComponents"] =
 	    render: function render() {
 	        var self = this;
 	        var props = self.props;
+	        var state = self.state;
 
 	        var selectorContent = React.createElement(DropDown.Selector, {
 	            onSelect: self.onSelect,
-	            defaultSelectedValue: self.state.currentSelectedValue !== null ? self.state.currentSelectedValue : props.defaultSelectedValue,
-	            getSelectorContent: self._getSelectorContent });
+	            defaultSelectedValue: state.currentSelectedValue,
+	            getSelectorContent: getSelectorContent(props.rejectValue, self.onChange) });
 
 	        var panelContent = React.Children.map(props.itemList, function (value, index) {
 	            return React.createElement(DropDown.Item, {
@@ -2445,7 +2470,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(DropDown, {
-	            selectorBindEvent: this.ensureEvent(),
+	            selectorBindEvent: this.queryBindEvent(),
 	            selectorContent: selectorContent,
 	            panelContent: panelContent });
 	    }
@@ -3145,7 +3170,7 @@ this["EssaComponents"] =
 	            defaultSelectedValue: self.state.currentSelectedValue,
 	            getSelectorContent: props.getSelectorContent });
 
-	        var panelContent = props.getItemsContent(props, state, this) || props.itemList.map(function (value, index) {
+	        var panelContent = props.getItemsContent(props, self.state, this) || props.itemList.map(function (value, index) {
 	            return React.createElement(DropDown.Item, {
 	                value: value,
 	                key: index,

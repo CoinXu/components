@@ -4,8 +4,17 @@
 ### Props
 + itemList - 选项值列表 - `[1, 2, 3, 4, 5, 6, 7, 8, 9, '10+']`
 + defaultSelectedValue - 默认选中的值 - `1`
-+ onSelect - 选择某个Item时（如果变为input，则为input.onchange事件的回调）的回调 - noop
++ onSelect - 选择某个Item时的回调 - noop
 + rejectValue - 触发`selector`变为`input`的值 - '10+'
++ validate(inputValue, inputNode) - 
+  验证函数，当组件变为input时，input `onChange` 事件触发，
+  如果该函数返回的值不为真，那么当前的 `inputValue` 不会设置为组件的当前值；
+  如果返回真，则设置。
+  - `function(){return true;}`
+
+### Props
++ validate - 验证`input`的输入值，在该函数中会调用 `props.validate` 函数来作为判断依据。
+  只有在组件变为 `input` 时有效，其余情况一律返回true。
 
 ### 调用
 ```JavaScript
@@ -16,9 +25,21 @@ var log = function () {
     console.info(arguments)
 };
 ```
-1. 默认Props
+1. 默认Props、传入验证函数
 ```JavaScript
-ReactDOM.render(<Selector.Importable onSelect={log}/>,mountNode);
+var validation = function (val, input) {
+    if (!/^[0-9]+$/.test(val)) {
+        alert('请输入数字');
+        return false;
+    }
+    return true;
+};
+ReactDOM.render(
+    <Selector.Importable
+        validate={validation}
+        onSelect={log}/>,
+    mountNode
+);
 ```
 2. 传入Props
 ```JavaScript
