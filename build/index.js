@@ -2875,6 +2875,9 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var noop = __webpack_require__(4);
+	var triggerHide = function triggerHide() {
+	    return true;
+	};
 
 	module.exports = {
 
@@ -2897,6 +2900,7 @@ this["EssaComponents"] =
 	            itemList: itemList,
 	            selectorClassName: '',
 	            selectorStyle: {},
+	            triggerHide: triggerHide,
 	            defaultSelectedValue: itemList[0],
 	            onSelect: noop
 	        };
@@ -3188,8 +3192,7 @@ this["EssaComponents"] =
 	    },
 
 	    ensureEvent: function ensureEvent() {
-	        var value = this.state.currentSelectedValue;
-	        return value !== this.props.rejectValue || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !value.target;
+	        return this.state.currentSelectedValue !== this.props.rejectValue;
 	    },
 
 	    render: function render() {

@@ -3,6 +3,9 @@
  */
 var React = require('react');
 var noop = require('../../com/noop');
+var triggerHide = function () {
+    return true;
+};
 
 module.exports = {
 
@@ -25,6 +28,7 @@ module.exports = {
             itemList: itemList,
             selectorClassName: '',
             selectorStyle: {},
+            triggerHide: triggerHide,
             defaultSelectedValue: itemList[0],
             onSelect: noop
         }

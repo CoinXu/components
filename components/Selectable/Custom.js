@@ -6,7 +6,6 @@ var React = require('react');
 var DropDown = require('./DropDown');
 var noop = require('../../com/noop');
 
-
 var Custom = React.createClass({
 
     getInitialState: function () {
@@ -48,9 +47,7 @@ var Custom = React.createClass({
     },
 
     ensureEvent: function () {
-        var value = this.state.currentSelectedValue;
-        return value !== this.props.rejectValue ||
-            (value && typeof value === 'object' && !value.target)
+        return this.state.currentSelectedValue !== this.props.rejectValue;
     },
 
     render: function () {
