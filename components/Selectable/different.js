@@ -44,6 +44,7 @@ var Diff = React.createClass({
         return {
             itemList: itemList,
             defaultSelectedValue: itemList[0],
+            rejectValue: null,
             onSelect: noop,
             getSelectorContent: getSelectorContent,
             getItemContent: getItemContent
@@ -58,9 +59,7 @@ var Diff = React.createClass({
     },
 
     ensureEvent: function () {
-        var value = this.state.currentSelectedValue;
-        return value !== this.props.rejectValue ||
-            (value && typeof value === 'object' && !value.target)
+        return this.state.currentSelectedValue !== this.props.rejectValue
     },
 
     render: function () {

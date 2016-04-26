@@ -2732,12 +2732,6 @@ this["EssaComponents"] =
 
 	'use strict';
 
-	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	function _typeof(obj) {
-	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	}
-
 	/**
 	 * Created by xcp on 2016/3/23.
 	 */
@@ -2770,6 +2764,7 @@ this["EssaComponents"] =
 	        return {
 	            itemList: itemList,
 	            defaultSelectedValue: itemList[0],
+	            rejectValue: null,
 	            onSelect: noop,
 	            getSelectorContent: getSelectorContent,
 	            getItemContent: getItemContent
@@ -2784,8 +2779,7 @@ this["EssaComponents"] =
 	    },
 
 	    ensureEvent: function ensureEvent() {
-	        var value = this.state.currentSelectedValue;
-	        return value !== this.props.rejectValue || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !value.target;
+	        return this.state.currentSelectedValue !== this.props.rejectValue;
 	    },
 
 	    render: function render() {
