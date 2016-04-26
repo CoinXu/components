@@ -40,7 +40,7 @@ var FOContainer = React.createClass({
                  onClick={this.onSelect.bind(this, item)}>
                 <span className={this.getProgressClassName(item.percent, 'progress-bar-text')}/>
             </div>
-            <span className="icon-img icon-close util-v-m" onClick={this.removeOne.bind(this, item)}/>
+            <span className="icon-img icon-close util-v-m" onClick={this.props.remove.bind(this, item)}/>
         </li>)
     },
 
@@ -102,7 +102,7 @@ var FOContainer = React.createClass({
                         </li>
                         {itemList}
                         <li className="comp-panel-title util-text-center">
-                            <span className="icon-img icon-plus util-v-m" onClick={this.addOne}/>
+                            <span className="icon-img icon-plus util-v-m" onClick={this.props.add}/>
                         </li>
                     </ol>
                 </div>

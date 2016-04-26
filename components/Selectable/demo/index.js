@@ -100,6 +100,7 @@ ReactDOM.render(
 
 ReactDOM.render(
     <Selector.MiniContainer
+        selectorStyle={{padding:0}}
         itemList={containers}
         onSelect={log}/>,
     document.getElementById('mini-container')

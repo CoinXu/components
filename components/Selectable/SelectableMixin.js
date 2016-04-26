@@ -23,6 +23,8 @@ module.exports = {
         var itemList = [];
         return {
             itemList: itemList,
+            selectorClassName: '',
+            selectorStyle: {},
             defaultSelectedValue: itemList[0],
             onSelect: noop
         }
@@ -59,8 +61,11 @@ module.exports = {
         })
     },
 
+    hidePanel: function () {
+        this.setState({panelStateIsShow: false})
+    },
+
     componentWillMount: function () {
         this.setState({currentSelectedValue: this.props.defaultSelectedValue});
-
     }
 };

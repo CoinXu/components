@@ -6,6 +6,7 @@
 + symbolClass - `Array` - 小箭头的 className
 + closeable - `Boolean` - 是否可关闭
 + style - `Object` - 外层容器 style，一般不用传
++ onComponentMount(warpNode, inst) - `Function` - 组件挂载后回调
 
 ## 调用方式
 
@@ -34,6 +35,7 @@ ReactDOM.render(
 ```JavaScript
 ReactDOM.render(
     <Bias 
+        onComponentMount={log}
         placement="top"
         closeable>
         Bias 内容

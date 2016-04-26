@@ -2,8 +2,16 @@
  * Created by xcp on 2016/3/24.
  */
 var classNames = require('classnames');
+var noop = require('../../com/noop');
 
 module.exports = {
+
+    getDefaultProps: function () {
+        return {
+            add: noop,
+            remove: noop
+        }
+    },
 
     addOne: function () {
         var index = 0;

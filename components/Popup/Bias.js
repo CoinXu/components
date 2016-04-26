@@ -4,6 +4,7 @@
 
 var React = require('react');
 var ReactDOM = require('react-dom');
+var noop = require('../../com/noop');
 
 var Bias = React.createClass({
 
@@ -17,6 +18,7 @@ var Bias = React.createClass({
             closeable: false,
             symbolStyle: {},
             symbolClass: [],
+            onComponentMount: noop,
             style: {}
         }
     },
@@ -46,6 +48,10 @@ var Bias = React.createClass({
         ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
     },
 
+    componentDidMount: function () {
+        this.props.onComponentMount(this.refs.wrap, this);
+    },
+
     render: function () {
 
         var classNames = this.getClassName();
@@ -62,7 +68,7 @@ var Bias = React.createClass({
         return (<div className={classNames.wrapperClass} style={this.props.style}>
             <span className={classNames.symbolClass + symbolClassName}
                   style={this.props.symbolStyle}/>
-            <div className="bub-bias-con">
+            <div className="bub-bias-con" ref="wrap">
                 <div className="bub-bias-con-text inline-block">{this.props.children}</div>
                 {closeElement}
             </div>

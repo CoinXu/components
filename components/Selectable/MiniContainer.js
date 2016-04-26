@@ -24,6 +24,7 @@ var MiniContainer = React.createClass({
     },
 
     render: function () {
+        var props = this.props;
         var panelClassName = {
             'comp-custom-select': true,
             'comp-show-panel': this.state.panelStateIsShow
@@ -50,8 +51,12 @@ var MiniContainer = React.createClass({
         }, this);
 
         return (<div className={classNames(panelClassName)} ref="selectable">
-            <div className="comp-select-selector-pd">
-                <div className="comp-select-selector" onClick={this.showPanel}>
+            <div
+                className={"comp-select-selector-pd" + (props.selectorClassName ? (' ' + props.selectorClassName) : '')}
+                style={props.selectorStyle}>
+                <div
+                    className='comp-select-selector'
+                    onClick={this.showPanel}>
                     <div className="comp-select-progress">
                         <span className={progressClassName}/>
                     </div>
@@ -68,7 +73,7 @@ var MiniContainer = React.createClass({
                         <div className="row">
                             {itemList}
                             <div className="comp-panel-title util-text-center col-xs-12">
-                                <span className="icon-img icon-plus util-v-m" onClick={this.addOne}/>
+                                <span className="icon-img icon-plus util-v-m" onClick={props.add}/>
                             </div>
                         </div>
                     </div>

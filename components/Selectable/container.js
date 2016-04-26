@@ -47,7 +47,7 @@ var Container = React.createClass({
                 </div>
                 <span
                     className="icon-img icon-close util-v-m"
-                    onClick={this.removeOne.bind(this, item)}/>
+                    onClick={this.props.remove.bind(this, item)}/>
             </li>
         }, this);
 
@@ -69,7 +69,7 @@ var Container = React.createClass({
                     <ol className="comp-select-m-t">
                         {itemList}
                         <li className="comp-panel-title util-text-center">
-                            <span className="icon-img icon-plus util-v-m" onClick={this.addOne}/>
+                            <span className="icon-img icon-plus util-v-m" onClick={this.props.add}/>
                         </li>
                     </ol>
                 </div>

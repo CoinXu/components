@@ -40,7 +40,10 @@ ReactDOM.render(
 ### 可关闭的弹层，各种方向
 ```JavaScript
 ReactDOM.render(
-    <Bias closeable placement="right">{biasContent}</Bias>,
+    <Bias 
+        onComponentMount={log} 
+        closeable 
+        placement="right">{biasContent}</Bias>,
     mountNode
 );
 ```

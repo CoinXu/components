@@ -1,3 +1,11 @@
+## 2016-04-26 —— xcp
+1. ContainerMixin 添加 `add` `remove` 两个 props
+2. SelectableMixin 添加 `selectorClassName` `selectorStyle` 两个props
+受影响的组件包括： `MiniContainer` `Container` `FirstOutContainer`
+
+## 2016-04-25 —— xcp
+Bubble\Bias 组件添加 `onComponentMount` 属性，具体看文档
+
 ## 2016-04-23 —— xcp
 1. Selectable.Importable 添加 `validate` 属性，用于组件变为 input 状态时的验证。
 2. Selectable.Importable 添加 `validate` 方法。

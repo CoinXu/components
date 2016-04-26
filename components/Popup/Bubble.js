@@ -3,6 +3,7 @@
  */
 
 var React = require('react');
+var noop = require('../../com/noop');
 var Bubble = React.createClass({
 
     propTypes: {
@@ -14,6 +15,7 @@ var Bubble = React.createClass({
             placement: 'top',
             symbolStyle: {},
             symbolClass: [],
+            onComponentMount: noop,
             style: {}
         }
     },
@@ -32,6 +34,10 @@ var Bubble = React.createClass({
         }
     },
 
+    componentDidMount: function () {
+        this.props.onComponentMount(this.refs.wrap, this);
+    },
+
     render: function () {
 
         var classNames = this.getClassName();
@@ -42,7 +48,7 @@ var Bubble = React.createClass({
         return (<div className={classNames.wrapperClass} style={this.props.style}>
             <span className={classNames.symbolClass + symbolClassName}
                   style={this.props.symbolStyle}/>
-            <div className="bub-con">
+            <div className="bub-con" ref="wrap">
                 {this.props.children}
             </div>
         </div>)

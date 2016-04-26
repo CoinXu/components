@@ -8,6 +8,9 @@ var Popup = require('../Popup');
 var Bubble = require('../Bubble');
 var Bias = require('../Bias');
 var assign = require('object-assign');
+var log = function () {
+    console.log(arguments)
+};
 
 var __button = function (message) {
     return <button className="btn btn-primary btn-sm">{message}</button>
@@ -74,7 +77,7 @@ ReactDOM.render(
 
 
 ReactDOM.render(
-    <Bias closeable placement="right">{biasContent}</Bias>,
+    <Bias onComponentMount={log} closeable placement="right">{biasContent}</Bias>,
     document.getElementById('bias-right')
 );
 
@@ -150,6 +153,7 @@ ReactDOM.render(
             // 需要继承父级传入的 style
             // 用于指定绝对位置
             return <Bubble
+                onComponentMount={log}
                 style={assign(this.props.style, {width:210})}
                 symbolStyle={{left:'50%',marginLeft:-10}}>
                 <button

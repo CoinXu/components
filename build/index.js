@@ -2110,6 +2110,7 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
 	var Bubble = React.createClass({
 	    displayName: 'Bubble',
 
@@ -2122,6 +2123,7 @@ this["EssaComponents"] =
 	            placement: 'top',
 	            symbolStyle: {},
 	            symbolClass: [],
+	            onComponentMount: noop,
 	            style: {}
 	        };
 	    },
@@ -2140,13 +2142,17 @@ this["EssaComponents"] =
 	        };
 	    },
 
+	    componentDidMount: function componentDidMount() {
+	        this.props.onComponentMount(this.refs.wrap, this);
+	    },
+
 	    render: function render() {
 
 	        var classNames = this.getClassName();
 	        var symbolClassName = this.props.symbolClass.length > 0 ? ' ' + this.props.symbolClass.join(' ') : '';
 
 	        return React.createElement('div', { className: classNames.wrapperClass, style: this.props.style }, React.createElement('span', { className: classNames.symbolClass + symbolClassName,
-	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-con' }, this.props.children));
+	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-con', ref: 'wrap' }, this.props.children));
 	    }
 	});
 
@@ -2164,6 +2170,7 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var ReactDOM = __webpack_require__(15);
+	var noop = __webpack_require__(4);
 
 	var Bias = React.createClass({
 	    displayName: 'Bias',
@@ -2178,6 +2185,7 @@ this["EssaComponents"] =
 	            closeable: false,
 	            symbolStyle: {},
 	            symbolClass: [],
+	            onComponentMount: noop,
 	            style: {}
 	        };
 	    },
@@ -2207,6 +2215,10 @@ this["EssaComponents"] =
 	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
 	    },
 
+	    componentDidMount: function componentDidMount() {
+	        this.props.onComponentMount(this.refs.wrap, this);
+	    },
+
 	    render: function render() {
 
 	        var classNames = this.getClassName();
@@ -2219,7 +2231,7 @@ this["EssaComponents"] =
 	        }
 
 	        return React.createElement('div', { className: classNames.wrapperClass, style: this.props.style }, React.createElement('span', { className: classNames.symbolClass + symbolClassName,
-	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-bias-con' }, React.createElement('div', { className: 'bub-bias-con-text inline-block' }, this.props.children), closeElement));
+	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-bias-con', ref: 'wrap' }, React.createElement('div', { className: 'bub-bias-con-text inline-block' }, this.props.children), closeElement));
 	    }
 	});
 
@@ -2838,14 +2850,14 @@ this["EssaComponents"] =
 	            return React.createElement('li', { className: 'comp-panel-item', key: item.index }, React.createElement('strong', { className: 'comp-icon-gap' }, item.index), React.createElement('div', { className: 'comp-select-progress comp-icon-gap',
 	                onClick: this.onSelect.bind(this, item) }, React.createElement('span', { className: this.getProgressClassName(item.percent, progressText) })), React.createElement('span', {
 	                className: 'icon-img icon-close util-v-m',
-	                onClick: this.removeOne.bind(this, item) }));
+	                onClick: this.props.remove.bind(this, item) }));
 	        }, this);
 
 	        return React.createElement('div', { className: classNames(panelClassName), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, React.createElement('div', { className: 'comp-select-selector', onClick: this.showPanel }, React.createElement('div', { className: 'comp-select-progress' }, React.createElement('span', { className: progressClassName })), React.createElement('span', { className: 'icon-img icon-tran-black-d' }))), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
 	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
-	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel' }, React.createElement('ol', { className: 'comp-select-m-t' }, itemList, React.createElement('li', { className: 'comp-panel-title util-text-center' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.addOne }))))));
+	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel' }, React.createElement('ol', { className: 'comp-select-m-t' }, itemList, React.createElement('li', { className: 'comp-panel-title util-text-center' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.props.add }))))));
 	    }
 	});
 
@@ -2883,6 +2895,8 @@ this["EssaComponents"] =
 	        var itemList = [];
 	        return {
 	            itemList: itemList,
+	            selectorClassName: '',
+	            selectorStyle: {},
 	            defaultSelectedValue: itemList[0],
 	            onSelect: noop
 	        };
@@ -2919,6 +2933,10 @@ this["EssaComponents"] =
 	        });
 	    },
 
+	    hidePanel: function hidePanel() {
+	        this.setState({ panelStateIsShow: false });
+	    },
+
 	    componentWillMount: function componentWillMount() {
 	        this.setState({ currentSelectedValue: this.props.defaultSelectedValue });
 	    }
@@ -2935,8 +2953,16 @@ this["EssaComponents"] =
 	 */
 
 	var classNames = __webpack_require__(13);
+	var noop = __webpack_require__(4);
 
 	module.exports = {
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            add: noop,
+	            remove: noop
+	        };
+	    },
 
 	    addOne: function addOne() {
 	        var index = 0;
@@ -3013,7 +3039,7 @@ this["EssaComponents"] =
 
 	    getItemElement: function getItemElement(item) {
 	        return React.createElement('li', { className: 'comp-panel-item', key: item.index }, React.createElement('strong', { className: 'comp-icon-gap' }, item.index), React.createElement('div', { className: 'comp-select-progress comp-icon-gap',
-	            onClick: this.onSelect.bind(this, item) }, React.createElement('span', { className: this.getProgressClassName(item.percent, 'progress-bar-text') })), React.createElement('span', { className: 'icon-img icon-close util-v-m', onClick: this.removeOne.bind(this, item) }));
+	            onClick: this.onSelect.bind(this, item) }, React.createElement('span', { className: this.getProgressClassName(item.percent, 'progress-bar-text') })), React.createElement('span', { className: 'icon-img icon-close util-v-m', onClick: this.props.remove.bind(this, item) }));
 	    },
 
 	    render: function render() {
@@ -3038,7 +3064,7 @@ this["EssaComponents"] =
 	            refTarget: this.refs.selectable,
 	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
-	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel' }, React.createElement('div', { className: 'bub-bd-b' }, React.createElement('div', { className: 'bub-pd-l-lg bub-pd-r-lg' }, React.createElement('span', { className: 'color-selection comp-neg-m-l comp-icon-gap' }, '先出货柜'), React.createElement('span', { className: 'icon-img icon-qa-normal util-v-text-t' })), React.createElement('div', { className: 'bub-pd-b' }, React.createElement('ol', { className: 'comp-select-m-t bub-pd-t' }, firstOutList))), React.createElement('ol', { className: 'comp-select-m-t bub-pd-t' }, React.createElement('li', { className: 'comp-panel-title util-line-14' }, React.createElement('span', { className: 'color-selection comp-neg-m-l comp-icon-gap' }, '其他货柜'), React.createElement('span', { className: 'icon-img icon-qa-normal util-v-text-t' })), itemList, React.createElement('li', { className: 'comp-panel-title util-text-center' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.addOne }))))));
+	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel' }, React.createElement('div', { className: 'bub-bd-b' }, React.createElement('div', { className: 'bub-pd-l-lg bub-pd-r-lg' }, React.createElement('span', { className: 'color-selection comp-neg-m-l comp-icon-gap' }, '先出货柜'), React.createElement('span', { className: 'icon-img icon-qa-normal util-v-text-t' })), React.createElement('div', { className: 'bub-pd-b' }, React.createElement('ol', { className: 'comp-select-m-t bub-pd-t' }, firstOutList))), React.createElement('ol', { className: 'comp-select-m-t bub-pd-t' }, React.createElement('li', { className: 'comp-panel-title util-line-14' }, React.createElement('span', { className: 'color-selection comp-neg-m-l comp-icon-gap' }, '其他货柜'), React.createElement('span', { className: 'icon-img icon-qa-normal util-v-text-t' })), itemList, React.createElement('li', { className: 'comp-panel-title util-text-center' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.props.add }))))));
 	    }
 	});
 
@@ -3076,6 +3102,7 @@ this["EssaComponents"] =
 	    },
 
 	    render: function render() {
+	        var props = this.props;
 	        var panelClassName = {
 	            'comp-custom-select': true,
 	            'comp-show-panel': this.state.panelStateIsShow
@@ -3087,11 +3114,15 @@ this["EssaComponents"] =
 	            return React.createElement('div', { className: 'col-xs-4', key: item.index }, React.createElement('div', { className: 'comp-mini-item', onClick: this.onSelect.bind(this, item) }, React.createElement('div', { className: 'row' }, React.createElement('strong', { className: 'col-xs-4 util-text-right' }, item.index), React.createElement('div', { className: 'col-xs-8' }, React.createElement('span', { className: this.getProgressClassName(item.percent) })))));
 	        }, this);
 
-	        return React.createElement('div', { className: classNames(panelClassName), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, React.createElement('div', { className: 'comp-select-selector', onClick: this.showPanel }, React.createElement('div', { className: 'comp-select-progress' }, React.createElement('span', { className: progressClassName })), React.createElement('span', { className: 'icon-img icon-tran-black-d' }))), React.createElement(HideOnBodyClick, {
+	        return React.createElement('div', { className: classNames(panelClassName), ref: 'selectable' }, React.createElement('div', {
+	            className: "comp-select-selector-pd" + (props.selectorClassName ? ' ' + props.selectorClassName : ''),
+	            style: props.selectorStyle }, React.createElement('div', {
+	            className: 'comp-select-selector',
+	            onClick: this.showPanel }, React.createElement('div', { className: 'comp-select-progress' }, React.createElement('span', { className: progressClassName })), React.createElement('span', { className: 'icon-img icon-tran-black-d' }))), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
 	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
-	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel comp-mini-progress' }, React.createElement('div', { className: 'comp-select-m-t' }, React.createElement('div', { className: 'row' }, itemList, React.createElement('div', { className: 'comp-panel-title util-text-center col-xs-12' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: this.addOne })))))));
+	            triggerHide: this.triggerHide }, React.createElement('div', { className: 'comp-select-panel comp-progress-panel comp-mini-progress' }, React.createElement('div', { className: 'comp-select-m-t' }, React.createElement('div', { className: 'row' }, itemList, React.createElement('div', { className: 'comp-panel-title util-text-center col-xs-12' }, React.createElement('span', { className: 'icon-img icon-plus util-v-m', onClick: props.add })))))));
 	    }
 	});
 

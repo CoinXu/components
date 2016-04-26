@@ -5,6 +5,7 @@
 + symbolStyle - `Object` - 小箭头的 style，用于控制位置
 + symbolClass - `Array` - 小箭头的 className
 + style - `Object` - 外层容器 style，一般不用传
++ onComponentMount(warpNode, inst) - `Function` - 组件挂载后回调
 
 ## 调用方式
 该组件不单独调用，一般用与 [Popup](./docs.html) 配合使用。
@@ -20,6 +21,7 @@ var Bubble = require('react-components-s').Bubble
 ```JavaScript
 ReactDOM.render(
     <Bubble 
+        onComponentMount={log}
         placement="top"
         symbolStyle={{}}
         symbolClass={[]}

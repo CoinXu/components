@@ -53,6 +53,7 @@
             // 需要继承父级传入的 style
             // 用于指定绝对位置
             return <Bubble
+                onComponentMount={log}
                 style={assign(this.props.style, {width:210})}
                 symbolStyle={{left:'50%',marginLeft:-10}}>
                 <button
