@@ -45,6 +45,7 @@ var Pagination = React.createClass({
     },
 
     componentWillMount: function () {
+        this.setState({current: this.props.defaultCurrent});
         var props = this.props;
         var pages = Math.ceil(props.total / props.itemsInOnePage);
         var showPages = pages > props.pageSize ? props.pageSize : pages;
