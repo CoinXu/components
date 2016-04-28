@@ -15,14 +15,14 @@ var plugins = [];
 var argvs = process.argv;
 var filename = '[name].';
 
-if(argvs.indexOf('--compress') !== -1){
+if (argvs.indexOf('--compress') !== -1) {
     plugins.push(UglifyJsPlugin);
     filename = filename + 'min.'
 }
 
 module.exports = {
 
-    entry: {index:path.join(__dirname, './index')},
+    entry: {index: path.join(__dirname, './index')},
 
     output: {
         path: 'build',
@@ -66,7 +66,8 @@ module.exports = {
     externals: {
         "react": "React",
         "react-dom": "ReactDOM",
-        "react-dom/server": "ReactDOMServer"
+        "react-dom/server": "ReactDOMServer",
+        "moment": "moment"
     },
 
     plugins: plugins,

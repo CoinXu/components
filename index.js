@@ -9,5 +9,7 @@ module.exports = {
     Message: require('./dist/Message'),
     Pagination: require('./dist/Pagination'),
     Popup: require('./dist/Popup'),
+    Calendar: require('./dist/Calendar'),
+    Cascader: require('./dist/Cascader'),
     Selectable: require('./dist/Selectable')
 };

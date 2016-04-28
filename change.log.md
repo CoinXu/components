@@ -1,3 +1,6 @@
+## 2016-04-28 - xcp
+添加 `Calendar` 组件，详见文档
+
 ## 2016-04-26 —— xcp
 1. ContainerMixin 添加 `add` `remove` 两个 props
 2. SelectableMixin 添加 `selectorClassName` `selectorStyle` 两个props
