@@ -46,6 +46,10 @@ var Custom = React.createClass({
         })
     },
 
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({currentSelectedValue: nextProps.defaultSelectedValue})
+    },
+
     ensureEvent: function () {
         return this.state.currentSelectedValue !== this.props.rejectValue;
     },

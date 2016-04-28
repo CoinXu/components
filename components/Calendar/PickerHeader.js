@@ -72,17 +72,26 @@ const PickerHeader = React.createClass({
         this.__monthList = monthList;
 
         this.setState({
-            currentYear: yearList[0],
-            currentMonth: monthList[0]
+            currentYear: this.props.currentTime,
+            // 月份、星期都是从0开始计
+            currentMonth: this.props.currentTime.month() + 1
         })
     },
 
     shouldComponentUpdate: function (nextProps, nextState) {
         if (nextState.currentYear.year() !== this.state.currentYear.year() ||
             nextState.currentMonth !== this.state.currentMonth) {
-            this.props.onChange(nextState.currentYear.year(), nextState.currentMonth)
+            this.props.onChange(nextState.currentYear.year(), nextState.currentMonth - 1);
+            return true;
         }
         return false;
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({
+            currentYear: nextProps.currentTime,
+            currentMonth: nextProps.currentTime.month() + 1
+        })
     },
 
     render: function () {

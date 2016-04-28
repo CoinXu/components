@@ -88,6 +88,10 @@ var Importable = React.createClass({
         return !nextState.fromInput
     },
 
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({currentSelectedValue: nextProps.defaultSelectedValue})
+    },
+
     queryBindEvent: function () {
         var value = this.state.currentSelectedValue;
         return value !== this.props.rejectValue ||

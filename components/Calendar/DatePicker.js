@@ -11,6 +11,7 @@ const DatePicker = React.createClass({
 
     getDefaultProps: function () {
         return {
+            dateItemClassName: 'date-item',
             disabledClassName: 'disabled',
             currentClassName: 'curr',
             diffMonthClassName: 'diff',
@@ -32,18 +33,22 @@ const DatePicker = React.createClass({
         var props = this.props;
         var disabled = props.disabledDate(props.time);
         var className = {};
+        var current = moment();
 
+        className[props.dateItemClassName] = true;
         className[props.disabledClassName] = disabled;
         className[props.currentClassName] =
-            props.currentTime.isSame(props.time, 'day');
+            props.time.isSame(current, 'year') &&
+            props.time.isSame(current, 'month') &&
+            props.time.isSame(current, 'day');
         className[props.diffMonthClassName] =
             props.diffDate(props.currentTime, props.time);
 
-        return <span
+        return <div
             className={classnames(className)}
             onClick={disabled ? noop : this.onSelect}>
             {props.time.date()}
-        </span>
+        </div>
     }
 });
 

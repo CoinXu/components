@@ -119,6 +119,10 @@ DropDown.Selector = React.createClass({
         this.setState({currentSelectedValue: this.props.defaultSelectedValue})
     },
 
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({currentSelectedValue: nextProps.defaultSelectedValue})
+    },
+
     onSelect: function (value) {
         var self = this;
         this.setState({currentSelectedValue: value}, function () {
