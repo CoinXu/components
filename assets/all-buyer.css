@@ -199,21 +199,23 @@ html {
   display: inline-block;
 }
 .pull-left,
-.pull-constant-auto > .pull-constant,
 .widget-st-line .widget-bg-text,
 .page-cont-text-box .widget-bg-text {
   float: left;
 }
-.pull-right,
-.pull-constant-auto > .pull-auto {
+.pull-right {
   float: right;
 }
+.pull-constant-auto {
+  position: relative;
+}
 .pull-constant-auto > .pull-constant {
+  position: absolute;
+  z-index: 1;
   width: 80px;
 }
 .pull-constant-auto > .pull-auto {
   width: 100%;
-  margin-left: -100%;
 }
 .pull-constant-auto > .pull-auto > .pull-auto-con {
   padding-left: 80px;
@@ -539,6 +541,9 @@ fieldset[disabled] .btn-info.focus {
 }
 .bub {
   position: relative;
+}
+.bub .icon-close-yellow {
+  cursor: pointer;
 }
 .bub-con,
 .bub-dialog,
@@ -1389,6 +1394,14 @@ fieldset[disabled] .btn-info.focus {
   opacity: 0.65;
   filter: alpha(opacity=65);
   cursor: not-allowed;
+}
+.input-no-drop,
+.textarea-no-drop,
+.select-no-drop {
+  border: 1px solid #EEE;
+  cursor: default;
+  color: #cccccc;
+  background: #fff;
 }
 .input-date {
   padding: 0 5px;
@@ -2617,6 +2630,68 @@ fieldset[disabled] .btn-info.focus {
   text-align: center;
   line-height: 18px;
 }
+.comp-mini-progress {
+  width: 260px;
+}
+.comp-mini-progress .row {
+  margin-left: -2px;
+  margin-right: -2px;
+}
+.comp-mini-progress .comp-select-m-t {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.comp-mini-progress .comp-mini-item {
+  line-height: 14px;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+.comp-mini-progress .comp-mini-item:hover {
+  background-color: #eceff9;
+}
+.comp-mini-progress .col-xs-3,
+.comp-mini-progress .col-xs-4,
+.comp-mini-progress .col-xs-8,
+.comp-mini-progress .col-xs-9 {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.comp-date-picker {
+  padding: 4px;
+  border: 1px solid #eeeeee;
+  display: inline-block;
+}
+.comp-date-picker > table tr > td {
+  padding-top: 1px;
+  padding-right: 1px;
+  text-align: center;
+}
+.comp-date-picker > table {
+  border-top: 1px solid #eeeeee;
+}
+.comp-date-picker .date-header {
+  padding: 6px 15px 6px 4px;
+}
+.comp-date-picker .date-item {
+  display: block;
+  width: 50px;
+  height: 22px;
+  line-height: 22px;
+  cursor: pointer;
+}
+.comp-date-picker .date-item.diff {
+  color: #ccc;
+}
+.comp-date-picker .curr,
+.comp-date-picker .date-item:hover {
+  background-color: #1e9ee1;
+  color: #ffffff;
+}
+.comp-date-picker .disabled,
+.comp-date-picker .disabled:hover {
+  background-color: #eeeeee;
+  color: #999;
+}
 .page-deploy-product {
   width: 820px;
   padding: 28px 18px 0;
@@ -2849,6 +2924,13 @@ fieldset[disabled] .btn-info.focus {
 .comp-progress-panel .comp-panel-item {
   margin-top: 1px;
   margin-bottom: 1px;
+}
+.comp-progress-panel .comp-panel-item .icon-close {
+  display: none;
+}
+.comp-progress-panel .comp-panel-item.focus .icon-close,
+.comp-progress-panel .comp-panel-item:hover .icon-close {
+  display: inline-block;
 }
 .comp-progress-panel .comp-select-m-t {
   margin-top: -8px;
@@ -3542,6 +3624,16 @@ fieldset[disabled] .btn-info.focus {
   font-size: 12px;
   text-align: center;
   z-index: 9;
+}
+.dropListBox-no-drop .box {
+  border: 1px solid #EEE;
+  cursor: default;
+}
+.dropListBox-no-drop .box .select-view {
+  color: #cccccc;
+}
+.dropListBox-no-drop .box .icon-tran-black-d {
+  opacity: 0.1;
 }
 .pop-box-select .select-view-a {
   padding: 5px 0;
@@ -4751,7 +4843,7 @@ fieldset[disabled] .btn-info.focus {
   height: 360px;
 }
 .promotion-view .pa-height-hot-commodities {
-  height: 270px;
+  height: 290px;
 }
 .promotion-view .pa-height-brand {
   height: 160px;
@@ -4911,7 +5003,18 @@ fieldset[disabled] .btn-info.focus {
 }
 .item-fill .view .caption {
   width: 266px;
+  margin-bottom: 5px;
   color: #aaaaaa;
+}
+.item-fill .view .fob {
+  display: inline-block;
+}
+.item-fill .view .fob .dropListBox {
+  margin-left: 10px;
+  float: left;
+}
+.item-fill .view .fob .dropListBox:first-child {
+  margin-left: 0;
 }
 .item-fill .view .emphasize {
   color: #e4393c;
@@ -4986,6 +5089,9 @@ fieldset[disabled] .btn-info.focus {
 }
 .item-fill .w-70 {
   width: 70px;
+}
+.item-fill .w-82 {
+  width: 82px;
 }
 .item-fill .w-120 {
   width: 120px;
@@ -5910,6 +6016,11 @@ fieldset[disabled] .btn-info.focus {
 .bub-dialog .bub-view .input-default {
   width: 100%;
 }
+.bub-con .bub-view .label-check,
+.bub-dialog .bub-view .label-check {
+  display: inline-block;
+  padding-top: 5px;
+}
 .bub-con .bub-view .btn,
 .bub-dialog .bub-view .btn {
   width: 100%;
@@ -5919,6 +6030,16 @@ fieldset[disabled] .btn-info.focus {
   vertical-align: middle;
   margin-left: 8px;
   cursor: pointer;
+}
+.bub-con .caption,
+.bub-dialog .caption {
+  margin-bottom: 5px;
+  color: #aaaaaa;
+}
+.bub-con .tz-yq,
+.bub-dialog .tz-yq {
+  display: table;
+  margin-top: 4px;
 }
 .bub-con .bub-btn,
 .bub-dialog .bub-btn {
@@ -7263,7 +7384,7 @@ fieldset .btn {
   border-top: none;
   border-radius: 0 0 4px 4px;
   background: #fff;
-  padding: 10px 0;
+  padding: 6px 0;
   position: absolute;
   top: 33px;
   left: -1px;
@@ -7272,6 +7393,10 @@ fieldset .btn {
 .search-lg-box .search-info ul {
   width: 100%;
   font-size: 14px;
+  float: left;
+}
+.search-lg-box .search-info ul:first-child {
+  margin-bottom: 8px;
 }
 .search-lg-box .search-info li {
   width: 100%;
@@ -7286,12 +7411,11 @@ fieldset .btn {
 .search-lg-box .search-info .tit {
   width: 100%;
   font-size: 12px;
-  display: inline-block;
-  line-height: 1;
+  float: left;
+  line-height: 16px;
   padding: 0 10px;
+  margin-top: 4px;
   color: #999;
-  position: relative;
-  top: 5px;
 }
 .cart-tot {
   margin-right: 20px;
@@ -7784,33 +7908,43 @@ fieldset .btn {
 }
 .place-module-list li {
   width: 100%;
-  padding: 2px 0;
+  padding: 4px 0;
+  padding-left: 30px;
+  position: relative;
 }
 .place-module-list li i {
   background: #ddd;
   width: 1px;
-  height: 6px;
-  display: inline-block;
-  position: relative;
-  left: 13px;
-  top: -16px;
+  height: 100%;
+  position: absolute;
+  left: 12px;
+  top: -4px;
 }
 .place-module-list li em {
   width: 25px;
   height: 25px;
   text-align: center;
   line-height: 25px;
-  display: inline-block;
   background: #f7f8fa;
   border-radius: 50%;
   border: 1px solid #dae2ee;
+  position: absolute;
+  left: 0;
+  z-index: 2;
 }
 .place-module-list li span {
-  padding-left: 8px;
+  display: inline-block;
+  padding-top: 2px;
   font-size: 14px;
 }
 .place-module-list li:first-child i {
-  display: none;
+  top: 28px;
+}
+.place-module-list li:last-child i {
+  height: 8px;
+}
+.place-module-list li.last-child i {
+  height: 8px;
 }
 .by-category {
   width: 100%;
@@ -7823,6 +7957,7 @@ fieldset .btn {
   padding: 0 20px;
 }
 .by-category .ul {
+  width: 100%;
   display: inline-block;
   margin: 10px 0;
 }
@@ -7902,9 +8037,11 @@ fieldset .btn {
   line-height: 1;
 }
 .instructions-module-a .tit {
+  display: table;
   padding-top: 10px;
 }
 .instructions-module-a .view {
+  display: table;
   padding-top: 2px;
 }
 .instructions-module-a .view li {
@@ -8188,7 +8325,7 @@ fieldset .btn {
   margin-bottom: 20px;
 }
 .web-page-xsk .pd-switch-list-li {
-  width: 60%;
+  width: 65%;
   border-bottom: none;
 }
 .web-page-xsk .pd-switch-list-li .scx {
@@ -8231,8 +8368,7 @@ fieldset .btn {
   background: #f4ffee !important;
 }
 .web-sku-tb .picture {
-  padding: 0 5px;
-  padding-bottom: 10px;
+  padding: 0 5px 10px 5px;
 }
 .web-sku-tb .sku-pic {
   width: 100%;
@@ -8259,6 +8395,9 @@ fieldset .btn {
 }
 .web-sku-tb .a-link {
   font-size: 14px;
+}
+.web-sku-tb .pdName {
+  line-height: 18px;
 }
 .web-page-brand {
   width: 100%;
@@ -8516,13 +8655,51 @@ fieldset .btn {
   display: inline-block;
   margin-bottom: 10px;
 }
+.web-404 {
+  width: 100%;
+  height: 330px;
+  position: relative;
+  padding-top: 50px;
+}
+.web-404 .pic-404-bg {
+  width: 50%;
+  float: left;
+  text-align: right;
+}
+.web-404 .pic-404-bg img {
+  position: relative;
+  right: -80px;
+}
+.web-404 .txt {
+  width: 50%;
+  float: left;
+  padding-top: 50px;
+}
+.web-404 strong {
+  font-size: 50px;
+  display: table;
+  line-height: 1;
+}
+.web-404 strong.info {
+  font-size: 18px;
+  padding-top: 2px;
+}
+.web-404 span {
+  color: #666;
+  display: table;
+  padding-top: 20px;
+}
 .product-condition {
   width: 100%;
   border: 1px solid #e7e7e7;
+  position: relative;
 }
 .product-condition em {
   color: #aaaaaa;
   margin: 0 2px;
+}
+.condition-fixed {
+  margin-top: -1px;
 }
 .condition-title {
   width: 100%;
@@ -8683,6 +8860,8 @@ fieldset .btn {
   padding: 14px 10px 16px;
 }
 .msg-common-checkbox .list {
+  max-height: 240px;
+  overflow: auto;
   display: inline-block;
 }
 .msg-common-checkbox label {

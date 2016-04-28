@@ -2460,6 +2460,10 @@ this["EssaComponents"] =
 	        return !nextState.fromInput;
 	    },
 
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ currentSelectedValue: nextProps.defaultSelectedValue });
+	    },
+
 	    queryBindEvent: function queryBindEvent() {
 	        var value = this.state.currentSelectedValue;
 	        return value !== this.props.rejectValue || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !value.target;
@@ -2614,6 +2618,10 @@ this["EssaComponents"] =
 
 	    componentWillMount: function componentWillMount() {
 	        this.setState({ currentSelectedValue: this.props.defaultSelectedValue });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ currentSelectedValue: nextProps.defaultSelectedValue });
 	    },
 
 	    onSelect: function onSelect(value) {
@@ -3184,6 +3192,10 @@ this["EssaComponents"] =
 	        this.setState({
 	            currentSelectedValue: this.props.defaultSelectedValue === null ? this.props.itemList[0] : this.props.defaultSelectedValue
 	        });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ currentSelectedValue: nextProps.defaultSelectedValue });
 	    },
 
 	    ensureEvent: function ensureEvent() {

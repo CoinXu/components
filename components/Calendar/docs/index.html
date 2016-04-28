@@ -6,57 +6,24 @@
     <link rel="stylesheet" href="../../../assets/all-buyer.css">
     <!--<link rel="stylesheet" href="../../../assets/github-markdown.css">-->
     <link rel="stylesheet" href="../../../assets/example.css">
-    <style>
-        .comp-date-picker {
-            padding: 4px;
-            border: 1px solid #eee;
-            display: inline-block;
-        }
-
-        .comp-date-picker > table tr > td {
-            padding-top: 1px;
-            padding-right: 1px;
-            text-align: center;
-        }
-
-        .comp-date-picker .date-header {
-            border-bottom: 1px solid #eee;
-            padding:6px 0;
-        }
-
-        .comp-date-picker .date-item {
-            display: block;
-            width: 50px;
-            height: 22px;
-            line-height: 22px;
-            cursor: pointer;
-        }
-
-        .comp-date-picker .date-item.diff {
-            color: #ccc;
-        }
-
-        .comp-date-picker .curr,
-        .comp-date-picker .date-item:hover {
-            background-color: #1e9ee1;
-            color: #ffffff;
-        }
-
-        .comp-date-picker .disabled,
-        .comp-date-picker .disabled:hover {
-            background-color: #eeeeee;
-            color: #999;
-        }
-
-    </style>
 </head>
-<body class="markdown-body">
+<body class="markdown-body" style="padding-bottom: 300px;">
 <iframe id="docs" src="../../../documents/Calendar/docs/docs.html" frameborder="0" class="example"></iframe>
 <div class="example-body">
+    <h2>简单的渲染</h2>
     <div id="demo"></div>
+</div>
+<div class="example-body">
+    <h2>只显示年月，不显示日期</h2>
+    <div id="demo-only-show-month"></div>
+</div>
+<div class="example-body">
+    <h2>使用Popup包装</h2>
+    <div id="demo-wrap"></div>
 </div>
 <script src="../../../lib/react.js"></script>
 <script src="../../../lib/react-dom.js"></script>
+<script src="../../../lib/moment.js"></script>
 <script src="../../../dist/Calendar.bundle.js"></script>
 </body>
 </html>

@@ -24,8 +24,7 @@ const PickerHeader = React.createClass({
 
     getInitialState: function () {
         return {
-            currentYear: null,
-            currentMonth: null
+            currentTime: null
         }
     },
 
@@ -33,23 +32,43 @@ const PickerHeader = React.createClass({
         return {
             className: '',
             currentTime: moment(),
-            startTime: [2010, 1, 1],
-            endTime: [2020, 1, 1],
+            startTime: [2010, 0, 1],
+            endTime: [2020, 0, 1],
             onChange: noop
         }
     },
 
-    setYear: function (year) {
-        this.setState({currentYear: year})
+    setTime: function (time) {
+        this.setState({currentTime: time})
+    },
+
+    setYear: function (time) {
+        this.setTime(time.clone().month(this.state.currentTime.month()))
     },
 
     setMonth: function (month) {
-        this.setState({currentMonth: month})
+        this.setTime(this.state.currentTime.clone().month(month - 1))
+    },
+
+    nextMonth: function () {
+        this.setTime(this.state.currentTime.clone().add(1, 'month'))
+    },
+
+    previousMonth: function () {
+        this.setTime(this.state.currentTime.clone().add(-1, 'month'))
+    },
+
+    nextYear: function () {
+        this.setTime(this.state.currentTime.clone().add(1, 'year'))
+    },
+
+    previousYear: function () {
+        this.setTime(this.state.currentTime.clone().add(-1, 'year'))
     },
 
     componentWillMount: function () {
         var props = this.props;
-        var start = moment(props.startTime);
+        var start = moment(props.startTime).month(props.currentTime.month());
         var end = moment(props.endTime);
 
         var sl = start.year();
@@ -72,40 +91,45 @@ const PickerHeader = React.createClass({
         this.__monthList = monthList;
 
         this.setState({
-            currentYear: this.props.currentTime,
-            // 月份、星期都是从0开始计
-            currentMonth: this.props.currentTime.month() + 1
+            currentTime: this.props.currentTime
         })
     },
 
     shouldComponentUpdate: function (nextProps, nextState) {
-        if (nextState.currentYear.year() !== this.state.currentYear.year() ||
-            nextState.currentMonth !== this.state.currentMonth) {
-            this.props.onChange(nextState.currentYear.year(), nextState.currentMonth - 1);
+        if (nextState.currentTime.year() !== this.state.currentTime.year() ||
+            nextState.currentTime.month() !== this.state.currentTime.month()) {
+            this.props.onChange(nextState.currentTime.year(), nextState.currentTime.month());
             return true;
         }
         return false;
     },
 
     componentWillReceiveProps: function (nextProps) {
-        this.setState({
-            currentYear: nextProps.currentTime,
-            currentMonth: nextProps.currentTime.month() + 1
-        })
+        this.setState({currentTime: nextProps.currentTime})
     },
 
     render: function () {
+        var iconStyle = {cursor: 'pointer'};
+
         return <div className={this.props.className}>
+
             <Selectable.Custom
-                defaultSelectedValue={this.state.currentYear}
+                defaultSelectedValue={this.state.currentTime}
                 getSelectorContent={getSelectorContent}
                 getItemContent={getItemContent}
                 onSelect={this.setYear}
                 itemList={this.__yearList}/>
             <Selectable.Importable
-                defaultSelectedValue={this.state.currentMonth}
+                defaultSelectedValue={this.state.currentTime.month() + 1}
                 onSelect={this.setMonth}
                 itemList={this.__monthList}/>
+
+            <span style={iconStyle}
+                  className="icon-img icon-img icon-tran-black-l util-v-m comp-icon-gap"
+                  onClick={this.previousMonth}/>
+            <span style={iconStyle}
+                  className="icon-img icon-img icon-tran-black-r util-v-m"
+                  onClick={this.nextMonth}/>
         </div>
     }
 

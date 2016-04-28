@@ -2,16 +2,12 @@
  * Created by xcp on 2016/4/27.
  */
 
+const React = require('react');
 const moment = require('moment');
 const DropDown = require('../Selectable/DropDown');
-const React = require('react');
 const noop = require('../../com/noop');
 const DatePicker = require('./DatePicker');
 const PickerHeader = require('./PickerHeader');
-
-const addTimes = function (baseTime, num, unit) {
-    return moment(baseTime).clone().add(num, unit);
-};
 
 // 如果日期在当前日期之前，则禁用掉
 const disabledDate = function (time) {
@@ -33,7 +29,8 @@ const Calendar = React.createClass({
         return {
             show: false,
             changeFromHeader: false,
-            currentTime: null
+            currentTime: null,
+            onlyShowMonth: false
         }
     },
 
@@ -47,8 +44,8 @@ const Calendar = React.createClass({
             diffMonthClassName: 'diff',
 
             // header
-            startTime: [2010, 1, 1],
-            endTime: [2020, 1, 1],
+            startTime: [2010, 0, 1],
+            endTime: [2020, 0, 1],
 
             defaultTime: new Date() * 1,
             showDays: 6 * 7,
@@ -56,7 +53,7 @@ const Calendar = React.createClass({
 
             startWeek: 0, // [0-6]
             format: 'YYYY-MM-DD HH:mm:ss',
-
+            onlyShowMonth: false,
             disabledDate: disabledDate,
             diffDate: diffDate,
             onChange: noop,
@@ -67,24 +64,9 @@ const Calendar = React.createClass({
     componentWillMount: function () {
         this.setState({
             currentTime: moment(this.props.defaultTime),
-            showDays: this.props.showDays
+            showDays: this.props.showDays,
+            onlyShowMonth: this.props.onlyShowMonth
         });
-    },
-
-    nextMonth: function () {
-        this.setState({currentTime: addTimes(this.state.currentTime, 1, 'month')})
-    },
-
-    previousMonth: function () {
-        this.setState({currentTime: addTimes(this.state.currentTime, -1, 'month')})
-    },
-
-    nextYear: function () {
-        this.setState({currentTime: addTimes(this.state.currentTime, 1, 'year')})
-    },
-
-    previousYear: function () {
-        this.setState({currentTime: addTimes(this.state.currentTime, -1, 'year')})
     },
 
     today: function () {
@@ -137,76 +119,82 @@ const Calendar = React.createClass({
         var props = self.props;
         var state = self.state;
 
-        var m = moment(state.currentTime);
+        var m, firstDay, w, start,
+            total, count, list, l, days,
+            week, datePanel;
 
-        // 获得当前月的第一天
-        var firstDay = m.clone().date(1);
+        if (!state.onlyShowMonth) {
+            m = moment(state.currentTime);
+            // 获得当前月的第一天
+            firstDay = m.clone().date(1);
+            // 获得第一天的星期
+            w = firstDay.day();
+            // 计算其开始位置的日期
+            // 从周日开始[默认为0]
+            start = w > props.startWeek ?
+                firstDay.clone().add(-(w - props.startWeek), 'day') :
+                firstDay;
 
-        // 获得第一天的星期
-        var w = firstDay.day();
+            self.__startTime = start;
 
-        // 计算其开始位置的日期
-        // 从周日开始[默认为0]
-        var start = w > props.startWeek ?
-            firstDay.clone().add(-(w - props.startWeek), 'day') :
-            firstDay;
+            total = props.showDays;
+            count = 0;
 
-        self.__startTime = start;
+            // 循环生成每一天
+            // 日期分成多份，每份长度为一周
+            list = this._spliceArray(new Array(total).fill(true), 7);
+            l = list.length - 1;
+            days = list.map(function (week, index) {
+                return <tr key={index}>
+                    {week.map(function () {
+                        var time = start.clone().add(count++, 'day');
 
-        var total = props.showDays;
-        var count = 0;
+                        if (index === l) {
+                            self.__endTime = time
+                        }
 
-        // 循环生成每一天
-        // 日期分成多份，每份长度为一周
-        var list = this._spliceArray(new Array(total).fill(true), 7);
-        var l = list.length - 1;
-        var days = list.map(function (week, index) {
-            return <tr key={index}>
-                {week.map(function () {
-                    var time = start.clone().add(count++, 'day');
+                        return <td key={count}>
+                            <DatePicker
+                                className={props.headerClassName}
+                                onSelect={self.onSelect}
+                                diffMonthClassName={props.diffMonthClassName}
+                                disabledClassName={props.disabledClassName}
+                                currentClassName={props.currentClassName}
+                                currentTime={m}
+                                disabledDate={props.disabledDate}
+                                diffDate={props.diffDate}
+                                format={props.format}
+                                time={time}/>
+                        </td>
+                    })}
+                </tr>
+            });
 
-                    if (index === l) {
-                        self.__endTime = time
-                    }
+            week = [];
+            total = props.weekDaysMin.length;
+            count = props.startWeek;
 
-                    return <td key={count}>
-                        <DatePicker
-                            className={props.headerClassName}
-                            onSelect={self.onSelect}
-                            diffMonthClassName={props.diffMonthClassName}
-                            disabledClassName={props.disabledClassName}
-                            currentClassName={props.currentClassName}
-                            currentTime={m}
-                            disabledDate={props.disabledDate}
-                            diffDate={props.diffDate}
-                            format={props.format}
-                            time={time}/>
-                    </td>
-                })}
-            </tr>
-        });
+            while (count < total) {
+                week.push(<td key={'week-' + count}>
+                    <div className="date-week">{props.weekDaysMin[count++]}</div>
+                </td>);
+            }
 
-        var week = [];
+            count = 0;
+            total = props.startWeek;
+            while (count < total) {
+                week.push(<td key={'week-' + count}>
+                    <div>{props.weekDaysMin[count++]}</div>
+                </td>)
+            }
 
-        total = props.weekDaysMin.length;
-        count = props.startWeek;
+            week = <tr>{week}</tr>;
 
-        while (count < total) {
-            week.push(<td key={'week-' + count}>
-                <div>{props.weekDaysMin[count++]}</div>
-            </td>);
+            datePanel = <table>
+                <thead>{week}</thead>
+                <tbody>{days}</tbody>
+            </table>;
         }
-
-        count = 0;
-        total = props.startWeek;
-
-        while (count < total) {
-            week.push(<td key={'week-' + count}>
-                <div>{props.weekDaysMin[count++]}</div>
-            </td>)
-        }
-
-        week = <tr>{week}</tr>;
 
         return <div className={props.wrapClassName}>
             <PickerHeader
@@ -215,10 +203,7 @@ const Calendar = React.createClass({
                 startTime={props.startTime}
                 endTime={props.endTime}
                 onChange={this.onHeaderChange}/>
-            <table>
-                <thead>{week}</thead>
-                <tbody>{days}</tbody>
-            </table>
+            {datePanel}
         </div>
     }
 });

@@ -58,7 +58,8 @@ module.exports = {
     externals: {
         "react": "React",
         "react-dom": "ReactDOM",
-        "react-dom/server": "ReactDOMServer"
+        "react-dom/server": "ReactDOMServer",
+        "moment": "moment"
     },
 
     plugins: [

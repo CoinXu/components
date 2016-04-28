@@ -28,7 +28,6 @@ const DatePicker = React.createClass({
         this.props.onSelect(this.props.time)
     },
 
-
     render: function () {
         var props = this.props;
         var disabled = props.disabledDate(props.time);
