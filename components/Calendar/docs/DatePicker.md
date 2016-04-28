@@ -1,5 +1,5 @@
 ### DatePicker 日历组件 -> 日期元素
-+ 依赖: [moment](https://github.com/moment/moment)，需要手动引入 `/com/moment`
++ 依赖: [moment](https://github.com/moment/moment)，需要手动引入 `/lib/moment`
 
 ### Props
 + `className` - 容器className - '',

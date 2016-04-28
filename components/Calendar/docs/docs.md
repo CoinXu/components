@@ -1,5 +1,5 @@
 ### Calendar 日历组件
-+ 依赖: [moment](https://github.com/moment/moment)，需要手动引入 `/com/moment`
++ 依赖: [moment](https://github.com/moment/moment)，需要手动引入 `/lib/moment`
 + 目前下属两个子元素
   - [DatePicker](./DatePicker.html)
   - [PickerHeader](./PickerHeader.html)
