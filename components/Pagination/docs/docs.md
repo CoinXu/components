@@ -8,9 +8,9 @@
 + keepPages - `React.PropTypes.number` - 2
   > 如果当前显示的按钮之前或者之后还有页码不能完全显示出来。
     则会显示最前面和最后面的页码，该参数设置最前和最后显示的页码数。
-+ onChange - `React.PropTypes.func` - 页码变化时的回调 - noop
++ onChange(pageNo, itemsInOnePage) - `React.PropTypes.func` - 页码变化时的回调 - noop
   > 传入一个参数 `num`，为当前页码编号
-+ onSelect - `React.PropTypes.func` - 某一页码选中后的回调 - noop
++ onSelect(pageNo, itemsInOnePage) - `React.PropTypes.func` - 某一页码选中后的回调 - noop
   > 传入一个参数 `num`，为当前页码编号
 + getPage - `React.PropTypes.fun` - 自定义页码内容函数
 ```JavaScript
@@ -22,6 +22,9 @@ function (num, isCurrent) {
 // `num` - 当前页码数
 // `isCurrent` - 当前页码是否被选中
 ```
++ importable - 是否可输入页码 - true
++ itemsConfigurable - 是否可选择每一页包含多少条数据 - true
++ configurableList - `itemsConfigurable` 可选择的值 - [200, 100, 60]
 
 ## 最简单的调用
 

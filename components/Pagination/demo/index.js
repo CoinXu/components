@@ -23,7 +23,7 @@ ReactDOM.render(
 ReactDOM.render(
     <Pagination
         defaultCurrent={3}
-        total={1000}
+        total={2000}
         keepPages={1}
         pageSize={6}
         onChange={onChange}/>,
@@ -32,9 +32,8 @@ ReactDOM.render(
 
 ReactDOM.render(
     <Pagination
-        total={20}
+        total={500}
         pageSize={9}
-        itemsInOnePage={5}
         onChange={onChange}/>,
     document.getElementById('demo-2')
 );

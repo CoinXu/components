@@ -4,6 +4,21 @@
 
 var React = require('react');
 var noop = require('../../com/noop');
+var NotAllowSelect = require('./NotAllowSelect');
+var PageInput = require('./PageInput');
+var Selectable = require('../Selectable');
+
+var getContent = function (current) {
+    return <div className="comp-area-item util-font-12 color-white-bg util-line-14">
+        {current}
+        <span className="icon-img icon-tran-black-d"/>
+    </div>
+};
+
+var getItemContent = function (val, props) {
+    var item = <li className="comp-panel-item util-font-12"><strong>{val}</strong></li>;
+    return React.cloneElement(item, props);
+};
 
 var Pagination = React.createClass({
 
@@ -21,7 +36,8 @@ var Pagination = React.createClass({
     getInitialState: function () {
         return {
             // current page
-            current: 1
+            current: 1,
+            itemsInOnePage: 60
         }
     },
 
@@ -31,10 +47,15 @@ var Pagination = React.createClass({
             defaultCurrent: 1,
             // item total
             total: 0,
-            itemsInOnePage: 10,
+            itemsInOnePage: 60,
             // pages in one item
             pageSize: 5,
             keepPages: 2,
+            // 可输入页码
+            importable: true,
+            // 可配置 itemsInOnePage
+            itemsConfigurable: true,
+            configurableList: [200, 100, 60],
             // invoke when page number changed
             onChange: noop,
             onSelect: noop,
@@ -44,10 +65,9 @@ var Pagination = React.createClass({
         }
     },
 
-    componentWillMount: function () {
-        this.setState({current: this.props.defaultCurrent});
+    _computed: function (itemsInOnePage) {
         var props = this.props;
-        var pages = Math.ceil(props.total / props.itemsInOnePage);
+        var pages = Math.ceil(props.total / itemsInOnePage);
         var showPages = pages > props.pageSize ? props.pageSize : pages;
 
         this.__computed = {
@@ -57,8 +77,12 @@ var Pagination = React.createClass({
         };
     },
 
-    componentDidMount: function () {
-        this.skip(this.props.defaultCurrent)
+    componentWillMount: function () {
+        this._computed(this.props.itemsInOnePage);
+        this.setState({
+            current: this.props.defaultCurrent,
+            itemsInOnePage: this.props.itemsInOnePage
+        });
     },
 
     onSelect: function (num) {
@@ -83,7 +107,7 @@ var Pagination = React.createClass({
         var self = this;
         self.setState({current: num}, function () {
             if (!silent)
-                self.props.onChange(num)
+                self.props.onChange(num, self.state.itemsInOnePage)
         })
     },
 
@@ -96,8 +120,8 @@ var Pagination = React.createClass({
         var computed = this.__computed;
         var start = page - computed.currentPageOffset;
 
-        // 衡量边界 start > 0 && pages > start + showPages
-        return start + computed.showPages > computed.pages ?
+        // 衡量边界
+        return start + computed.showPages >= computed.pages ?
             (computed.pages - computed.showPages + 1) :
             start > this.props.keepPages ? start : 1;
     },
@@ -107,6 +131,29 @@ var Pagination = React.createClass({
             onClick: this.onSelect.bind(this, num),
             key: num
         })
+    },
+
+    onItemsInOnePageChange: function (num) {
+        this.setState({
+            itemsInOnePage: num,
+            current: this.props.defaultCurrent
+        })
+    },
+
+    componentDidMount: function () {
+        this.props.onSelect(this.state.current, this.state.itemsInOnePage)
+    },
+
+    componentWillUpdate: function (nextProps, nextState) {
+        if (nextState.itemsInOnePage !== this.state.itemsInOnePage) {
+            this._computed(nextState.itemsInOnePage)
+        }
+    },
+
+    shouldComponentUpdate: function (nextProps, nextState) {
+        var cur = this.state;
+        return cur.current !== nextState.current ||
+            cur.itemsInOnePage !== nextState.itemsInOnePage
     },
 
     render: function () {
@@ -120,7 +167,7 @@ var Pagination = React.createClass({
             prev = new Array(props.keepPages)
                 .fill(1)
                 .map(function (v, i) {
-                    return this._getPage(i + 1, i + 1 === v);
+                    return this._getPage(i + 1, i + 1 === current);
                 }, this)
         }
 
@@ -140,13 +187,33 @@ var Pagination = React.createClass({
                 }, this)
         }
 
-        return <div className="pagination">
-            {prev}
-            {prev ? <span className="page-item default"/> : null}
-            {pageItems}
-            {next ? <span className="page-item default"/> : null}
-            {next}
-        </div>
+        var configurable = null;
+        if (props.itemsConfigurable)
+            configurable = <Selectable.Custom
+                getSelectorContent={getContent}
+                getItemContent={getItemContent}
+                onSelect={this.onItemsInOnePageChange}
+                itemList={props.configurableList}
+                defaultSelectedValue={this.state.itemsInOnePage}/>;
+
+        var importable = null;
+        if (props.importable)
+            importable = <PageInput
+                current={this.state.current}
+                max={computed.pages}
+                onSearch={this.skip}/>;
+
+        return <NotAllowSelect>
+            <div className="pagination">
+                {configurable}
+                {prev}
+                {prev ? <span className="page-item default"/> : null}
+                {pageItems}
+                {next ? <span className="page-item default"/> : null}
+                {next}
+                {importable}
+            </div>
+        </NotAllowSelect>
     }
 });
 
