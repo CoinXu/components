@@ -238,3 +238,24 @@ ReactDOM.render(
     document.getElementById('dialog-mount-node')
 );
 
+
+// 指定一个元素，弹出Popup
+var baseElement = document.querySelector('#demo-special-position');
+
+baseElement.addEventListener('click', function (e) {
+    var onMount = function (wrap, inst) {
+        wrap.innerHTML = '<h2>BiuBiu~</h2>';
+    };
+
+    var triggerHide = function () {
+        return false;
+    };
+
+    var popup = ReactDOM.render(<Popup
+        content={<Bubble onComponentMount={onMount}/>}
+        triggerHide={triggerHide}
+        baseElement={e.target || e.srcElement}
+    />, document.querySelector('#special-warp'));
+
+    popup.showPopup();
+}, false);

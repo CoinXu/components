@@ -3108,6 +3108,7 @@ this["EssaComponents"] =
 	            trigger: 'click',
 	            content: null,
 	            placement: null,
+	            baseElement: null,
 	            onHide: noop,
 	            triggerHide: triggerHide,
 	            onComponentMount: noop
@@ -3168,7 +3169,7 @@ this["EssaComponents"] =
 
 	    computedPosition: function computedPosition() {
 	        var props = this.props;
-	        var targetNode = this.refs.targetNode;
+	        var targetNode = props.baseElement || this.refs.targetNode;
 	        // 左上角的位置
 	        var pos = absolutePosition(targetNode);
 	        var placement = props.placement;
@@ -3235,7 +3236,7 @@ this["EssaComponents"] =
 	            props.onMouseLeave = this.autoVisible;
 	        }
 
-	        return React.cloneElement(this.props.children, props);
+	        return React.cloneElement(this.props.children || React.createElement('span', { style: { display: 'none' } }), props);
 	    }
 	});
 

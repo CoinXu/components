@@ -31,6 +31,7 @@ var Popup = React.createClass({
             trigger: 'click',
             content: null,
             placement: null,
+            baseElement: null,
             onHide: noop,
             triggerHide: triggerHide,
             onComponentMount: noop
@@ -93,7 +94,7 @@ var Popup = React.createClass({
 
     computedPosition: function () {
         var props = this.props;
-        var targetNode = this.refs.targetNode;
+        var targetNode = props.baseElement || this.refs.targetNode;
         // 左上角的位置
         var pos = absolutePosition(targetNode);
         var placement = props.placement;
@@ -166,7 +167,10 @@ var Popup = React.createClass({
             props.onMouseLeave = this.autoVisible
         }
 
-        return React.cloneElement(this.props.children, props);
+        return React.cloneElement(
+            this.props.children || <span style={{display:'none'}}/>,
+            props
+        );
     }
 });
 
