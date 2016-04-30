@@ -30,6 +30,7 @@ var PopupWrap = React.createClass({
             style: {backgroundColor: '#fff'},
             placement: 'top',
             refTarget: null,
+            baseElement: null,
             isVisible: false,
             onHide: noop,
             triggerHide: triggerHide,
@@ -40,14 +41,15 @@ var PopupWrap = React.createClass({
     componentDidMount: function () {
         var node = ReactDOM.findDOMNode(this.refs.popup);
         var position = {x: node.offsetWidth, y: node.offsetHeight};
+        var baseElement = this.props.baseElement || this.props.refTarget;
 
         switch (this.props.placement) {
             case "top":
-                position.x = -(position.x - this.props.refTarget.offsetWidth) / 2;
+                position.x = -(position.x - baseElement.offsetWidth) / 2;
                 position.y = -position.y;
                 break;
             case "bottom":
-                position.x = -(position.x - this.props.refTarget.offsetWidth) / 2;
+                position.x = -(position.x - baseElement.offsetWidth) / 2;
                 position.y = 0;
                 break;
             case "left":

@@ -241,21 +241,14 @@ ReactDOM.render(
 
 // 指定一个元素，弹出Popup
 var baseElement = document.querySelector('#demo-special-position');
+var positionBubble = require('../PositionBubble');
 
 baseElement.addEventListener('click', function (e) {
     var onMount = function (wrap, inst) {
         wrap.innerHTML = '<h2>BiuBiu~</h2>';
     };
 
-    var triggerHide = function () {
-        return false;
-    };
-
-    var popup = ReactDOM.render(<Popup
-        content={<Bubble onComponentMount={onMount}/>}
-        triggerHide={triggerHide}
-        baseElement={e.target || e.srcElement}
-    />, document.querySelector('#special-warp'));
-
-    popup.showPopup();
+    var popup = positionBubble(e.target || e.srcElement, onMount);
+    popup.show();
+    // popup.hide()
 }, false);

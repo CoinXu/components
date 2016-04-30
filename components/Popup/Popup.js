@@ -131,6 +131,7 @@ var Popup = React.createClass({
         var props = this.props;
         ReactDOM.render(
             <PopupWrap
+                baseElement={props.baseElement}
                 onAnimateMount={this.onAnimateMount}
                 style={{position:'absolute',left: this.__position.x, top: this.__position.y}}
                 placement={props.placement}

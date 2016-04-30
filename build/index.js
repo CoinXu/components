@@ -3205,6 +3205,7 @@ this["EssaComponents"] =
 
 	        var props = this.props;
 	        ReactDOM.render(React.createElement(PopupWrap, {
+	            baseElement: props.baseElement,
 	            onAnimateMount: this.onAnimateMount,
 	            style: { position: 'absolute', left: this.__position.x, top: this.__position.y },
 	            placement: props.placement,
@@ -3281,6 +3282,7 @@ this["EssaComponents"] =
 	            style: { backgroundColor: '#fff' },
 	            placement: 'top',
 	            refTarget: null,
+	            baseElement: null,
 	            isVisible: false,
 	            onHide: noop,
 	            triggerHide: triggerHide,
@@ -3291,14 +3293,15 @@ this["EssaComponents"] =
 	    componentDidMount: function componentDidMount() {
 	        var node = ReactDOM.findDOMNode(this.refs.popup);
 	        var position = { x: node.offsetWidth, y: node.offsetHeight };
+	        var baseElement = this.props.baseElement || this.props.refTarget;
 
 	        switch (this.props.placement) {
 	            case "top":
-	                position.x = -(position.x - this.props.refTarget.offsetWidth) / 2;
+	                position.x = -(position.x - baseElement.offsetWidth) / 2;
 	                position.y = -position.y;
 	                break;
 	            case "bottom":
-	                position.x = -(position.x - this.props.refTarget.offsetWidth) / 2;
+	                position.x = -(position.x - baseElement.offsetWidth) / 2;
 	                position.y = 0;
 	                break;
 	            case "left":
