@@ -1,5 +1,6 @@
 ## 2016-04-29 - xcp
-`Popup` 添加 `baseElement` 属性，详见文档
+1. `Popup` 添加 `baseElement` 属性，详见文档
+2. `Popup` 下添加 `PositionBubble` 组件，详见文档
 
 ## 2016-04-29 - xcp
 `Pagination` 添加可选择每页多少条数据和可输入页码跳转功能，详见文档。

@@ -3365,6 +3365,8 @@ this["EssaComponents"] =
 	    var offsetTop = node.offsetTop;
 
 	    var parent = node.offsetParent;
+	    if (!parent) return result;
+
 	    while (parent !== body) {
 	        offsetLeft += parent.offsetLeft;
 	        offsetTop += parent.offsetTop;
