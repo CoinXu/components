@@ -5,6 +5,8 @@
     并将有效值显示在 `input` 元素上。
 3. 修复给 `selector` 绑定显示 `panel` 事件的bug。
 4. 给所有的 `DropDown` 的 `selector` 内容设置为不可选择（因快速双击时会触发区域内容选择事件）
+5. 修复 `Pagination` bug，添加搜索自动排往下一页
+6. 开放 `PositionBubble` 所有参数
 
 涉及到的组件包括：`Selectable.Custom` `Selectable.Different` 
 `Selectable.DropDown` `Selectable.Importable`
