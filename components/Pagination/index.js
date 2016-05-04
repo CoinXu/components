@@ -87,7 +87,6 @@ var Pagination = React.createClass({
 
     onSelect: function (num) {
         this.skip(num);
-        this.props.onSelect(num);
     },
 
     prev: function () {
@@ -99,6 +98,7 @@ var Pagination = React.createClass({
     },
 
     skip: function (num, silent) {
+        this.props.onSelect(num, this.state.itemsInOnePage);
         if (num < 1
             || num > this.__computed.pages
             || num === this.state.current)
@@ -134,10 +134,15 @@ var Pagination = React.createClass({
     },
 
     onItemsInOnePageChange: function (num) {
-        this.setState({
-            itemsInOnePage: num,
-            current: this.props.defaultCurrent
-        })
+        // 每页显示条数改变后，直接跳转到第1页
+        this.setState(
+            {
+                itemsInOnePage: num,
+                current: 1
+            },
+            this.onSelect.bind(this, 1)
+        );
+
     },
 
     componentDidMount: function () {
@@ -197,12 +202,15 @@ var Pagination = React.createClass({
                 defaultSelectedValue={this.state.itemsInOnePage}/>;
 
         var importable = null;
-        if (props.importable)
+        var nextPage = null;
+        if (props.importable) {
+            nextPage = current + 1;
+            nextPage = nextPage > computed.pages ? computed.pages : nextPage;
             importable = <PageInput
-                current={this.state.current}
+                current={nextPage}
                 max={computed.pages}
                 onSearch={this.skip}/>;
-
+        }
         return <NotAllowSelect>
             <div className="pagination">
                 {configurable}

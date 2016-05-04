@@ -9,7 +9,11 @@ var positionBubble = require('../PositionBubble');
 var onMount = function (wrap, inst) {
     wrap.innerHTML = '<h2>BiuBiu~</h2>';
 };
-var popup = positionBubble(baseElement, onMount);
+var popup = positionBubble(baseElement, {
+    onMount: onMount,
+    placement: 'left',
+    symbolStyle: {top: 6}
+});
 // 显示
 baseElement.addEventListener('click', popup.show, false);
 // 关闭

@@ -6,8 +6,8 @@ var Pagination = require('../index');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-var onChange = function (num) {
-    console.log(num)
+var onChange = function () {
+    console.log(arguments)
 };
 
 ReactDOM.render(

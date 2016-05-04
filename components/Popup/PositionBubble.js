@@ -21,6 +21,7 @@ var PositionBubble = React.createClass({
     getDefaultProps: function () {
         return {
             placement: 'top',
+            trigger: 'click',
             bubbleStyle: {},
             symbolStyle: {left: '50%', marginLeft: -10},
             baseElement: null,
@@ -77,8 +78,9 @@ var PositionBubble = React.createClass({
             style={state.bubbleStyle}
             onComponentMount={this.onBubbleMount}/>;
         return <Popup
-            onHide={this._unmount}
             placement={props.placement}
+            trigger={props.trigger}
+            onHide={this._unmount}
             onComponentMount={this.onMount}
             triggerHide={noop}
             baseElement={props.baseElement}
@@ -87,21 +89,31 @@ var PositionBubble = React.createClass({
 
 });
 
-module.exports = function (target, onMount) {
+module.exports = function (target, props) {
     var body = document && document.body;
     if (!body) return {};
 
+    props = typeof props === 'object' && props ?
+        props : {};
+
+    var _props = {};
+
+    Object.keys(PositionBubble.defaultProps).forEach(function (name) {
+        if (props.hasOwnProperty(name))
+            _props[name] = props[name]
+    });
+
     var mountNode = document.createElement('div');
+
     body.appendChild(mountNode);
-    var onUnMount = function () {
+    var _onUnMount = _props.onUnMount;
+
+    _props.onUnMount = function () {
+        _onUnMount && _onUnMount();
         body.removeChild(mountNode)
     };
 
-    return ReactDOM.render(
-        <PositionBubble
-            onUnMount={onUnMount}
-            baseElement={target}
-            onMount={onMount}/>,
-        mountNode
-    )
+    _props.baseElement = target;
+
+    return ReactDOM.render(React.createElement(PositionBubble, _props), mountNode);
 };

@@ -6,6 +6,9 @@
 3. 修复给 `selector` 绑定显示 `panel` 事件的bug。
 4. 给所有的 `DropDown` 的 `selector` 内容设置为不可选择（因快速双击时会触发区域内容选择事件）
 
+涉及到的组件包括：`Selectable.Custom` `Selectable.Different` 
+`Selectable.DropDown` `Selectable.Importable`
+
 ## 2016-04-29 - xcp
 1. `Popup` 添加 `baseElement` 属性，详见文档
 2. `Popup` 下添加 `PositionBubble` 组件，详见文档

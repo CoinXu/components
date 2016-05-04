@@ -58,8 +58,8 @@ this["EssaComponents"] =
 	    Message: __webpack_require__(19),
 	    Pagination: __webpack_require__(22),
 	    Popup: __webpack_require__(37),
-	    Calendar: __webpack_require__(44),
-	    Cascader: __webpack_require__(48),
+	    Calendar: __webpack_require__(45),
+	    Cascader: __webpack_require__(49),
 	    Selectable: __webpack_require__(25)
 	};
 
@@ -1730,7 +1730,6 @@ this["EssaComponents"] =
 
 	    onSelect: function onSelect(num) {
 	        this.skip(num);
-	        this.props.onSelect(num);
 	    },
 
 	    prev: function prev() {
@@ -1742,6 +1741,7 @@ this["EssaComponents"] =
 	    },
 
 	    skip: function skip(num, silent) {
+	        this.props.onSelect(num, this.state.itemsInOnePage);
 	        if (num < 1 || num > this.__computed.pages || num === this.state.current) return;
 
 	        var self = this;
@@ -1774,7 +1774,7 @@ this["EssaComponents"] =
 	        this.setState({
 	            itemsInOnePage: num,
 	            current: this.props.defaultCurrent
-	        });
+	        }, this.onSelect.bind(this, this.props.defaultCurrent));
 	    },
 
 	    componentDidMount: function componentDidMount() {
@@ -3123,6 +3123,7 @@ this["EssaComponents"] =
 	    Bubble: __webpack_require__(41),
 	    Bias: __webpack_require__(42),
 	    Dialog: __webpack_require__(43),
+	    PositionBubble: __webpack_require__(44),
 	    PopupWrap: __webpack_require__(39)
 	};
 
@@ -3682,16 +3683,147 @@ this["EssaComponents"] =
 
 	'use strict';
 
+	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	function _typeof(obj) {
+	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	}
+
+	/**
+	 * Created by xcp on 2016/4/30.
+	 * 参数
+	 * target
+	 * onMount
+	 *
+	 * 返回对象
+	 * hide
+	 * open
+	 * show
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(15);
+	var noop = __webpack_require__(4);
+	var Popup = __webpack_require__(38);
+	var Bubble = __webpack_require__(41);
+
+	var PositionBubble = React.createClass({
+	    displayName: 'PositionBubble',
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            placement: 'top',
+	            trigger: 'click',
+	            bubbleStyle: {},
+	            symbolStyle: { left: '50%', marginLeft: -10 },
+	            baseElement: null,
+	            onUnMount: noop,
+	            onMount: noop
+	        };
+	    },
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            bubbleStyle: null,
+	            symbolStyle: null
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({
+	            bubbleStyle: this.props.bubbleStyle,
+	            symbolStyle: this.props.symbolStyle
+	        });
+	    },
+
+	    unMount: function unMount() {
+	        this._popup.autoVisible();
+	    },
+
+	    show: function show() {
+	        if (this.isMounted()) {
+	            this._popup.showPopup();
+	        }
+	    },
+
+	    onMount: function onMount(inst) {
+	        this._popup = inst;
+	    },
+
+	    onBubbleMount: function onBubbleMount(wrap, inst) {
+	        this.props.onMount(wrap, inst);
+	    },
+
+	    componentWillUnmount: function componentWillUnmount() {
+	        this.props.onUnMount();
+	    },
+
+	    _unmount: function _unmount() {
+	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var state = this.state;
+	        var content = React.createElement(Bubble, {
+	            symbolStyle: state.symbolStyle,
+	            style: state.bubbleStyle,
+	            onComponentMount: this.onBubbleMount });
+	        return React.createElement(Popup, {
+	            placement: props.placement,
+	            trigger: props.trigger,
+	            onHide: this._unmount,
+	            onComponentMount: this.onMount,
+	            triggerHide: noop,
+	            baseElement: props.baseElement,
+	            content: content });
+	    }
+
+	});
+
+	module.exports = function (target, props) {
+	    var body = document && document.body;
+	    if (!body) return {};
+
+	    props = (typeof props === 'undefined' ? 'undefined' : _typeof(props)) === 'object' && props ? props : {};
+
+	    var _props = {};
+
+	    Object.keys(PositionBubble.defaultProps).forEach(function (name) {
+	        if (props.hasOwnProperty(name)) _props[name] = props[name];
+	    });
+
+	    var mountNode = document.createElement('div');
+
+	    body.appendChild(mountNode);
+	    var _onUnMount = _props.onUnMount;
+
+	    _props.onUnMount = function () {
+	        _onUnMount && _onUnMount();
+	        body.removeChild(mountNode);
+	    };
+
+	    _props.baseElement = target;
+
+	    return ReactDOM.render(React.createElement(PositionBubble, _props), mountNode);
+	};
+
+/***/ },
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
 	/**
 	 * Created by xcp on 2016/4/27.
 	 */
 
 	var React = __webpack_require__(2);
-	var moment = __webpack_require__(45);
+	var moment = __webpack_require__(46);
 	var DropDown = __webpack_require__(27);
 	var noop = __webpack_require__(4);
-	var DatePicker = __webpack_require__(46);
-	var PickerHeader = __webpack_require__(47);
+	var DatePicker = __webpack_require__(47);
+	var PickerHeader = __webpack_require__(48);
 
 	// 如果日期在当前日期之前，则禁用掉
 	var disabledDate = function disabledDate(time) {
@@ -3876,13 +4008,13 @@ this["EssaComponents"] =
 	module.exports = Calendar;
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports) {
 
 	(function() { module.exports = this["moment"]; }());
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3891,7 +4023,7 @@ this["EssaComponents"] =
 	 * Created by xcp on 2016/4/27.
 	 */
 
-	var moment = __webpack_require__(45);
+	var moment = __webpack_require__(46);
 	var React = __webpack_require__(2);
 	var noop = __webpack_require__(4);
 	var classnames = __webpack_require__(13);
@@ -3938,7 +4070,7 @@ this["EssaComponents"] =
 	module.exports = DatePicker;
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3948,7 +4080,7 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
-	var moment = __webpack_require__(45);
+	var moment = __webpack_require__(46);
 	var Selectable = __webpack_require__(25);
 	var noop = __webpack_require__(4);
 	var assert = __webpack_require__(9);
@@ -4074,7 +4206,7 @@ this["EssaComponents"] =
 	module.exports = PickerHeader;
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

@@ -42,7 +42,17 @@ ReactDOM.render(
     mountNode
 );
 ```
-2. 传入Props
+2. 禁用
+```JavaScript
+ReactDOM.render(
+    <Selector.Importable
+        disabled
+        validate={validation}
+        onSelect={log}/>,
+    document.getElementById('demo-disabled')
+);
+```
+3. 传入Props
 ```JavaScript
 var itemList = ['全部时间', '3天内', '7天内', '30天内', '其他'];
 ReactDOM.render(
