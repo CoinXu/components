@@ -6,6 +6,7 @@ var React = require('react');
 var noop = require('../../com/noop');
 var classNames = require('classnames');
 var HideOnBodyClick = require('../HideOnBodyClick');
+var NotAllowSelect = require('../Pagination/NotAllowSelect');
 
 var Selectable = React.createClass({
 
@@ -16,14 +17,24 @@ var Selectable = React.createClass({
             onComponentMount: noop,
             selectorBindEvent: true,
             selectorContent: null,
+            disabled: false,
             panelContent: null
         }
     },
 
     getInitialState: function () {
         return {
-            panelStateIsShow: false
+            disabled: false,
+            visible: false
         }
+    },
+
+    componentWillMount: function () {
+        this.setState({disabled: this.props.disabled})
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({disabled: nextProps.disabled})
     },
 
     componentDidMount: function () {
@@ -32,7 +43,7 @@ var Selectable = React.createClass({
 
     showPanel: function () {
         var self = this;
-        self.setState({panelStateIsShow: true}, function () {
+        self.setState({visible: true}, function () {
             var animate = self.__animate;
             var animateProps = animate.props;
             animate.animate(animateProps.from, animateProps.to)
@@ -52,18 +63,21 @@ var Selectable = React.createClass({
     },
 
     onHide: function () {
-        this.setState({panelStateIsShow: false});
+        this.setState({visible: false});
     },
 
     triggerHide: function () {
-        return this.state.panelStateIsShow;
+        return this.state.visible;
     },
 
     render: function () {
         var props = this.props;
+        var state = this.state;
+
         var className = {
             'comp-custom-select': true,
-            'comp-show-panel': this.state.panelStateIsShow
+            'disabled': state.disabled,
+            'comp-show-panel': state.visible
         };
 
         if (props.wrapClassName) {
@@ -71,7 +85,7 @@ var Selectable = React.createClass({
         }
 
         var selector = null;
-        if (props.selectorBindEvent) {
+        if (props.selectorBindEvent && !state.disabled) {
             selector = <div onClick={this.showPanel}>
                 {props.selectorContent}
             </div>
@@ -81,7 +95,9 @@ var Selectable = React.createClass({
 
         return (<div className={classNames(className)} ref="selectable">
             <div className="comp-select-selector-pd">
-                {selector}
+                <NotAllowSelect>
+                    {selector}
+                </NotAllowSelect>
             </div>
             <HideOnBodyClick
                 refTarget={this.refs.selectable}

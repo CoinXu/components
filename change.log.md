@@ -1,3 +1,11 @@
+﻿## 2016-05-04 - xcp
+1. `DropDown` 组件添加 `disabled` 属性
+2. `Importable` 组件在变为 `input` 状态时，`onSelect` 的回调中传入的值
+    为上一次选中的有效值，不再是 `props.rejectValue`。
+    并将有效值显示在 `input` 元素上。
+3. 修复给 `selector` 绑定显示 `panel` 事件的bug。
+4. 给所有的 `DropDown` 的 `selector` 内容设置为不可选择（因快速双击时会触发区域内容选择事件）
+
 ## 2016-04-29 - xcp
 1. `Popup` 添加 `baseElement` 属性，详见文档
 2. `Popup` 下添加 `PositionBubble` 组件，详见文档

@@ -54,6 +54,14 @@ ReactDOM.render(
     document.getElementById('demo')
 );
 
+// 禁用
+ReactDOM.render(
+    <Selector.Importable
+        disabled
+        validate={validation}
+        onSelect={log}/>,
+    document.getElementById('demo-disabled')
+);
 
 // 自定义内容
 var itemList = ['全部时间', '3天内', '7天内', '30天内', '其他'];

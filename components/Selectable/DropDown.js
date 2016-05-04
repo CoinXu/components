@@ -10,19 +10,29 @@ var DropDown = React.createClass({
 
     getDefaultProps: function () {
         return {
-            onSelect: noop,
             wrapClassName: null,
             selectorContent: null,
             selectorBindEvent: true,
+            onSelect: noop,
             getItemWrap: noop,
+            disabled: false,
             panelContent: null
         }
     },
 
     getInitialState: function () {
         return {
+            disabled: false,
             currentSelectedValue: null
         }
+    },
+
+    componentWillMount: function () {
+        this.setState({disabled: this.props.disabled})
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({disabled: nextProps.disabled})
     },
 
     onSelect: function (value) {
@@ -62,6 +72,7 @@ var DropDown = React.createClass({
         });
 
         return <Selectable
+            disabled={this.state.disabled}
             wrapClassName={props.wrapClassName}
             selectorBindEvent={props.selectorBindEvent}
             onComponentMount={this.onSelectableMount}

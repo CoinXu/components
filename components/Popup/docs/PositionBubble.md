@@ -1,13 +1,19 @@
 ## PositionBubble 给定一个元素，弹出一个 Popup
-为一个函数，直接调用
+该组件是一个函数，直接调用，不用 `ReactDOM.render` 渲染。
 ```JavaScript
+// 指定一个元素，弹出Popup
+var baseElement = document.querySelector('#demo-special-position');
+var closeElement = document.querySelector('#demo-special-position-close');
 var positionBubble = require('../PositionBubble');
+// 组件挂载后，插入内容
 var onMount = function (wrap, inst) {
-        wrap.innerHTML = '<h2>BiuBiu~</h2>';
-    };
-var popup = positionBubble(e.target || e.srcElement, onMount);
-popup.show();
-// popup.hide()
+    wrap.innerHTML = '<h2>BiuBiu~</h2>';
+};
+var popup = positionBubble(baseElement, onMount);
+// 显示
+baseElement.addEventListener('click', popup.show, false);
+// 关闭
+closeElement.addEventListener('click', popup.unMount, false);
 ```
 
 ### 内部封装组件
@@ -20,5 +26,5 @@ popup.show();
 + onUnMount() - `Function` - 组件挂载后回调
 
 ### Methods
-+ hide()
++ unMount()
 + show()

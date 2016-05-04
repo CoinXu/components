@@ -43,12 +43,14 @@ var PositionBubble = React.createClass({
         })
     },
 
-    hide: function () {
+    unMount: function () {
         this._popup.autoVisible();
     },
 
     show: function () {
-        this._popup.showPopup();
+        if (this.isMounted()) {
+            this._popup.showPopup();
+        }
     },
 
     onMount: function (inst) {
@@ -63,7 +65,7 @@ var PositionBubble = React.createClass({
         this.props.onUnMount()
     },
 
-    unmount: function () {
+    _unmount: function () {
         ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode)
     },
 
@@ -75,7 +77,7 @@ var PositionBubble = React.createClass({
             style={state.bubbleStyle}
             onComponentMount={this.onBubbleMount}/>;
         return <Popup
-            onHide={this.unmount}
+            onHide={this._unmount}
             placement={props.placement}
             onComponentMount={this.onMount}
             triggerHide={noop}

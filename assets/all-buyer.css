@@ -2887,6 +2887,11 @@ fieldset[disabled] .btn-info.focus {
 .comp-custom-select .comp-select-selector > .icon-img {
   padding-left: 7px;
 }
+.comp-custom-select.disabled .comp-select-selector {
+  cursor: not-allowed;
+  opacity: 0.65;
+  filter: alpha(opacity=65);
+}
 .comp-custom-select .comp-select-panel {
   display: none;
   position: absolute;
@@ -4052,10 +4057,13 @@ fieldset[disabled] .btn-info.focus {
 }
 .pd-switch-grid li .btn-box .btn.bold {
   font-weight: bold;
-  margin-right: 2px;
 }
 .pd-switch-grid li .btn-box .btn {
   line-height: 14px;
+  margin-left: 2px;
+}
+.pd-switch-grid li .btn-box .btn:first-child {
+  margin-left: 0;
 }
 .pd-switch-grid li .progress-line {
   width: 100%;
@@ -5196,15 +5204,17 @@ fieldset[disabled] .btn-info.focus {
   white-space: nowrap;
 }
 .bubble-collection .module .list li {
-  padding: 2px  0;
+  padding: 2px 0 2px 20px;
   height: auto;
+  position: relative;
   line-height: normal;
   font-weight: normal;
   cursor: pointer;
 }
-.bubble-collection .icon-img {
-  display: inline-block;
-  margin-right: 10px;
+.bubble-collection .icon-checked-s {
+  position: absolute;
+  left: 2px;
+  top: 6px;
 }
 .bubble-service {
   width: 400px;
@@ -7924,7 +7934,7 @@ fieldset .btn {
   width: 25px;
   height: 25px;
   text-align: center;
-  line-height: 25px;
+  line-height: 23px;
   background: #f7f8fa;
   border-radius: 50%;
   border: 1px solid #dae2ee;
@@ -8730,6 +8740,10 @@ fieldset .btn {
 .msg-commodity {
   padding: 8px 10px 12px 10px;
 }
+.msg-commodity .commodity-height {
+  height: 122px;
+  overflow: hidden;
+}
 .msg-commodity .module {
   width: 100%;
   padding-top: 5px;
@@ -8759,6 +8773,11 @@ fieldset .btn {
 .msg-commodity .list li {
   padding: 4px 0;
   line-height: 16px;
+}
+.msg-commodity .show-hide {
+  display: table;
+  padding-top: 10px;
+  text-decoration: none;
 }
 .msg-brand-pic {
   width: 100%;
@@ -9439,6 +9458,7 @@ fieldset .btn {
   font-size: 12px;
   color: #666;
   line-height: 1;
+  transition: all 0.5s ease 0s;
 }
 .web-footer .view li {
   padding: 5px 0;

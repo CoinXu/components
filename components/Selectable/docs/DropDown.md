@@ -2,8 +2,11 @@
 该组件包含两个粒子组件
 
 ### DropDown.Item - 包含如下四个属性
++ wrapClassName - 容器class - null
++ selectorBindEvent - 是否给selector绑定显示panel事件 - null
 + value - null - Item的值，在 `onSelect` 执行时会将该属性传入
 + isItem - true - 是否是一个Item，如果是，会绑定对应的事件，如果不是，则不会绑定。
++ disabled - 是否禁用 - `false`
 + getItemContent(value, props, inst) - noop - 获取Item内容函数；组件会优先取用 `props.children` 的内容，
   如果 `props.children` 为null，则使用该函数的返回值。
   该函数会传入两个参数：`value` 、 `{onClick: this.onSelect}`，使用时可以将属性绑定在对应的元素上。

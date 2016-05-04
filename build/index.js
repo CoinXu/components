@@ -1974,12 +1974,6 @@ this["EssaComponents"] =
 
 	'use strict';
 
-	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	function _typeof(obj) {
-	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	}
-
 	/**
 	 * Created by xcp on 2016/3/23.
 	 */
@@ -1988,15 +1982,15 @@ this["EssaComponents"] =
 	var DropDown = __webpack_require__(27);
 	var noop = __webpack_require__(4);
 
-	var getSelectorContent = function getSelectorContent(rejectValue, onChange) {
+	var getSelectorContent = function getSelectorContent(props, state, onChange) {
 	    return function (value) {
-	        if (value === rejectValue) {
+	        if (state.inputState) {
 	            return React.createElement('input', {
 	                ref: 'inputNode',
 	                onChange: onChange,
 	                className: 'input-default',
 	                style: { width: 60 },
-	                placeholder: '请输入...' });
+	                placeholder: value });
 	        }
 	        return React.createElement('div', { className: 'comp-select-selector' }, React.createElement('span', { className: 'util-font-12' }, value), React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
 	    };
@@ -2017,7 +2011,9 @@ this["EssaComponents"] =
 	    getInitialState: function getInitialState() {
 	        return {
 	            currentSelectedValue: null,
-	            fromInput: false
+	            fromInput: false,
+	            disabled: false,
+	            inputState: false
 	        };
 	    },
 
@@ -2029,17 +2025,21 @@ this["EssaComponents"] =
 	            validate: getTruth,
 	            getSelectorContent: getSelectorContent(null),
 	            getItemContent: getItemContent,
+	            disabled: false,
 	            rejectValue: '10+'
 	        };
 	    },
 
 	    onSelect: function onSelect(value) {
-	        var self = this;
-	        self.setState({
-	            currentSelectedValue: value,
-	            fromInput: false
-	        }, function () {
-	            self.props.onSelect(value);
+	        var isReject = value === this.props.rejectValue;
+	        var next = isReject ? this.state.currentSelectedValue : value;
+
+	        // 如果当前值为 rejectValue，则将上一次选择的值传给回调
+	        // 同时需要重新 render，以确认是否需要绑定事件
+	        this.props.onSelect(next);
+	        this.setState({
+	            currentSelectedValue: next,
+	            inputState: isReject
 	        });
 	    },
 
@@ -2058,7 +2058,10 @@ this["EssaComponents"] =
 	    },
 
 	    componentWillMount: function componentWillMount() {
-	        this.setState({ currentSelectedValue: this.props.defaultSelectedValue });
+	        this.setState({
+	            currentSelectedValue: this.props.defaultSelectedValue,
+	            disabled: this.props.disabled
+	        });
 	    },
 
 	    // 如果是input的输入值变化，则不需要重新渲染
@@ -2067,12 +2070,17 @@ this["EssaComponents"] =
 	    },
 
 	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        this.setState({ currentSelectedValue: nextProps.defaultSelectedValue });
+	        this.setState({
+	            currentSelectedValue: nextProps.defaultSelectedValue,
+	            disabled: nextProps.disabled
+	        });
 	    },
 
 	    queryBindEvent: function queryBindEvent() {
-	        var value = this.state.currentSelectedValue;
-	        return value !== this.props.rejectValue || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !value.target;
+	        //var value = this.state.currentSelectedValue;
+	        //return value !== this.props.rejectValue ||
+	        //    (value && typeof value === 'object' && !value.target)
+	        return !this.state.disabled && !this.state.inputState;
 	    },
 
 	    render: function render() {
@@ -2083,7 +2091,7 @@ this["EssaComponents"] =
 	        var selectorContent = React.createElement(DropDown.Selector, {
 	            onSelect: self.onSelect,
 	            defaultSelectedValue: state.currentSelectedValue,
-	            getSelectorContent: getSelectorContent(props.rejectValue, self.onChange) });
+	            getSelectorContent: getSelectorContent(props, state, self.onChange) });
 
 	        var panelContent = React.Children.map(props.itemList, function (value, index) {
 	            return React.createElement(DropDown.Item, {
@@ -2093,6 +2101,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(DropDown, {
+	            disabled: props.disabled,
 	            selectorBindEvent: this.queryBindEvent(),
 	            selectorContent: selectorContent,
 	            panelContent: panelContent });
@@ -2120,19 +2129,29 @@ this["EssaComponents"] =
 
 	    getDefaultProps: function getDefaultProps() {
 	        return {
-	            onSelect: noop,
 	            wrapClassName: null,
 	            selectorContent: null,
 	            selectorBindEvent: true,
+	            onSelect: noop,
 	            getItemWrap: noop,
+	            disabled: false,
 	            panelContent: null
 	        };
 	    },
 
 	    getInitialState: function getInitialState() {
 	        return {
+	            disabled: false,
 	            currentSelectedValue: null
 	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ disabled: this.props.disabled });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ disabled: nextProps.disabled });
 	    },
 
 	    onSelect: function onSelect(value) {
@@ -2169,6 +2188,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(Selectable, {
+	            disabled: this.state.disabled,
 	            wrapClassName: props.wrapClassName,
 	            selectorBindEvent: props.selectorBindEvent,
 	            onComponentMount: this.onSelectableMount,
@@ -2258,6 +2278,7 @@ this["EssaComponents"] =
 	var noop = __webpack_require__(4);
 	var classNames = __webpack_require__(13);
 	var HideOnBodyClick = __webpack_require__(14);
+	var NotAllowSelect = __webpack_require__(23);
 
 	var Selectable = React.createClass({
 	    displayName: 'Selectable',
@@ -2269,14 +2290,24 @@ this["EssaComponents"] =
 	            onComponentMount: noop,
 	            selectorBindEvent: true,
 	            selectorContent: null,
+	            disabled: false,
 	            panelContent: null
 	        };
 	    },
 
 	    getInitialState: function getInitialState() {
 	        return {
-	            panelStateIsShow: false
+	            disabled: false,
+	            visible: false
 	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ disabled: this.props.disabled });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ disabled: nextProps.disabled });
 	    },
 
 	    componentDidMount: function componentDidMount() {
@@ -2285,7 +2316,7 @@ this["EssaComponents"] =
 
 	    showPanel: function showPanel() {
 	        var self = this;
-	        self.setState({ panelStateIsShow: true }, function () {
+	        self.setState({ visible: true }, function () {
 	            var animate = self.__animate;
 	            var animateProps = animate.props;
 	            animate.animate(animateProps.from, animateProps.to);
@@ -2305,18 +2336,21 @@ this["EssaComponents"] =
 	    },
 
 	    onHide: function onHide() {
-	        this.setState({ panelStateIsShow: false });
+	        this.setState({ visible: false });
 	    },
 
 	    triggerHide: function triggerHide() {
-	        return this.state.panelStateIsShow;
+	        return this.state.visible;
 	    },
 
 	    render: function render() {
 	        var props = this.props;
+	        var state = this.state;
+
 	        var className = {
 	            'comp-custom-select': true,
-	            'comp-show-panel': this.state.panelStateIsShow
+	            'disabled': state.disabled,
+	            'comp-show-panel': state.visible
 	        };
 
 	        if (props.wrapClassName) {
@@ -2324,13 +2358,13 @@ this["EssaComponents"] =
 	        }
 
 	        var selector = null;
-	        if (props.selectorBindEvent) {
+	        if (props.selectorBindEvent && !state.disabled) {
 	            selector = React.createElement('div', { onClick: this.showPanel }, props.selectorContent);
 	        } else {
 	            selector = props.selectorContent;
 	        }
 
-	        return React.createElement('div', { className: classNames(className), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, selector), React.createElement(HideOnBodyClick, {
+	        return React.createElement('div', { className: classNames(className), ref: 'selectable' }, React.createElement('div', { className: 'comp-select-selector-pd' }, React.createElement(NotAllowSelect, null, selector)), React.createElement(HideOnBodyClick, {
 	            refTarget: this.refs.selectable,
 	            onHide: this.onHide,
 	            onAnimateMount: this.onAnimateMount,
@@ -2369,7 +2403,8 @@ this["EssaComponents"] =
 
 	    getInitialState: function getInitialState() {
 	        return {
-	            currentSelectedValue: null
+	            currentSelectedValue: null,
+	            disabled: false
 	        };
 	    },
 
@@ -2380,6 +2415,7 @@ this["EssaComponents"] =
 	            itemList: itemList,
 	            defaultSelectedValue: itemList[0],
 	            rejectValue: null,
+	            disabled: false,
 	            onSelect: noop,
 	            getSelectorContent: getSelectorContent,
 	            getItemContent: getItemContent
@@ -2390,6 +2426,20 @@ this["EssaComponents"] =
 	        var self = this;
 	        self.setState({ currentSelectedValue: value }, function () {
 	            self.props.onSelect(value);
+	        });
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({
+	            currentSelectedValue: this.props.defaultSelectedValue === null ? this.props.itemList[0] : this.props.defaultSelectedValue,
+	            disabled: this.props.disabled
+	        });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({
+	            currentSelectedValue: nextProps.defaultSelectedValue,
+	            disabled: nextProps.disabled
 	        });
 	    },
 
@@ -2407,6 +2457,7 @@ this["EssaComponents"] =
 	            getSelectorContent: props.getSelectorContent });
 
 	        return React.createElement(DropDown, {
+	            disabled: this.state.disabled,
 	            selectorContent: selector,
 	            panelContent: panelContent });
 	    }
@@ -2766,7 +2817,8 @@ this["EssaComponents"] =
 
 	    getInitialState: function getInitialState() {
 	        return {
-	            currentSelectedValue: null
+	            currentSelectedValue: null,
+	            disabled: true
 	        };
 	    },
 
@@ -2775,6 +2827,7 @@ this["EssaComponents"] =
 	            itemList: [],
 	            wrapClassName: null,
 	            defaultSelectedValue: null,
+	            disabled: false,
 	            onSelect: noop,
 	            getItemWrap: noop,
 	            getSelectorContent: noop,
@@ -2796,16 +2849,20 @@ this["EssaComponents"] =
 
 	    componentWillMount: function componentWillMount() {
 	        this.setState({
-	            currentSelectedValue: this.props.defaultSelectedValue === null ? this.props.itemList[0] : this.props.defaultSelectedValue
+	            currentSelectedValue: this.props.defaultSelectedValue === null ? this.props.itemList[0] : this.props.defaultSelectedValue,
+	            disabled: this.props.disabled
 	        });
 	    },
 
 	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        this.setState({ currentSelectedValue: nextProps.defaultSelectedValue });
+	        this.setState({
+	            currentSelectedValue: nextProps.defaultSelectedValue,
+	            disabled: nextProps.disabled
+	        });
 	    },
 
 	    ensureEvent: function ensureEvent() {
-	        return this.state.currentSelectedValue !== this.props.rejectValue;
+	        return this.state.currentSelectedValue !== this.props.rejectValue && !this.state.disabled;
 	    },
 
 	    render: function render() {
@@ -2825,6 +2882,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(DropDown, {
+	            disabled: this.state.disabled,
 	            getItemWrap: props.getItemWrap,
 	            wrapClassName: props.wrapClassName,
 	            selectorBindEvent: this.ensureEvent(),

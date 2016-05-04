@@ -10,7 +10,8 @@ var Custom = React.createClass({
 
     getInitialState: function () {
         return {
-            currentSelectedValue: null
+            currentSelectedValue: null,
+            disabled: true
         }
     },
 
@@ -19,6 +20,7 @@ var Custom = React.createClass({
             itemList: [],
             wrapClassName: null,
             defaultSelectedValue: null,
+            disabled: false,
             onSelect: noop,
             getItemWrap: noop,
             getSelectorContent: noop,
@@ -42,16 +44,20 @@ var Custom = React.createClass({
         this.setState({
             currentSelectedValue: this.props.defaultSelectedValue === null ?
                 this.props.itemList[0] :
-                this.props.defaultSelectedValue
+                this.props.defaultSelectedValue,
+            disabled: this.props.disabled
         })
     },
 
     componentWillReceiveProps: function (nextProps) {
-        this.setState({currentSelectedValue: nextProps.defaultSelectedValue})
+        this.setState({
+            currentSelectedValue: nextProps.defaultSelectedValue,
+            disabled: nextProps.disabled
+        })
     },
 
     ensureEvent: function () {
-        return this.state.currentSelectedValue !== this.props.rejectValue;
+        return this.state.currentSelectedValue !== this.props.rejectValue && !this.state.disabled;
     },
 
     render: function () {
@@ -72,6 +78,7 @@ var Custom = React.createClass({
             });
 
         return <DropDown
+            disabled={this.state.disabled}
             getItemWrap={props.getItemWrap}
             wrapClassName={props.wrapClassName}
             selectorBindEvent={this.ensureEvent()}

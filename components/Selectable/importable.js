@@ -6,15 +6,15 @@ var React = require('react');
 var DropDown = require('./DropDown');
 var noop = require('../../com/noop');
 
-var getSelectorContent = function (rejectValue, onChange) {
+var getSelectorContent = function (props, state, onChange) {
     return function (value) {
-        if (value === rejectValue) {
+        if (state.inputState) {
             return <input
                 ref="inputNode"
                 onChange={onChange}
                 className="input-default"
                 style={{width:60}}
-                placeholder="请输入..."/>
+                placeholder={value}/>
         }
         return <div className="comp-select-selector">
             <span className="util-font-12">{value}</span>
@@ -37,7 +37,9 @@ var Importable = React.createClass({
     getInitialState: function () {
         return {
             currentSelectedValue: null,
-            fromInput: false
+            fromInput: false,
+            disabled: false,
+            inputState: false
         }
     },
 
@@ -49,17 +51,23 @@ var Importable = React.createClass({
             validate: getTruth,
             getSelectorContent: getSelectorContent(null),
             getItemContent: getItemContent,
+            disabled: false,
             rejectValue: '10+'
         }
     },
 
     onSelect: function (value) {
-        var self = this;
-        self.setState({
-            currentSelectedValue: value,
-            fromInput: false
-        }, function () {
-            self.props.onSelect(value);
+        var isReject = value === this.props.rejectValue;
+        var next = isReject ?
+            this.state.currentSelectedValue :
+            value;
+
+        // 如果当前值为 rejectValue，则将上一次选择的值传给回调
+        // 同时需要重新 render，以确认是否需要绑定事件
+        this.props.onSelect(next);
+        this.setState({
+            currentSelectedValue: next,
+            inputState: isReject
         });
     },
 
@@ -80,7 +88,10 @@ var Importable = React.createClass({
     },
 
     componentWillMount: function () {
-        this.setState({currentSelectedValue: this.props.defaultSelectedValue})
+        this.setState({
+            currentSelectedValue: this.props.defaultSelectedValue,
+            disabled: this.props.disabled
+        })
     },
 
     // 如果是input的输入值变化，则不需要重新渲染
@@ -89,13 +100,17 @@ var Importable = React.createClass({
     },
 
     componentWillReceiveProps: function (nextProps) {
-        this.setState({currentSelectedValue: nextProps.defaultSelectedValue})
+        this.setState({
+            currentSelectedValue: nextProps.defaultSelectedValue,
+            disabled: nextProps.disabled
+        })
     },
 
     queryBindEvent: function () {
-        var value = this.state.currentSelectedValue;
-        return value !== this.props.rejectValue ||
-            (value && typeof value === 'object' && !value.target)
+        //var value = this.state.currentSelectedValue;
+        //return value !== this.props.rejectValue ||
+        //    (value && typeof value === 'object' && !value.target)
+        return !this.state.disabled && !this.state.inputState
     },
 
     render: function () {
@@ -106,10 +121,7 @@ var Importable = React.createClass({
         var selectorContent = <DropDown.Selector
             onSelect={self.onSelect}
             defaultSelectedValue={state.currentSelectedValue}
-            getSelectorContent={getSelectorContent(
-                props.rejectValue,
-                self.onChange)
-            }/>;
+            getSelectorContent={getSelectorContent(props, state, self.onChange)}/>;
 
         var panelContent = React.Children.map(
             props.itemList,
@@ -121,6 +133,7 @@ var Importable = React.createClass({
             });
 
         return <DropDown
+            disabled={props.disabled}
             selectorBindEvent={this.queryBindEvent()}
             selectorContent={selectorContent}
             panelContent={panelContent}/>

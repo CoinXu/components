@@ -11,8 +11,12 @@
       {value: 4, text: '已下架'}
   ]
   ```
++ disabled - 是否禁用 - `false`
 + defaultSelectedValue - 默认选中的值 - `itemList[0]`
++ rejectValue - 使选择框变为输入框的值 - `null`
 + onSelect - 选择某个Item时（如果变为input，则为input.onchange事件的回调）的回调 - noop
++ getSelectorContent(currentItem) - 获取Selector的内容 - noop
++ getItemContent(item, props) - 获取item的内容 - noop
 
 ### 注：
 `props.itemList` 中的值必须是 `{value:value, text: value}` 这样的形式。

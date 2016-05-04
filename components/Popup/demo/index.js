@@ -241,14 +241,15 @@ ReactDOM.render(
 
 // 指定一个元素，弹出Popup
 var baseElement = document.querySelector('#demo-special-position');
+var closeElement = document.querySelector('#demo-special-position-close');
 var positionBubble = require('../PositionBubble');
+// 组件挂载后，插入内容
+var onMount = function (wrap, inst) {
+    wrap.innerHTML = '<h2>BiuBiu~</h2>';
+};
+var popup = positionBubble(baseElement, onMount);
 
-baseElement.addEventListener('click', function (e) {
-    var onMount = function (wrap, inst) {
-        wrap.innerHTML = '<h2>BiuBiu~</h2>';
-    };
-
-    var popup = positionBubble(e.target || e.srcElement, onMount);
-    popup.show();
-    // popup.hide()
-}, false);
+// 显示
+baseElement.addEventListener('click', popup.show, false);
+// 关闭
+closeElement.addEventListener('click', popup.unMount, false);

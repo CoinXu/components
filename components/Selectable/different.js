@@ -28,7 +28,8 @@ var Diff = React.createClass({
 
     getInitialState: function () {
         return {
-            currentSelectedValue: null
+            currentSelectedValue: null,
+            disabled: false
         }
     },
 
@@ -45,6 +46,7 @@ var Diff = React.createClass({
             itemList: itemList,
             defaultSelectedValue: itemList[0],
             rejectValue: null,
+            disabled: false,
             onSelect: noop,
             getSelectorContent: getSelectorContent,
             getItemContent: getItemContent
@@ -56,6 +58,22 @@ var Diff = React.createClass({
         self.setState({currentSelectedValue: value}, function () {
             self.props.onSelect(value);
         });
+    },
+
+    componentWillMount: function () {
+        this.setState({
+            currentSelectedValue: this.props.defaultSelectedValue === null ?
+                this.props.itemList[0] :
+                this.props.defaultSelectedValue,
+            disabled: this.props.disabled
+        })
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({
+            currentSelectedValue: nextProps.defaultSelectedValue,
+            disabled: nextProps.disabled
+        })
     },
 
     ensureEvent: function () {
@@ -72,6 +90,7 @@ var Diff = React.createClass({
             getSelectorContent={props.getSelectorContent}/>;
 
         return <DropDown
+            disabled={this.state.disabled}
             selectorContent={selector}
             panelContent={panelContent}/>
     }

@@ -2,6 +2,7 @@
 + itemList - 数据列表 - []
 + wrapClassName - 外包装窗口 - null
 + defaultSelectedValue - 默认选中的值，如果不传，默认选择`itemList[0]` - null
++ disabled - 是否禁用 - `false`
 + onSelect - 选择事件回调 - noop
 + getItemWrap(panel, props, state, inst) - 
   获取弹层容器函数，panel `getItemContent` 返回的所有的内容
