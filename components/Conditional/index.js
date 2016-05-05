@@ -33,16 +33,18 @@ var Conditional = React.createClass({
     onChecked: function (isChecked, currentValue) {
         var prev = this.state.checkedItemValue;
 
-        this.setState({checkedItemValue: isChecked ? currentValue : null});
+        // 无论何时都有一个项被选中
+        //this.setState({checkedItemValue: isChecked ? currentValue : null});
+        this.setState({checkedItemValue: currentValue});
         this.props.onChecked(isChecked, currentValue);
-
         if (isChecked && prev !== currentValue) {
             this.props.onChange(prev, currentValue)
         }
     },
 
     componentWillMount: function () {
-        this.setState({checkedItemValue: this.props.defaultChecked});
+        var def = this.props.defaultChecked;
+        this.setState({checkedItemValue: def !== null ? def : this.props.itemList[0].value});
     },
 
     render: function () {

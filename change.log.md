@@ -9,7 +9,7 @@
 6. 开放 `PositionBubble` 所有参数
 
 涉及到的组件包括：`Selectable.Custom` `Selectable.Different` 
-`Selectable.DropDown` `Selectable.Importable`
+`Selectable.DropDown` `Selectable.Importable` `Pagination` `PositionBubble`
 
 ## 2016-04-29 - xcp
 1. `Popup` 添加 `baseElement` 属性，详见文档

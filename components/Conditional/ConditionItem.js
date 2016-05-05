@@ -33,7 +33,7 @@ var ConditionItem = React.createClass({
         this.setState({isChecked: this.props.isChecked})
     },
 
-    // todo 该组件设计得有点绕，得改
+    // TODO 该组件设计得有点绕，得改
     componentWillReceiveProps: function (nextProps) {
         this.setState({isChecked: nextProps.isChecked})
     },

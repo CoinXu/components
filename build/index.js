@@ -1771,10 +1771,11 @@ this["EssaComponents"] =
 	    },
 
 	    onItemsInOnePageChange: function onItemsInOnePageChange(num) {
+	        // 每页显示条数改变后，直接跳转到第1页
 	        this.setState({
 	            itemsInOnePage: num,
-	            current: this.props.defaultCurrent
-	        }, this.onSelect.bind(this, this.props.defaultCurrent));
+	            current: 1
+	        }, this.onSelect.bind(this, 1));
 	    },
 
 	    componentDidMount: function componentDidMount() {
@@ -1826,11 +1827,15 @@ this["EssaComponents"] =
 	            defaultSelectedValue: this.state.itemsInOnePage });
 
 	        var importable = null;
-	        if (props.importable) importable = React.createElement(PageInput, {
-	            current: this.state.current,
-	            max: computed.pages,
-	            onSearch: this.skip });
-
+	        var nextPage = null;
+	        if (props.importable) {
+	            nextPage = current + 1;
+	            nextPage = nextPage > computed.pages ? computed.pages : nextPage;
+	            importable = React.createElement(PageInput, {
+	                current: nextPage,
+	                max: computed.pages,
+	                onSearch: this.skip });
+	        }
 	        return React.createElement(NotAllowSelect, null, React.createElement('div', { className: 'pagination' }, configurable, prev, prev ? React.createElement('span', { className: 'page-item default' }) : null, pageItems, next ? React.createElement('span', { className: 'page-item default' }) : null, next, importable));
 	    }
 	});
