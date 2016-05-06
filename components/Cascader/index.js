@@ -1,5 +1,8 @@
 /**
  * Created by xcp on 2016/4/19.
+ * TODO
+ * 该组件为业务所写，不应该放在此处，后面删除
+ * 放在此处只是为了方便测试
  */
 
 var React = require('react');

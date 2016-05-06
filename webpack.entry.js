@@ -19,6 +19,7 @@ module.exports = {
     Selectable: _path('Selectable'),
     Register: _path('register'),
     Cascader: _path('Cascader'),
+    Collapse: _path('Collapse'),
     Calendar: _path('Calendar'),
     Pagination: _path('Pagination')
 };

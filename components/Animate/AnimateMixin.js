@@ -47,6 +47,7 @@ module.exports = {
             delay: 0,
             repeat: 0,
             componentDidMount: noop,
+            getContent: noop,
             easing: TWEEN.Easing.Linear.None
         });
     },
@@ -61,6 +62,10 @@ module.exports = {
 
     backToTheStart: function (callback) {
         this.animate(this.props.to, this.props.from, callback);
+    },
+
+    startAnimate: function (callback) {
+        this.animate(this.props.from, this.props.to, callback);
     },
 
     animate: function (from, to, callback) {
@@ -119,6 +124,6 @@ module.exports = {
 
     componentDidMount: function () {
         this.props.componentDidMount(this);
-        this.animate(this.props.from, this.props.to, this.props.onComplete);
+        this.startAnimate(this.props.onComplete);
     }
 };

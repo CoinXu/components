@@ -9,25 +9,31 @@ var Animate = React.createClass({
     mixins: [AnimateMixin],
 
     render: function () {
-        var children = this.props.children;
-        var Components = this.props.component;
         var self = this;
+        var props = self.props;
+        var children = props.children;
+        var Components = props.component;
+        var ret = props.getContent(props, this.state, self);
 
-        children = children && children.constructor === Array ?
-            children :
-            [children];
+        if (ret === undefined) {
+            children = children && children.constructor === Array ?
+                children :
+                [children];
 
-        assert(children.length, "children is required");
+            assert(children.length, "children is required");
 
-        children = React.Children.map(children, function (child) {
-            return React.cloneElement(child, {parent: self});
-        });
+            children = React.Children.map(children, function (child) {
+                return React.cloneElement(child, {parent: self});
+            });
 
-        return (<Components
-            className={this.props.className}
-            style={this.styleProps()}>
-            {children}
-        </Components>)
+            ret = <Components
+                className={props.className}
+                style={this.styleProps()}>
+                {children}
+            </Components>
+        }
+
+        return ret
     }
 
 });
