@@ -18,6 +18,7 @@ var React = require('react');
 var Animate = require('../Animate');
 var Panel = require('./Panel');
 var noop = require('../../com/noop');
+var util = require('../../com/util/array');
 
 var Collapse = React.createClass({
 
@@ -29,29 +30,53 @@ var Collapse = React.createClass({
 
     getDefaultProps: function () {
         return {
-            expandKeys: []
+            expandKeys: [],
+            className: '',
+            accordion: false
         }
     },
 
     componentWillMount: function () {
-        this.setState({expandKeys: this.props.expandKeys})
+        var keys = this.props.expandKeys;
+        this.setState({expandKeys: this.props.accordion ? keys.slice(0, 1) : keys})
+    },
+
+    addOne: function (key) {
+        this.setState({expandKeys: util.add(this.state.expandKeys, key)})
+    },
+
+    removeOne: function (key) {
+        this.setState({expandKeys: util.remove(this.state.expandKeys, key)})
+    },
+
+    onChange: function (key, collapse) {
+        if (this.props.accordion) {
+            this.setState({expandKeys: collapse ? [] : [key]});
+        } else {
+            this[(collapse ? 'remove' : 'add') + 'One'](key)
+        }
     },
 
     render: function () {
-        var expandKeys = this.state.expandKeys;
-        return <div className="util-shadow util-diff-bd util-def-pd">
+        var self = this;
+        var expandKeys = self.state.expandKeys;
+        var props = self.props;
+
+        return <div className={props.className}>
             {
-                React.Children.map(this.props.children, function (child) {
+                React.Children.map(props.children, function (child) {
                     return React.cloneElement(child, {
-                        collapse: expandKeys.indexOf(child.props.key) === -1
+                        mark: child.key,
+                        onChange: self.onChange,
+                        collapse: expandKeys.indexOf(child.key) === -1
                     })
-                }, this)
+                })
             }
         </div>
     }
 });
 
-Collapse.Panel = React.createClass({
+Collapse.Node = React.createClass({
 
     getInitialState: function () {
         return {collapse: true}
@@ -59,9 +84,10 @@ Collapse.Panel = React.createClass({
 
     getDefaultProps: function () {
         return {
-            key: null,
+            mark: null,
             title: null,
-            collapse: true
+            collapse: true,
+            onChange: noop
         }
     },
 
@@ -69,13 +95,14 @@ Collapse.Panel = React.createClass({
         this.setState({collapse: this.props.collapse})
     },
 
-    onMount: function (inst) {
-        this._panel = inst;
+    componentWillReceiveProps: function (nextProps) {
+        if (nextProps.collapse !== this.state.collapse) {
+            this.setState({collapse: nextProps.collapse})
+        }
     },
 
     toggle: function () {
-        this.setState({collapse: !this.state.collapse});
-        this._panel && this._panel.toggle();
+        this.props.onChange(this.props.mark, !this.state.collapse);
     },
 
     render: function () {
@@ -94,10 +121,9 @@ Collapse.Panel = React.createClass({
             <Panel
                 collapse={this.state.collapse}
                 title={title}
-                onMount={this.onMount}>
+                onChange={this.onChange}>
                 {props.children}
             </Panel>
-
         </div>
     }
 });

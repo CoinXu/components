@@ -72,6 +72,12 @@ var Panel = React.createClass({
         }
     },
 
+    componentWillReceiveProps: function (nextProps) {
+        if (nextProps.collapse !== this.state.collapse) {
+            this.setState({collapse: nextProps.collapse})
+        }
+    },
+
     shouldComponentUpdate: function (nextProps, nextState) {
         return nextState.collapse !== this.state.collapse
     },

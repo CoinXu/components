@@ -1,36 +1,18 @@
-/**
- * Created by xcp on 2016/5/5.
- */
+## Collapse 可折叠面板
+下属两个子组件：
++ [Panel](./Panel.html)
++ [Collapse.Node](./Node.html)
 
-var Panel = require('../Panel');
-var ReactDOM = require('react-dom');
+## Props
++ expandKeys - 需要展开的元素的key - `[]`
++ className - 包装容器的className - ''
++ accordion - 是否是手风琴形式[该形式同时只会有一个节点展开] - `false`
+
+## 调用
+### Collapse 同时可以展开多个
+```JavaScript
 var Collapse = require('../index');
 var Node = Collapse.Node;
-
-var content = <div>
-    <p>Panel content</p>
-    <p>Panel content</p>
-    <p>Panel content</p>
-    <p>Panel content</p>
-</div>;
-
-var inst1 = ReactDOM.render(<Panel
-        collapse={true}
-        title={<h3 onClick={function(){inst1.toggle()}}>Panel title</h3>}>
-        {content}
-    </Panel>,
-    document.getElementById('demo')
-);
-
-var inst2 = ReactDOM.render(<Panel
-        collapse={false}
-        title={<h3 onClick={function(){inst2.toggle()}}>Panel title</h3>}>
-        {content}
-    </Panel>,
-    document.getElementById('demo-expand')
-);
-
-// Collapse
 ReactDOM.render(
     <Collapse expandKeys={["2"]}>
         <Node title={<span>panel title 1</span>} key="1">
@@ -45,8 +27,10 @@ ReactDOM.render(
     </Collapse>,
     document.getElementById('demo-collapse')
 );
+```
 
-// accordion
+### Accordion 同时只能展开一个
+```JavaScript
 ReactDOM.render(
     <Collapse expandKeys={["2"]} accordion={true}>
         <Node title={<span>panel title 1</span>} key="1">
@@ -61,3 +45,4 @@ ReactDOM.render(
     </Collapse>,
     document.getElementById('demo-collapse-accordion')
 );
+```

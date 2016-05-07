@@ -53,14 +53,15 @@ this["EssaComponents"] =
 
 	module.exports = {
 	    Animate: __webpack_require__(1),
-	    Conditional: __webpack_require__(10),
-	    HideOnBodyClick: __webpack_require__(14),
-	    Message: __webpack_require__(19),
-	    Pagination: __webpack_require__(22),
-	    Popup: __webpack_require__(37),
-	    Calendar: __webpack_require__(45),
-	    Cascader: __webpack_require__(49),
-	    Selectable: __webpack_require__(25)
+	    Calendar: __webpack_require__(10),
+	    Cascader: __webpack_require__(33),
+	    Collapse: __webpack_require__(34),
+	    Conditional: __webpack_require__(37),
+	    HideOnBodyClick: __webpack_require__(15),
+	    Message: __webpack_require__(40),
+	    Pagination: __webpack_require__(43),
+	    Popup: __webpack_require__(45),
+	    Selectable: __webpack_require__(23)
 	};
 
 /***/ },
@@ -79,21 +80,27 @@ this["EssaComponents"] =
 	    mixins: [AnimateMixin],
 
 	    render: function render() {
-	        var children = this.props.children;
-	        var Components = this.props.component;
 	        var self = this;
+	        var props = self.props;
+	        var children = props.children;
+	        var Components = props.component;
+	        var ret = props.getContent(props, this.state, self);
 
-	        children = children && children.constructor === Array ? children : [children];
+	        if (ret === undefined) {
+	            children = children && children.constructor === Array ? children : [children];
 
-	        assert(children.length, "children is required");
+	            assert(children.length, "children is required");
 
-	        children = React.Children.map(children, function (child) {
-	            return React.cloneElement(child, { parent: self });
-	        });
+	            children = React.Children.map(children, function (child) {
+	                return React.cloneElement(child, { parent: self });
+	            });
 
-	        return React.createElement(Components, {
-	            className: this.props.className,
-	            style: this.styleProps() }, children);
+	            ret = React.createElement(Components, {
+	                className: props.className,
+	                style: this.styleProps() }, children);
+	        }
+
+	        return ret;
 	    }
 
 	});
@@ -161,6 +168,7 @@ this["EssaComponents"] =
 	            delay: 0,
 	            repeat: 0,
 	            componentDidMount: noop,
+	            getContent: noop,
 	            easing: TWEEN.Easing.Linear.None
 	        });
 	    },
@@ -175,6 +183,10 @@ this["EssaComponents"] =
 
 	    backToTheStart: function backToTheStart(callback) {
 	        this.animate(this.props.to, this.props.from, callback);
+	    },
+
+	    startAnimate: function startAnimate(callback) {
+	        this.animate(this.props.from, this.props.to, callback);
 	    },
 
 	    animate: function animate(from, to, callback) {
@@ -229,7 +241,7 @@ this["EssaComponents"] =
 
 	    componentDidMount: function componentDidMount() {
 	        this.props.componentDidMount(this);
-	        this.animate(this.props.from, this.props.to, this.props.onComplete);
+	        this.startAnimate(this.props.onComplete);
 	    }
 	};
 
@@ -1123,138 +1135,203 @@ this["EssaComponents"] =
 	'use strict';
 
 	/**
-	 * Created by xcp on 2016/3/14.
+	 * Created by xcp on 2016/4/27.
 	 */
 
 	var React = __webpack_require__(2);
-	var assert = __webpack_require__(9);
+	var moment = __webpack_require__(11);
+	var DropDown = __webpack_require__(12);
 	var noop = __webpack_require__(4);
-	var ConditionItem = __webpack_require__(11);
-	var ConditionMixin = __webpack_require__(12);
+	var DatePicker = __webpack_require__(21);
+	var PickerHeader = __webpack_require__(22);
 
-	var Conditional = React.createClass({
-	    displayName: 'Conditional',
+	// 如果日期在当前日期之前，则禁用掉
+	var disabledDate = function disabledDate(time) {
+	    return time.isBefore(new Date(), 'day');
+	};
 
-	    mixins: [ConditionMixin],
+	// 如果日期不属于同一月，则表示diff
+	var diffDate = function diffDate(base, comp) {
+	    return !(base.isSame(comp, 'month') && base.isSame(comp, 'year'));
+	};
+
+	var Calendar = React.createClass({
+	    displayName: 'Calendar',
+
+	    propTypes: {
+	        weekDaysMin: React.PropTypes.array
+	    },
 
 	    getInitialState: function getInitialState() {
 	        return {
-	            checkedItemValue: null
+	            show: false,
+	            changeFromHeader: false,
+	            currentTime: null,
+	            onlyShowMonth: false
 	        };
 	    },
 
 	    getDefaultProps: function getDefaultProps() {
 	        return {
-	            itemList: [],
-	            onChecked: noop,
+	            // class name
+	            wrapClassName: 'comp-date-picker',
+	            headerClassName: 'date-header',
+	            disabledClassName: 'disabled',
+	            currentClassName: 'curr',
+	            diffMonthClassName: 'diff',
+
+	            // header
+	            startTime: [2010, 0, 1],
+	            endTime: [2020, 0, 1],
+
+	            defaultTime: new Date() * 1,
+	            showDays: 6 * 7,
+	            weekDaysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+
+	            startWeek: 0, // [0-6]
+	            format: 'YYYY-MM-DD HH:mm:ss',
+	            onlyShowMonth: false,
+	            disabledDate: disabledDate,
+	            diffDate: diffDate,
 	            onChange: noop,
-	            className: 'conditional',
-	            itemClassName: 'cond-item',
-	            checkedClassName: 'checked',
-	            defaultChecked: null
-	        };
-	    },
-
-	    onChecked: function onChecked(isChecked, currentValue) {
-	        var prev = this.state.checkedItemValue;
-
-	        this.setState({ checkedItemValue: isChecked ? currentValue : null });
-	        this.props.onChecked(isChecked, currentValue);
-
-	        if (isChecked && prev !== currentValue) {
-	            this.props.onChange(prev, currentValue);
-	        }
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({ checkedItemValue: this.props.defaultChecked });
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-
-	        var items = props.itemList.map(function (item) {
-	            return React.createElement(ConditionItem, {
-	                key: item.value,
-	                isChecked: this.state.checkedItemValue === item.value,
-	                onChecked: this.onChecked,
-	                value: item.value }, item.children);
-	        }, this);
-
-	        return React.createElement('div', { className: props.className }, items);
-	    }
-	});
-
-	module.exports = Conditional;
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/14.
-	 */
-
-	var React = __webpack_require__(2);
-	var noop = __webpack_require__(4);
-	var ConditionMixin = __webpack_require__(12);
-	var classNames = __webpack_require__(13);
-
-	var ConditionItem = React.createClass({
-	    displayName: 'ConditionItem',
-
-	    mixins: [ConditionMixin],
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            isChecked: false
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            className: 'cond-item',
-	            checkedClassName: 'checked',
-	            children: null,
-	            value: null,
-	            onChecked: noop,
-	            onChange: noop,
-	            isChecked: false
+	            onSelect: noop
 	        };
 	    },
 
 	    componentWillMount: function componentWillMount() {
-	        this.setState({ isChecked: this.props.isChecked });
-	    },
-
-	    // todo 该组件设计得有点绕，得改
-	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        this.setState({ isChecked: nextProps.isChecked });
-	    },
-
-	    onChecked: function onChecked() {
-	        this.setState({ isChecked: !this.state.isChecked }, function () {
-	            this.props.onChecked(this.state.isChecked, this.props.value);
+	        this.setState({
+	            currentTime: moment(this.props.defaultTime),
+	            showDays: this.props.showDays,
+	            onlyShowMonth: this.props.onlyShowMonth
 	        });
 	    },
 
+	    today: function today() {
+	        this.setState({ currentTime: moment() });
+	    },
+
+	    _isSameDate: function _isSameDate(base, comp) {
+	        return base.isSame(comp, 'year') && base.isSame(comp, 'month') && base.isSame(comp, 'day');
+	    },
+
+	    // 如果年份或月分发生了变化
+	    // 则更新
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        if (!this._isSameDate(nextState.currentTime, this.state.currentTime)) {
+	            this.props.onChange(nextState.currentTime, this.state.currentTime);
+	        }
+	        return nextState.changeFromHeader;
+	    },
+
+	    _spliceArray: function _spliceArray(arr, step) {
+	        var l = arr.length;
+	        var start = 0;
+	        var r = [];
+	        while (start < l) {
+	            r.push(arr.slice(start, start + step));
+	            start += step;
+	        }
+	        return r;
+	    },
+
+	    onHeaderChange: function onHeaderChange(year, month) {
+	        this.setState({
+	            currentTime: moment([year, month, 1]),
+	            changeFromHeader: true
+	        });
+	    },
+
+	    onSelect: function onSelect(cur) {
+	        this.setState({
+	            currentTime: cur,
+	            changeFromHeader: false
+	        });
+	        this.props.onSelect(cur);
+	    },
+
 	    render: function render() {
-	        var props = this.props;
-	        var className = {};
+	        var self = this;
+	        var props = self.props;
+	        var state = self.state;
 
-	        className[props.className] = true;
-	        className[props.checkedClassName] = props.isChecked;
+	        var m, firstDay, w, start, total, count, list, l, days, week, datePanel;
 
-	        return React.createElement('span', {
-	            className: classNames(className),
-	            onClick: this.onChecked }, props.children);
+	        if (!state.onlyShowMonth) {
+	            m = moment(state.currentTime);
+	            // 获得当前月的第一天
+	            firstDay = m.clone().date(1);
+	            // 获得第一天的星期
+	            w = firstDay.day();
+	            // 计算其开始位置的日期
+	            // 从周日开始[默认为0]
+	            start = w > props.startWeek ? firstDay.clone().add(-(w - props.startWeek), 'day') : firstDay;
+
+	            self.__startTime = start;
+
+	            total = props.showDays;
+	            count = 0;
+
+	            // 循环生成每一天
+	            // 日期分成多份，每份长度为一周
+	            list = this._spliceArray(new Array(total).fill(true), 7);
+	            l = list.length - 1;
+	            days = list.map(function (week, index) {
+	                return React.createElement('tr', { key: index }, week.map(function () {
+	                    var time = start.clone().add(count++, 'day');
+
+	                    if (index === l) {
+	                        self.__endTime = time;
+	                    }
+
+	                    return React.createElement('td', { key: count }, React.createElement(DatePicker, {
+	                        className: props.headerClassName,
+	                        onSelect: self.onSelect,
+	                        diffMonthClassName: props.diffMonthClassName,
+	                        disabledClassName: props.disabledClassName,
+	                        currentClassName: props.currentClassName,
+	                        currentTime: m,
+	                        disabledDate: props.disabledDate,
+	                        diffDate: props.diffDate,
+	                        format: props.format,
+	                        time: time }));
+	                }));
+	            });
+
+	            week = [];
+	            total = props.weekDaysMin.length;
+	            count = props.startWeek;
+
+	            while (count < total) {
+	                week.push(React.createElement('td', { key: 'week-' + count }, React.createElement('div', { className: 'date-week' }, props.weekDaysMin[count++])));
+	            }
+
+	            count = 0;
+	            total = props.startWeek;
+	            while (count < total) {
+	                week.push(React.createElement('td', { key: 'week-' + count }, React.createElement('div', null, props.weekDaysMin[count++])));
+	            }
+
+	            week = React.createElement('tr', null, week);
+
+	            datePanel = React.createElement('table', null, React.createElement('thead', null, week), React.createElement('tbody', null, days));
+	        }
+
+	        return React.createElement('div', { className: props.wrapClassName }, React.createElement(PickerHeader, {
+	            className: props.headerClassName,
+	            currentTime: state.currentTime,
+	            startTime: props.startTime,
+	            endTime: props.endTime,
+	            onChange: this.onHeaderChange }), datePanel);
 	    }
-
 	});
 
-	module.exports = ConditionItem;
+	module.exports = Calendar;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	(function() { module.exports = this["moment"]; }());
 
 /***/ },
 /* 12 */
@@ -1263,871 +1340,12 @@ this["EssaComponents"] =
 	'use strict';
 
 	/**
-	 * Created by xcp on 2016/3/14.
-	 */
-
-	var React = __webpack_require__(2);
-
-	module.exports = {
-	    propTypes: {
-	        itemList: React.PropTypes.array,
-	        onChecked: React.PropTypes.func,
-	        onChange: React.PropTypes.func,
-	        className: React.PropTypes.string,
-	        itemClassName: React.PropTypes.string,
-	        checkedClassName: React.PropTypes.string,
-	        defaultChecked: React.PropTypes.any
-	    }
-	};
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/classnames
-	*/
-	/* global define */
-
-	(function () {
-		'use strict';
-
-		var hasOwn = {}.hasOwnProperty;
-
-		function classNames () {
-			var classes = [];
-
-			for (var i = 0; i < arguments.length; i++) {
-				var arg = arguments[i];
-				if (!arg) continue;
-
-				var argType = typeof arg;
-
-				if (argType === 'string' || argType === 'number') {
-					classes.push(arg);
-				} else if (Array.isArray(arg)) {
-					classes.push(classNames.apply(null, arg));
-				} else if (argType === 'object') {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(key);
-						}
-					}
-				}
-			}
-
-			return classes.join(' ');
-		}
-
-		if (typeof module !== 'undefined' && module.exports) {
-			module.exports = classNames;
-		} else if (true) {
-			// register as 'classnames', consistent with npm package name
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-				return classNames;
-			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		} else {
-			window.classNames = classNames;
-		}
-	}());
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/22.
-	 */
-
-	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var Animate = __webpack_require__(1);
-	var contains = __webpack_require__(16);
-	var DOMEvent = __webpack_require__(17);
-	var body = __webpack_require__(18);
-	var noop = __webpack_require__(4);
-	var assert = __webpack_require__(9);
-	var triggerHide = function triggerHide() {
-	    return true;
-	};
-
-	var HideOnBodyClick = React.createClass({
-	    displayName: 'HideOnBodyClick',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            isVisible: true
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            component: 'div',
-	            refTarget: null,
-	            isVisible: true,
-	            onHide: noop,
-	            onAnimateMount: noop,
-	            triggerHide: triggerHide
-	        };
-	    },
-
-	    componentDidMount: function componentDidMount() {
-	        var self = this;
-
-	        this.__bodyHandle = function (e) {
-	            var target = e.target || e.srcElement;
-	            var mountNode = ReactDOM.findDOMNode(self);
-	            var props = self.props;
-
-	            if (!props.triggerHide() || props.refTarget && contains(props.refTarget, target) || contains(mountNode, target)) {
-	                return;
-	            }
-
-	            if (self.__animate && self.__animate.backToTheStart) {
-	                self.__animate.backToTheStart(function () {
-	                    props.onHide();
-	                });
-	            }
-	        };
-
-	        DOMEvent.on(body, 'click', this.__bodyHandle, false);
-	    },
-
-	    componentWillUnmount: function componentWillUnmount() {
-	        DOMEvent.off(body, 'click', this.__bodyHandle, false);
-	    },
-
-	    holdAnimate: function holdAnimate(animate) {
-	        this.__animate = animate;
-	        this.props.onAnimateMount(animate);
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-	        assert(props.children, 'children required in HideOnBodyClick');
-
-	        return React.createElement(Animate, {
-	            style: props.style,
-	            component: props.component,
-	            from: { opacity: 0 },
-	            to: { opacity: 1 },
-	            during: 200,
-	            componentDidMount: this.holdAnimate }, props.children);
-	    }
-	});
-
-	module.exports = HideOnBodyClick;
-
-/***/ },
-/* 15 */
-/***/ function(module, exports) {
-
-	(function() { module.exports = this["ReactDOM"]; }());
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	/**
-	 * Created by xcp on 2016/3/15.
-	 *
-	 * from jquery-1.9.1
-	 */
-
-	module.exports = function (a, b) {
-	    var c = a.nodeType === 9 ? a.documentElement : a;
-
-	    return a === b || !!(b && b.nodeType === 1 && (c.contains ? c.contains(b) : a.compareDocumentPosition && a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_CONTAINED_BY));
-	};
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/19.
-	 */
-
-	var isElement = function isElement(elem) {
-	    var result = false;
-	    try {
-	        result = elem.nodeType === 1;
-	    } catch (e) {}
-	    return result;
-	};
-
-	var body = __webpack_require__(18);
-	var isW3c = !!body.addEventListener;
-	var ADD_EVENT_NAME = isW3c ? 'addEventListener' : 'attachEvent';
-	var REMOVE_EVENT_NAME = isW3c ? 'removeEventListener' : 'detachEvent';
-	var EVENT_TYPE_PREFIX = isW3c ? '' : 'on';
-
-	var eventType = function eventType(type) {
-	    return EVENT_TYPE_PREFIX + type;
-	};
-
-	var factory = function factory(handleName) {
-	    return function (elem, type, handle, capture) {
-	        if (!isElement(elem)) return elem;
-	        if (elem[handleName]) {
-	            elem[handleName](eventType(type), handle, capture);
-	        }
-	        return elem;
-	    };
-	};
-
-	module.exports = {
-	    on: factory(ADD_EVENT_NAME),
-	    off: factory(REMOVE_EVENT_NAME)
-	};
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/19.
-	 */
-
-	module.exports = __webpack_require__(7)() ? {} : document.body || document.documentElement;
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by xcp on 2016/3/19.
-	 */
-	"use strict";
-
-	var runtimeIsNode = __webpack_require__(7)();
-	var noop = __webpack_require__(4);
-	var ReactDOM = __webpack_require__(15);
-	var Message = __webpack_require__(20);
-	var body = __webpack_require__(18);
-
-	if (!runtimeIsNode) {
-
-	    var mountNodeWrap = document.createElement('div');
-	    mountNodeWrap.style.cssText = 'position:absolute;top:20px;left:50%;';
-	    body.appendChild(mountNodeWrap);
-
-	    module.exports = function (message, callback) {
-	        var mountNode = document.createElement('div');
-	        mountNode.style.cssText = 'margin-bottom:10px';
-	        mountNodeWrap.appendChild(mountNode);
-	        var afterClose = function afterClose() {
-	            callback && callback();
-	            mountNodeWrap.removeChild(mountNode);
-	        };
-
-	        ReactDOM.render(React.createElement(Message, {
-	            message: message,
-	            afterClose: afterClose }), mountNode);
-	    };
-	} else {
-	    module.exports = Message;
-	}
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/18.
-	 * 全局提示信息，会自动隐藏掉
-	 * 如果有多个信息同时出现，则依次排成一列
-	 */
-
-	var React = __webpack_require__(2);
-	var Animate = __webpack_require__(1);
-	var AutoUnmountMixin = __webpack_require__(21);
-	var noop = __webpack_require__(4);
-
-	var Message = React.createClass({
-	    displayName: 'Message',
-
-	    mixins: [AutoUnmountMixin],
-
-	    render: function render() {
-	        var props = this.props;
-	        var onComplete = props.closeable ? noop : this.autoUnmount;
-
-	        return React.createElement(Animate, {
-	            component: props.animate.component,
-	            from: props.animate.from,
-	            to: props.animate.to,
-	            during: props.animate.during,
-	            componentDidMount: this.animateDidMount,
-	            onComplete: onComplete }, React.createElement('div', { className: 'inline-block' }, React.createElement('div', { className: 'bub-bill' }, React.createElement('div', { className: 'util-bill-pd' }, props.message))));
-	    }
-	});
-
-	module.exports = Message;
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/18.
-	 */
-
-	var ReactDOM = __webpack_require__(15);
-	var noop = __webpack_require__(4);
-
-	module.exports = {
-
-	    getInitialState: function getInitialState() {
-	        return { isVisible: true };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        this.__backToTheStart = noop;
-	        return {
-	            message: '',
-	            during: 3000,
-	            onComplete: noop,
-	            closeable: false,
-	            afterClose: noop,
-	            animate: {
-	                component: 'span',
-	                from: { opacity: 0 },
-	                to: { opacity: 1 },
-	                during: 500
-	            }
-	        };
-	    },
-
-	    // export animate
-	    animateDidMount: function animateDidMount(animate) {
-	        this.__backToTheStart = animate.backToTheStart;
-	    },
-
-	    unmount: function unmount() {
-	        var self = this;
-	        var mountNode = ReactDOM.findDOMNode(self).parentNode;
-	        if (typeof self.__backToTheStart === 'function') {
-	            self.__backToTheStart(function () {
-	                ReactDOM.unmountComponentAtNode(mountNode);
-	            });
-	        } else {
-	            ReactDOM.unmountComponentAtNode(mountNode);
-	        }
-	        self.props.afterClose();
-	    },
-
-	    autoUnmount: function autoUnmount() {
-	        setTimeout(this.unmount, this.props.during);
-	    }
-	};
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/23.
-	 */
-
-	var React = __webpack_require__(2);
-	var noop = __webpack_require__(4);
-	var NotAllowSelect = __webpack_require__(23);
-	var PageInput = __webpack_require__(24);
-	var Selectable = __webpack_require__(25);
-
-	var getContent = function getContent(current) {
-	    return React.createElement('div', { className: 'comp-area-item util-font-12 color-white-bg util-line-14' }, current, React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
-	};
-
-	var getItemContent = function getItemContent(val, props) {
-	    var item = React.createElement('li', { className: 'comp-panel-item util-font-12' }, React.createElement('strong', null, val));
-	    return React.cloneElement(item, props);
-	};
-
-	var Pagination = React.createClass({
-	    displayName: 'Pagination',
-
-	    propTypes: {
-	        defaultCurrent: React.PropTypes.number,
-	        total: React.PropTypes.number,
-	        pageSize: React.PropTypes.number,
-	        itemsInOnePage: React.PropTypes.number,
-	        keepPages: React.PropTypes.number,
-	        onChange: React.PropTypes.func,
-	        onSelect: React.PropTypes.func,
-	        getPage: React.PropTypes.func
-	    },
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            // current page
-	            current: 1,
-	            itemsInOnePage: 60
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            // default page
-	            defaultCurrent: 1,
-	            // item total
-	            total: 0,
-	            itemsInOnePage: 60,
-	            // pages in one item
-	            pageSize: 5,
-	            keepPages: 2,
-	            // 可输入页码
-	            importable: true,
-	            // 可配置 itemsInOnePage
-	            itemsConfigurable: true,
-	            configurableList: [200, 100, 60],
-	            // invoke when page number changed
-	            onChange: noop,
-	            onSelect: noop,
-	            getPage: function getPage(num, isCurrent) {
-	                return React.createElement('span', { className: 'page-item' + (isCurrent ? ' focus' : '') }, num);
-	            }
-	        };
-	    },
-
-	    _computed: function _computed(itemsInOnePage) {
-	        var props = this.props;
-	        var pages = Math.ceil(props.total / itemsInOnePage);
-	        var showPages = pages > props.pageSize ? props.pageSize : pages;
-
-	        this.__computed = {
-	            pages: pages,
-	            showPages: showPages,
-	            currentPageOffset: Math.ceil(showPages / 2) - 1
-	        };
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this._computed(this.props.itemsInOnePage);
-	        this.setState({
-	            current: this.props.defaultCurrent,
-	            itemsInOnePage: this.props.itemsInOnePage
-	        });
-	    },
-
-	    onSelect: function onSelect(num) {
-	        this.skip(num);
-	    },
-
-	    prev: function prev() {
-	        this.skip(this.state.current - 1);
-	    },
-
-	    next: function next() {
-	        this.skip(this.state.current + 1);
-	    },
-
-	    skip: function skip(num, silent) {
-	        this.props.onSelect(num, this.state.itemsInOnePage);
-	        if (num < 1 || num > this.__computed.pages || num === this.state.current) return;
-
-	        var self = this;
-	        self.setState({ current: num }, function () {
-	            if (!silent) self.props.onChange(num, self.state.itemsInOnePage);
-	        });
-	    },
-
-	    _getCurrentStart: function _getCurrentStart(page) {
-	        // 只需要保持 current 在一个固定位置
-	        // 即可保证鼠标下一次点击的时候不会点击在同一个 number 上
-	        // 点击固定位置的右边 -> next
-	        // 点击因定位置的右边 -> prev
-	        // 该函数需要根据 page 确认当前页码的开始位置
-	        var computed = this.__computed;
-	        var start = page - computed.currentPageOffset;
-
-	        // 衡量边界
-	        return start + computed.showPages >= computed.pages ? computed.pages - computed.showPages + 1 : start > this.props.keepPages ? start : 1;
-	    },
-
-	    _getPage: function _getPage(num, isCurrent) {
-	        return React.cloneElement(this.props.getPage(num, isCurrent), {
-	            onClick: this.onSelect.bind(this, num),
-	            key: num
-	        });
-	    },
-
-	    onItemsInOnePageChange: function onItemsInOnePageChange(num) {
-	        // 每页显示条数改变后，直接跳转到第1页
-	        this.setState({
-	            itemsInOnePage: num,
-	            current: 1
-	        }, this.onSelect.bind(this, 1));
-	    },
-
-	    componentDidMount: function componentDidMount() {
-	        this.props.onSelect(this.state.current, this.state.itemsInOnePage);
-	    },
-
-	    componentWillUpdate: function componentWillUpdate(nextProps, nextState) {
-	        if (nextState.itemsInOnePage !== this.state.itemsInOnePage) {
-	            this._computed(nextState.itemsInOnePage);
-	        }
-	    },
-
-	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-	        var cur = this.state;
-	        return cur.current !== nextState.current || cur.itemsInOnePage !== nextState.itemsInOnePage;
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-	        var computed = this.__computed;
-	        var current = this.state.current;
-	        var start = this._getCurrentStart(current);
-	        var prev, next;
-
-	        if (start > props.keepPages) {
-	            prev = new Array(props.keepPages).fill(1).map(function (v, i) {
-	                return this._getPage(i + 1, i + 1 === current);
-	            }, this);
-	        }
-
-	        var pageItems = new Array(computed.showPages).fill(1).map(function () {
-	            var num = start++;
-	            return this._getPage(num, current === num);
-	        }, this);
-
-	        if (start < computed.pages) {
-	            next = new Array(props.keepPages).fill(1).map(function (v, i) {
-	                var num = computed.pages - props.keepPages + i + 1;
-	                return this._getPage(num, current === num);
-	            }, this);
-	        }
-
-	        var configurable = null;
-	        if (props.itemsConfigurable) configurable = React.createElement(Selectable.Custom, {
-	            getSelectorContent: getContent,
-	            getItemContent: getItemContent,
-	            onSelect: this.onItemsInOnePageChange,
-	            itemList: props.configurableList,
-	            defaultSelectedValue: this.state.itemsInOnePage });
-
-	        var importable = null;
-	        var nextPage = null;
-	        if (props.importable) {
-	            nextPage = current + 1;
-	            nextPage = nextPage > computed.pages ? computed.pages : nextPage;
-	            importable = React.createElement(PageInput, {
-	                current: nextPage,
-	                max: computed.pages,
-	                onSearch: this.skip });
-	        }
-	        return React.createElement(NotAllowSelect, null, React.createElement('div', { className: 'pagination' }, configurable, prev, prev ? React.createElement('span', { className: 'page-item default' }) : null, pageItems, next ? React.createElement('span', { className: 'page-item default' }) : null, next, importable));
-	    }
-	});
-
-	module.exports = Pagination;
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/4/29.
-	 */
-
-	var React = __webpack_require__(2);
-	var NotAllowSelect = React.createClass({
-	    displayName: 'NotAllowSelect',
-
-	    render: function render() {
-	        return React.createElement('div', { onSelect: function onSelect() {
-	                return false;
-	            },
-	            style: { MozUserSelect: 'none', WebkitUserSelect: 'none', msUserSelect: 'none', userSelect: 'none' } }, this.props.children);
-	    }
-	});
-	module.exports = NotAllowSelect;
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/4/29.
-	 */
-
-	var React = __webpack_require__(2);
-	var noop = __webpack_require__(4);
-	var intReg = /^\d+$/;
-	var getTruth = function getTruth() {
-	    return true;
-	};
-
-	var PageInput = React.createClass({
-	    displayName: 'PageInput',
-
-	    getInitialState: function getInitialState() {
-	        return { current: 1 };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            onSearch: noop,
-	            validate: getTruth,
-	            current: 1,
-	            max: Math.MAX_VALUE,
-	            min: 0,
-	            validateFailedMark: -1
-	        };
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({ current: this.props.current });
-	    },
-
-	    componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextState) {
-	        this.setState({ current: nextProps.current });
-	    },
-
-	    _validate: function _validate(str) {
-	        var mark = this.props.validateFailedMark;
-	        if (str.length === 0 || !intReg.test(str) || !this.props.validate(str)) {
-	            return mark;
-	        }
-
-	        var num = parseInt(str);
-	        return num >= this.props.min && num <= this.props.max ? num : mark;
-	    },
-
-	    onChange: function onChange() {
-	        var val = this.refs.page.value;
-
-	        if (val) {
-	            var result = this._validate(val);
-
-	            if (result === this.props.validateFailedMark) {
-	                return this.refs.page.value = this.state.current;
-	            }
-
-	            if (result !== this.state.current) {
-	                this.setState({ current: result });
-	            }
-	        }
-	    },
-
-	    onSearch: function onSearch() {
-	        this.props.onSearch(this.state.current);
-	    },
-
-	    render: function render() {
-	        return React.createElement('span', null, React.createElement('input', {
-	            onChange: this.onChange,
-	            ref: 'page',
-	            type: 'number',
-	            style: { padding: 0 },
-	            className: 'input-default page-item',
-	            placeholder: this.state.current }), React.createElement('div', { className: 'page-item comp-search', onClick: this.onSearch }, React.createElement('div', { className: 'icon-img icon-search util-v-m' })));
-	    }
-	});
-
-	module.exports = PageInput;
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/22.
-	 */
-
-	module.exports = {
-	    Importable: __webpack_require__(26),
-	    Diff: __webpack_require__(29),
-	    Container: __webpack_require__(30),
-	    FOContainer: __webpack_require__(33),
-	    MiniContainer: __webpack_require__(34),
-	    DropDown: __webpack_require__(27),
-	    Custom: __webpack_require__(35),
-	    Checkbox: __webpack_require__(36),
-	    Selectable: __webpack_require__(28)
-	};
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/23.
-	 */
-
-	var React = __webpack_require__(2);
-	var DropDown = __webpack_require__(27);
-	var noop = __webpack_require__(4);
-
-	var getSelectorContent = function getSelectorContent(props, state, onChange) {
-	    return function (value) {
-	        if (state.inputState) {
-	            return React.createElement('input', {
-	                ref: 'inputNode',
-	                onChange: onChange,
-	                className: 'input-default',
-	                style: { width: 60 },
-	                placeholder: value });
-	        }
-	        return React.createElement('div', { className: 'comp-select-selector' }, React.createElement('span', { className: 'util-font-12' }, value), React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
-	    };
-	};
-
-	var getItemContent = function getItemContent(value, props) {
-	    var item = React.createElement('li', { className: 'comp-panel-item' }, React.createElement('strong', null, value));
-	    return React.cloneElement(item, props);
-	};
-
-	var getTruth = function getTruth() {
-	    return true;
-	};
-
-	var Importable = React.createClass({
-	    displayName: 'Importable',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            currentSelectedValue: null,
-	            fromInput: false,
-	            disabled: false,
-	            inputState: false
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'],
-	            defaultSelectedValue: 1,
-	            onSelect: noop,
-	            validate: getTruth,
-	            getSelectorContent: getSelectorContent(null),
-	            getItemContent: getItemContent,
-	            disabled: false,
-	            rejectValue: '10+'
-	        };
-	    },
-
-	    onSelect: function onSelect(value) {
-	        var isReject = value === this.props.rejectValue;
-	        var next = isReject ? this.state.currentSelectedValue : value;
-
-	        // 如果当前值为 rejectValue，则将上一次选择的值传给回调
-	        // 同时需要重新 render，以确认是否需要绑定事件
-	        this.props.onSelect(next);
-	        this.setState({
-	            currentSelectedValue: next,
-	            inputState: isReject
-	        });
-	    },
-
-	    onChange: function onChange(e) {
-	        if (this.props.validate(e.target.value, this.refs.inputNode)) {
-	            this.setState({
-	                currentSelectedValue: e.target.value,
-	                fromInput: true
-	            });
-	        }
-	    },
-
-	    validate: function validate() {
-	        var inputNode = this.refs.inputNode;
-	        return inputNode ? this.props.validate(inputNode.value, inputNode) : true;
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({
-	            currentSelectedValue: this.props.defaultSelectedValue,
-	            disabled: this.props.disabled
-	        });
-	    },
-
-	    // 如果是input的输入值变化，则不需要重新渲染
-	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-	        return !nextState.fromInput;
-	    },
-
-	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        this.setState({
-	            currentSelectedValue: nextProps.defaultSelectedValue,
-	            disabled: nextProps.disabled
-	        });
-	    },
-
-	    queryBindEvent: function queryBindEvent() {
-	        //var value = this.state.currentSelectedValue;
-	        //return value !== this.props.rejectValue ||
-	        //    (value && typeof value === 'object' && !value.target)
-	        return !this.state.disabled && !this.state.inputState;
-	    },
-
-	    render: function render() {
-	        var self = this;
-	        var props = self.props;
-	        var state = self.state;
-
-	        var selectorContent = React.createElement(DropDown.Selector, {
-	            onSelect: self.onSelect,
-	            defaultSelectedValue: state.currentSelectedValue,
-	            getSelectorContent: getSelectorContent(props, state, self.onChange) });
-
-	        var panelContent = React.Children.map(props.itemList, function (value, index) {
-	            return React.createElement(DropDown.Item, {
-	                value: value,
-	                key: index,
-	                getItemContent: props.getItemContent });
-	        });
-
-	        return React.createElement(DropDown, {
-	            disabled: props.disabled,
-	            selectorBindEvent: this.queryBindEvent(),
-	            selectorContent: selectorContent,
-	            panelContent: panelContent });
-	    }
-	});
-
-	module.exports = Importable;
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
 	 * Created by xcp on 2016/3/22.
 	 */
 
 	var React = __webpack_require__(2);
 	var noop = __webpack_require__(4);
-	var Selectable = __webpack_require__(28);
+	var Selectable = __webpack_require__(13);
 
 	var DropDown = React.createClass({
 	    displayName: 'DropDown',
@@ -2270,7 +1488,7 @@ this["EssaComponents"] =
 	module.exports = DropDown;
 
 /***/ },
-/* 28 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2281,9 +1499,9 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var noop = __webpack_require__(4);
-	var classNames = __webpack_require__(13);
-	var HideOnBodyClick = __webpack_require__(14);
-	var NotAllowSelect = __webpack_require__(23);
+	var classNames = __webpack_require__(14);
+	var HideOnBodyClick = __webpack_require__(15);
+	var NotAllowSelect = __webpack_require__(20);
 
 	var Selectable = React.createClass({
 	    displayName: 'Selectable',
@@ -2381,7 +1599,466 @@ this["EssaComponents"] =
 	module.exports = Selectable;
 
 /***/ },
-/* 29 */
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/22.
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
+	var Animate = __webpack_require__(1);
+	var contains = __webpack_require__(17);
+	var DOMEvent = __webpack_require__(18);
+	var body = __webpack_require__(19);
+	var noop = __webpack_require__(4);
+	var assert = __webpack_require__(9);
+	var triggerHide = function triggerHide() {
+	    return true;
+	};
+
+	var HideOnBodyClick = React.createClass({
+	    displayName: 'HideOnBodyClick',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            isVisible: true
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            component: 'div',
+	            refTarget: null,
+	            isVisible: true,
+	            onHide: noop,
+	            onAnimateMount: noop,
+	            triggerHide: triggerHide
+	        };
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        var self = this;
+
+	        this.__bodyHandle = function (e) {
+	            var target = e.target || e.srcElement;
+	            var mountNode = ReactDOM.findDOMNode(self);
+	            var props = self.props;
+
+	            if (!props.triggerHide() || props.refTarget && contains(props.refTarget, target) || contains(mountNode, target)) {
+	                return;
+	            }
+
+	            if (self.__animate && self.__animate.backToTheStart) {
+	                self.__animate.backToTheStart(function () {
+	                    props.onHide();
+	                });
+	            }
+	        };
+
+	        DOMEvent.on(body, 'click', this.__bodyHandle, false);
+	    },
+
+	    componentWillUnmount: function componentWillUnmount() {
+	        DOMEvent.off(body, 'click', this.__bodyHandle, false);
+	    },
+
+	    holdAnimate: function holdAnimate(animate) {
+	        this.__animate = animate;
+	        this.props.onAnimateMount(animate);
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        assert(props.children, 'children required in HideOnBodyClick');
+
+	        return React.createElement(Animate, {
+	            style: props.style,
+	            component: props.component,
+	            from: { opacity: 0 },
+	            to: { opacity: 1 },
+	            during: 200,
+	            componentDidMount: this.holdAnimate }, props.children);
+	    }
+	});
+
+	module.exports = HideOnBodyClick;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	(function() { module.exports = this["ReactDOM"]; }());
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	/**
+	 * Created by xcp on 2016/3/15.
+	 *
+	 * from jquery-1.9.1
+	 */
+
+	module.exports = function (a, b) {
+	    var c = a.nodeType === 9 ? a.documentElement : a;
+
+	    return a === b || !!(b && b.nodeType === 1 && (c.contains ? c.contains(b) : a.compareDocumentPosition && a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_CONTAINED_BY));
+	};
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/19.
+	 */
+
+	var isElement = function isElement(elem) {
+	    var result = false;
+	    try {
+	        result = elem.nodeType === 1;
+	    } catch (e) {}
+	    return result;
+	};
+
+	var body = __webpack_require__(19);
+	var isW3c = !!body.addEventListener;
+	var ADD_EVENT_NAME = isW3c ? 'addEventListener' : 'attachEvent';
+	var REMOVE_EVENT_NAME = isW3c ? 'removeEventListener' : 'detachEvent';
+	var EVENT_TYPE_PREFIX = isW3c ? '' : 'on';
+
+	var eventType = function eventType(type) {
+	    return EVENT_TYPE_PREFIX + type;
+	};
+
+	var factory = function factory(handleName) {
+	    return function (elem, type, handle, capture) {
+	        if (!isElement(elem)) return elem;
+	        if (elem[handleName]) {
+	            elem[handleName](eventType(type), handle, capture);
+	        }
+	        return elem;
+	    };
+	};
+
+	module.exports = {
+	    on: factory(ADD_EVENT_NAME),
+	    off: factory(REMOVE_EVENT_NAME)
+	};
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/19.
+	 */
+
+	module.exports = __webpack_require__(7)() ? {} : document.body || document.documentElement;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/4/29.
+	 */
+
+	var React = __webpack_require__(2);
+	var NotAllowSelect = React.createClass({
+	    displayName: 'NotAllowSelect',
+
+	    render: function render() {
+	        return React.createElement('div', { onSelect: function onSelect() {
+	                return false;
+	            },
+	            style: { MozUserSelect: 'none', WebkitUserSelect: 'none', msUserSelect: 'none', userSelect: 'none' } }, this.props.children);
+	    }
+	});
+	module.exports = NotAllowSelect;
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/4/27.
+	 */
+
+	var moment = __webpack_require__(11);
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var classnames = __webpack_require__(14);
+
+	var DatePicker = React.createClass({
+	    displayName: 'DatePicker',
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            dateItemClassName: 'date-item',
+	            disabledClassName: 'disabled',
+	            currentClassName: 'curr',
+	            diffMonthClassName: 'diff',
+	            currentTime: moment(),
+	            time: moment(),
+	            format: 'YYYY-MM-DD HH:mm:ss',
+	            onSelect: noop,
+	            disabledDate: noop,
+	            diffDate: noop
+	        };
+	    },
+
+	    onSelect: function onSelect() {
+	        this.props.onSelect(this.props.time);
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var disabled = props.disabledDate(props.time);
+	        var className = {};
+	        var current = moment();
+
+	        className[props.dateItemClassName] = true;
+	        className[props.disabledClassName] = disabled;
+	        className[props.currentClassName] = props.time.isSame(current, 'year') && props.time.isSame(current, 'month') && props.time.isSame(current, 'day');
+	        className[props.diffMonthClassName] = props.diffDate(props.currentTime, props.time);
+
+	        return React.createElement('div', {
+	            className: classnames(className),
+	            onClick: disabled ? noop : this.onSelect }, props.time.date());
+	    }
+	});
+
+	module.exports = DatePicker;
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/4/27.
+	 */
+
+	var React = __webpack_require__(2);
+	var moment = __webpack_require__(11);
+	var Selectable = __webpack_require__(23);
+	var noop = __webpack_require__(4);
+	var assert = __webpack_require__(9);
+
+	var getItemContent = function getItemContent(value, props) {
+	    var item = React.createElement('li', { className: 'comp-panel-item' }, value.year());
+	    return React.cloneElement(item, props);
+	};
+
+	var getSelectorContent = function getSelectorContent(value) {
+	    return React.createElement('div', { className: 'comp-select-selector' }, React.createElement('span', { className: 'util-font-12' }, value.year()), React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
+	};
+
+	var PickerHeader = React.createClass({
+	    displayName: 'PickerHeader',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            currentTime: null
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            className: '',
+	            currentTime: moment(),
+	            startTime: [2010, 0, 1],
+	            endTime: [2020, 0, 1],
+	            onChange: noop
+	        };
+	    },
+
+	    setTime: function setTime(time) {
+	        this.setState({ currentTime: time });
+	    },
+
+	    setYear: function setYear(time) {
+	        this.setTime(time.clone().month(this.state.currentTime.month()));
+	    },
+
+	    setMonth: function setMonth(month) {
+	        this.setTime(this.state.currentTime.clone().month(month - 1));
+	    },
+
+	    nextMonth: function nextMonth() {
+	        this.setTime(this.state.currentTime.clone().add(1, 'month'));
+	    },
+
+	    previousMonth: function previousMonth() {
+	        this.setTime(this.state.currentTime.clone().add(-1, 'month'));
+	    },
+
+	    nextYear: function nextYear() {
+	        this.setTime(this.state.currentTime.clone().add(1, 'year'));
+	    },
+
+	    previousYear: function previousYear() {
+	        this.setTime(this.state.currentTime.clone().add(-1, 'year'));
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        var props = this.props;
+	        var start = moment(props.startTime).month(props.currentTime.month());
+	        var end = moment(props.endTime);
+
+	        var sl = start.year();
+	        var el = end.year();
+
+	        assert(sl >= el, 'start year need less than end year');
+
+	        // 年间距
+	        var yearList = [];
+	        var s = 0,
+	            l = el - sl;
+	        while (s <= l) {
+	            yearList.push(start.clone().add(s++, 'year'));
+	        }
+
+	        var monthList = new Array(12).fill(1).map(function (v, i) {
+	            return i + 1;
+	        });
+
+	        this.__yearList = yearList;
+	        this.__monthList = monthList;
+
+	        this.setState({
+	            currentTime: this.props.currentTime
+	        });
+	    },
+
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        if (nextState.currentTime.year() !== this.state.currentTime.year() || nextState.currentTime.month() !== this.state.currentTime.month()) {
+	            this.props.onChange(nextState.currentTime.year(), nextState.currentTime.month());
+	            return true;
+	        }
+	        return false;
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ currentTime: nextProps.currentTime });
+	    },
+
+	    render: function render() {
+	        var iconStyle = { cursor: 'pointer' };
+
+	        return React.createElement('div', { className: this.props.className }, React.createElement(Selectable.Custom, {
+	            defaultSelectedValue: this.state.currentTime,
+	            getSelectorContent: getSelectorContent,
+	            getItemContent: getItemContent,
+	            onSelect: this.setYear,
+	            itemList: this.__yearList }), React.createElement(Selectable.Importable, {
+	            defaultSelectedValue: this.state.currentTime.month() + 1,
+	            onSelect: this.setMonth,
+	            itemList: this.__monthList }), React.createElement('span', { style: iconStyle,
+	            className: 'icon-img icon-img icon-tran-black-l util-v-m comp-icon-gap',
+	            onClick: this.previousMonth }), React.createElement('span', { style: iconStyle,
+	            className: 'icon-img icon-img icon-tran-black-r util-v-m',
+	            onClick: this.nextMonth }));
+	    }
+
+	});
+
+	module.exports = PickerHeader;
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/22.
+	 */
+
+	module.exports = {
+	    Importable: __webpack_require__(24),
+	    Diff: __webpack_require__(25),
+	    Container: __webpack_require__(26),
+	    FOContainer: __webpack_require__(29),
+	    MiniContainer: __webpack_require__(30),
+	    DropDown: __webpack_require__(12),
+	    Custom: __webpack_require__(31),
+	    Checkbox: __webpack_require__(32),
+	    Selectable: __webpack_require__(13)
+	};
+
+/***/ },
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2391,7 +2068,149 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
-	var DropDown = __webpack_require__(27);
+	var DropDown = __webpack_require__(12);
+	var noop = __webpack_require__(4);
+
+	var getSelectorContent = function getSelectorContent(props, state, onChange) {
+	    return function (value) {
+	        if (state.inputState) {
+	            return React.createElement('input', {
+	                ref: 'inputNode',
+	                onChange: onChange,
+	                className: 'input-default',
+	                style: { width: 60 },
+	                placeholder: value });
+	        }
+	        return React.createElement('div', { className: 'comp-select-selector' }, React.createElement('span', { className: 'util-font-12' }, value), React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
+	    };
+	};
+
+	var getItemContent = function getItemContent(value, props) {
+	    var item = React.createElement('li', { className: 'comp-panel-item' }, React.createElement('strong', null, value));
+	    return React.cloneElement(item, props);
+	};
+
+	var getTruth = function getTruth() {
+	    return true;
+	};
+
+	var Importable = React.createClass({
+	    displayName: 'Importable',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            currentSelectedValue: null,
+	            fromInput: false,
+	            disabled: false,
+	            inputState: false
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            itemList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'],
+	            defaultSelectedValue: 1,
+	            onSelect: noop,
+	            validate: getTruth,
+	            getSelectorContent: getSelectorContent(null),
+	            getItemContent: getItemContent,
+	            disabled: false,
+	            rejectValue: '10+'
+	        };
+	    },
+
+	    onSelect: function onSelect(value) {
+	        var isReject = value === this.props.rejectValue;
+	        var next = isReject ? this.state.currentSelectedValue : value;
+
+	        // 如果当前值为 rejectValue，则将上一次选择的值传给回调
+	        // 同时需要重新 render，以确认是否需要绑定事件
+	        this.props.onSelect(next);
+	        this.setState({
+	            currentSelectedValue: next,
+	            inputState: isReject
+	        });
+	    },
+
+	    onChange: function onChange(e) {
+	        if (this.props.validate(e.target.value, this.refs.inputNode)) {
+	            this.setState({
+	                currentSelectedValue: e.target.value,
+	                fromInput: true
+	            });
+	        }
+	    },
+
+	    validate: function validate() {
+	        var inputNode = this.refs.inputNode;
+	        return inputNode ? this.props.validate(inputNode.value, inputNode) : true;
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({
+	            currentSelectedValue: this.props.defaultSelectedValue,
+	            disabled: this.props.disabled
+	        });
+	    },
+
+	    // 如果是input的输入值变化，则不需要重新渲染
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        return !nextState.fromInput;
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({
+	            currentSelectedValue: nextProps.defaultSelectedValue,
+	            disabled: nextProps.disabled
+	        });
+	    },
+
+	    queryBindEvent: function queryBindEvent() {
+	        //var value = this.state.currentSelectedValue;
+	        //return value !== this.props.rejectValue ||
+	        //    (value && typeof value === 'object' && !value.target)
+	        return !this.state.disabled && !this.state.inputState;
+	    },
+
+	    render: function render() {
+	        var self = this;
+	        var props = self.props;
+	        var state = self.state;
+
+	        var selectorContent = React.createElement(DropDown.Selector, {
+	            onSelect: self.onSelect,
+	            defaultSelectedValue: state.currentSelectedValue,
+	            getSelectorContent: getSelectorContent(props, state, self.onChange) });
+
+	        var panelContent = React.Children.map(props.itemList, function (value, index) {
+	            return React.createElement(DropDown.Item, {
+	                value: value,
+	                key: index,
+	                getItemContent: props.getItemContent });
+	        });
+
+	        return React.createElement(DropDown, {
+	            disabled: props.disabled,
+	            selectorBindEvent: this.queryBindEvent(),
+	            selectorContent: selectorContent,
+	            panelContent: panelContent });
+	    }
+	});
+
+	module.exports = Importable;
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/23.
+	 */
+
+	var React = __webpack_require__(2);
+	var DropDown = __webpack_require__(12);
 	var noop = __webpack_require__(4);
 
 	var getSelectorContent = function getSelectorContent(item) {
@@ -2471,7 +2290,7 @@ this["EssaComponents"] =
 	module.exports = Diff;
 
 /***/ },
-/* 30 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2481,12 +2300,12 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var HideOnBodyClick = __webpack_require__(14);
-	var classNames = __webpack_require__(13);
+	var ReactDOM = __webpack_require__(16);
+	var HideOnBodyClick = __webpack_require__(15);
+	var classNames = __webpack_require__(14);
 
-	var SelectableMixin = __webpack_require__(31);
-	var ContainerMixin = __webpack_require__(32);
+	var SelectableMixin = __webpack_require__(27);
+	var ContainerMixin = __webpack_require__(28);
 
 	var Container = React.createClass({
 	    displayName: 'Container',
@@ -2529,7 +2348,7 @@ this["EssaComponents"] =
 	module.exports = Container;
 
 /***/ },
-/* 31 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2612,7 +2431,7 @@ this["EssaComponents"] =
 	};
 
 /***/ },
-/* 32 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2621,7 +2440,7 @@ this["EssaComponents"] =
 	 * Created by xcp on 2016/3/24.
 	 */
 
-	var classNames = __webpack_require__(13);
+	var classNames = __webpack_require__(14);
 	var noop = __webpack_require__(4);
 
 	module.exports = {
@@ -2666,7 +2485,7 @@ this["EssaComponents"] =
 	};
 
 /***/ },
-/* 33 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2676,13 +2495,13 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var HideOnBodyClick = __webpack_require__(14);
-	var classNames = __webpack_require__(13);
+	var ReactDOM = __webpack_require__(16);
+	var HideOnBodyClick = __webpack_require__(15);
+	var classNames = __webpack_require__(14);
 	var noop = __webpack_require__(4);
 
-	var SelectableMixin = __webpack_require__(31);
-	var ContainerMixin = __webpack_require__(32);
+	var SelectableMixin = __webpack_require__(27);
+	var ContainerMixin = __webpack_require__(28);
 
 	var FOContainer = React.createClass({
 	    displayName: 'FOContainer',
@@ -2740,7 +2559,7 @@ this["EssaComponents"] =
 	module.exports = FOContainer;
 
 /***/ },
-/* 34 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2750,12 +2569,12 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var HideOnBodyClick = __webpack_require__(14);
-	var classNames = __webpack_require__(13);
+	var ReactDOM = __webpack_require__(16);
+	var HideOnBodyClick = __webpack_require__(15);
+	var classNames = __webpack_require__(14);
 
-	var SelectableMixin = __webpack_require__(31);
-	var ContainerMixin = __webpack_require__(32);
+	var SelectableMixin = __webpack_require__(27);
+	var ContainerMixin = __webpack_require__(28);
 
 	var MiniContainer = React.createClass({
 	    displayName: 'MiniContainer',
@@ -2798,7 +2617,7 @@ this["EssaComponents"] =
 	module.exports = MiniContainer;
 
 /***/ },
-/* 35 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2814,7 +2633,7 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
-	var DropDown = __webpack_require__(27);
+	var DropDown = __webpack_require__(12);
 	var noop = __webpack_require__(4);
 
 	var Custom = React.createClass({
@@ -2899,7 +2718,7 @@ this["EssaComponents"] =
 	module.exports = Custom;
 
 /***/ },
-/* 36 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3114,1110 +2933,16 @@ this["EssaComponents"] =
 	module.exports = Checkbox;
 
 /***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/25.
-	 */
-
-	module.exports = {
-	    Popup: __webpack_require__(38),
-	    Bubble: __webpack_require__(41),
-	    Bias: __webpack_require__(42),
-	    Dialog: __webpack_require__(43),
-	    PositionBubble: __webpack_require__(44),
-	    PopupWrap: __webpack_require__(39)
-	};
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/15.
-	 */
-
-	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var PopupWrap = __webpack_require__(39);
-	var absolutePosition = __webpack_require__(40);
-	var body = __webpack_require__(18);
-	var noop = __webpack_require__(4);
-	var POPUP_GAP = 5;
-	var triggerHide = function triggerHide() {
-	    return true;
-	};
-
-	var Popup = React.createClass({
-	    displayName: 'Popup',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            isVisible: true
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            animate: {
-	                from: { opacity: 0 },
-	                to: { opacity: 1 },
-	                during: 500
-	            },
-	            trigger: 'click',
-	            content: null,
-	            placement: null,
-	            baseElement: null,
-	            onHide: noop,
-	            triggerHide: triggerHide,
-	            onComponentMount: noop
-	        };
-	    },
-
-	    getTrigger: function getTrigger() {
-	        return { click: 'onClick', hover: 'onMouseEnter' }[this.props.trigger] || 'onClick';
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.__popupMountNode = null;
-	        this.__position = null;
-	        this.__content = null;
-	        this.__isUnmount = false;
-	    },
-
-	    // Invoked once, only on the client
-	    componentDidMount: function componentDidMount() {
-	        var popupMountNode = this.__popupMountNode = document.createElement('div');
-	        var props = this.props;
-	        body.appendChild(popupMountNode);
-
-	        if (typeof props.content === 'string') props.content = React.createElement('span', null, props.content);
-
-	        this.__content = React.cloneElement(props.content, {
-	            placement: props.placement
-	        });
-
-	        this.props.onComponentMount(this);
-	    },
-
-	    onHide: function onHide() {
-	        if (this.__isUnmount) return;
-	        var self = this;
-	        self.setState({ isVisible: true }, function () {
-	            ReactDOM.unmountComponentAtNode(self.__popupMountNode);
-	            self.props.onHide();
-	        });
-	    },
-
-	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-	        if (this.state.isVisible !== prevState.isVisible) this.renderPopup();
-	    },
-
-	    autoVisible: function autoVisible() {
-	        if (this.__isUnmount) return;
-	        var self = this;
-	        if (self.__animate) {
-	            self.__animate.backToTheStart(function () {
-	                self.setState({ isVisible: true }, function () {
-	                    ReactDOM.unmountComponentAtNode(self.__popupMountNode);
-	                    self.props.onHide();
-	                });
-	            });
-	        }
-	    },
-
-	    computedPosition: function computedPosition() {
-	        var props = this.props;
-	        var targetNode = props.baseElement || this.refs.targetNode;
-	        // 左上角的位置
-	        var pos = absolutePosition(targetNode);
-	        var placement = props.placement;
-	        var w = targetNode.offsetWidth;
-	        var h = targetNode.offsetHeight;
-
-	        // 在该组件内，只需将最外层定位到对应位置
-	        // 不用理会内容的size
-	        switch (placement) {
-	            case "top":
-	                pos.y = pos.y - POPUP_GAP;
-	                break;
-	            case "right":
-	                pos.x = pos.x + w + POPUP_GAP;
-	                break;
-	            case "bottom":
-	                pos.y = pos.y + h + POPUP_GAP;
-	                break;
-	            case "left":
-	                pos.x = pos.x - POPUP_GAP;
-	                break;
-	        }
-
-	        return this.__position = pos;
-	    },
-
-	    renderPopup: function renderPopup() {
-	        if (!this.isMounted()) return;
-	        // 渲染的时候才计算位置
-	        // 如果提前计算，在页面布局发生变化的情况下
-	        // 计算的位置是错误的
-	        this.computedPosition();
-
-	        var props = this.props;
-	        ReactDOM.render(React.createElement(PopupWrap, {
-	            baseElement: props.baseElement,
-	            onAnimateMount: this.onAnimateMount,
-	            style: { position: 'absolute', left: this.__position.x, top: this.__position.y },
-	            placement: props.placement,
-	            isVisible: this.state.isVisible,
-	            onHide: this.onHide,
-	            triggerHide: props.triggerHide,
-	            refTarget: this.refs.targetNode }, this.__content), this.__popupMountNode);
-	    },
-
-	    showPopup: function showPopup() {
-	        this.setState({ isVisible: false });
-	    },
-
-	    onAnimateMount: function onAnimateMount(animate) {
-	        this.__animate = animate;
-	    },
-
-	    componentWillUnmount: function componentWillUnmount() {
-	        this.__isUnmount = true;
-	        try {
-	            body.removeChild(this.__popupMountNode);
-	        } catch (e) {}
-	    },
-
-	    render: function render() {
-	        var props = { ref: 'targetNode' };
-	        props[this.getTrigger()] = this.showPopup;
-	        if (props.onMouseEnter) {
-	            props.onMouseLeave = this.autoVisible;
-	        }
-
-	        return React.cloneElement(this.props.children || React.createElement('span', { style: { display: 'none' } }), props);
-	    }
-	});
-
-	module.exports = Popup;
-
-/***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/15.
-	 * PopupWrap 的作用：
-	 * 1. 确定 popup 的位置
-	 * 2. 监听 body click 事件，卸载元素
-	 */
-
-	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var assign = __webpack_require__(8);
-	var noop = __webpack_require__(4);
-	var DOMEvent = __webpack_require__(17);
-	var HideOnBodyClick = __webpack_require__(14);
-	var triggerHide = function triggerHide() {
-	    return true;
-	};
-
-	var PopupWrap = React.createClass({
-	    displayName: 'PopupWrap',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            left: 0,
-	            top: 0
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-
-	        return {
-	            style: { backgroundColor: '#fff' },
-	            placement: 'top',
-	            refTarget: null,
-	            baseElement: null,
-	            isVisible: false,
-	            onHide: noop,
-	            triggerHide: triggerHide,
-	            onAnimateMount: noop
-	        };
-	    },
-
-	    componentDidMount: function componentDidMount() {
-	        var node = ReactDOM.findDOMNode(this.refs.popup);
-	        var position = { x: node.offsetWidth, y: node.offsetHeight };
-	        var baseElement = this.props.baseElement || this.props.refTarget;
-
-	        switch (this.props.placement) {
-	            case "top":
-	                position.x = -(position.x - baseElement.offsetWidth) / 2;
-	                position.y = -position.y;
-	                break;
-	            case "bottom":
-	                position.x = -(position.x - baseElement.offsetWidth) / 2;
-	                position.y = 0;
-	                break;
-	            case "left":
-	                position.x = -position.x;
-	                position.y = 0;
-	                break;
-	            default:
-	                position.x = 0;
-	                position.y = 0;
-	        }
-
-	        this.setState({ left: position.x, top: position.y });
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-	        var style = {
-	            top: this.state.top,
-	            left: this.state.left,
-	            position: 'absolute'
-	        };
-
-	        if (props.isVisible) {
-	            style = assign(style, { display: 'none' });
-	        }
-
-	        var children = React.cloneElement(props.children, {
-	            style: assign(style, props.children.props.style),
-	            placement: props.placement,
-	            ref: 'popup'
-	        });
-
-	        return React.createElement(HideOnBodyClick, {
-	            refTarget: props.refTarget,
-	            style: props.style,
-	            triggerHide: props.triggerHide,
-	            onAnimateMount: props.onAnimateMount,
-	            onHide: props.onHide }, children);
-	    }
-	});
-
-	module.exports = PopupWrap;
-
-/***/ },
-/* 40 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	/**
-	 * Created by xcp on 2016/3/15.
-	 */
-
-	module.exports = function (node) {
-	    var result = { x: 0, y: 0 };
-	    var body = document.body || document.documentElement;
-
-	    if (!(node && node.nodeType === 1)) return result;
-
-	    var offsetLeft = node.offsetLeft;
-	    var offsetTop = node.offsetTop;
-
-	    var parent = node.offsetParent;
-	    if (!parent) return result;
-
-	    while (parent !== body) {
-	        offsetLeft += parent.offsetLeft;
-	        offsetTop += parent.offsetTop;
-	        parent = parent.offsetParent;
-	    }
-	    return {
-	        x: offsetLeft,
-	        y: offsetTop
-	    };
-	};
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/15.
-	 */
-
-	var React = __webpack_require__(2);
-	var noop = __webpack_require__(4);
-	var Bubble = React.createClass({
-	    displayName: 'Bubble',
-
-	    propTypes: {
-	        symBolClass: React.PropTypes.array
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            placement: 'top',
-	            symbolStyle: {},
-	            symbolClass: [],
-	            onComponentMount: noop,
-	            style: {}
-	        };
-	    },
-
-	    getClassName: function getClassName() {
-	        var dir = {
-	            top: 'd',
-	            right: 'l',
-	            bottom: 't',
-	            left: 'r'
-	        }[this.props.placement] || 'd';
-
-	        return {
-	            wrapperClass: 'bub bub-dir-' + dir,
-	            symbolClass: 'bub-symbol icon-img icon-arrow-blue-' + dir
-	        };
-	    },
-
-	    componentDidMount: function componentDidMount() {
-	        this.props.onComponentMount(this.refs.wrap, this);
-	    },
-
-	    render: function render() {
-
-	        var classNames = this.getClassName();
-	        var symbolClassName = this.props.symbolClass.length > 0 ? ' ' + this.props.symbolClass.join(' ') : '';
-
-	        return React.createElement('div', { className: classNames.wrapperClass, style: this.props.style }, React.createElement('span', { className: classNames.symbolClass + symbolClassName,
-	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-con', ref: 'wrap' }, this.props.children));
-	    }
-	});
-
-	module.exports = Bubble;
-
-/***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/3/15.
-	 */
-
-	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var noop = __webpack_require__(4);
-
-	var Bias = React.createClass({
-	    displayName: 'Bias',
-
-	    propTypes: {
-	        symBolClass: React.PropTypes.array
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            placement: 'topLeft',
-	            closeable: false,
-	            symbolStyle: {},
-	            symbolClass: [],
-	            onComponentMount: noop,
-	            style: {}
-	        };
-	    },
-
-	    getClassName: function getClassName() {
-	        var symbolDir = {
-	            topLeft: 'd-l',
-	            right: 'r',
-	            topRight: 'd-r',
-	            left: 'l'
-	        }[this.props.placement] || 'd-l';
-
-	        var dir = {
-	            topLeft: 'd',
-	            topRight: 'd',
-	            right: 'r',
-	            left: 'l'
-	        }[this.props.placement] || 'd';
-
-	        return {
-	            wrapperClass: 'bub bub-bias-dir-' + dir,
-	            symbolClass: 'bub-symbol icon-img icon-bias-' + symbolDir
-	        };
-	    },
-
-	    unmount: function unmount() {
-	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
-	    },
-
-	    componentDidMount: function componentDidMount() {
-	        this.props.onComponentMount(this.refs.wrap, this);
-	    },
-
-	    render: function render() {
-
-	        var classNames = this.getClassName();
-	        var symbolClassName = this.props.symbolClass.length > 0 ? ' ' + this.props.symbolClass.join(' ') : '';
-	        var closeElement = null;
-	        if (this.props.closeable) {
-	            closeElement = React.createElement('span', {
-	                className: 'icon-img icon-close-yellow bub-bias-last',
-	                onClick: this.unmount });
-	        }
-
-	        return React.createElement('div', { className: classNames.wrapperClass, style: this.props.style }, React.createElement('span', { className: classNames.symbolClass + symbolClassName,
-	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-bias-con', ref: 'wrap' }, React.createElement('div', { className: 'bub-bias-con-text inline-block' }, this.props.children), closeElement));
-	    }
-	});
-
-	module.exports = Bias;
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/4/14.
-	 */
-
-	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var assign = __webpack_require__(8);
-	var noop = __webpack_require__(4);
-	var HideOnBodyClick = __webpack_require__(14);
-
-	var Dialog = React.createClass({
-	    displayName: 'Dialog',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            isVisible: true,
-	            baseStyle: {
-	                position: 'fixed',
-	                left: '50%',
-	                top: '50%',
-	                zIndex: 999
-	            },
-	            posStyle: {}
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            style: { backgroundColor: '#fff' },
-	            className: 'bub-dialog bubble-company-staff',
-	            refTarget: null,
-	            isVisible: true,
-	            onHidden: noop,
-	            onComponentMount: noop
-	        };
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({ isVisible: this.props.isVisible });
-	    },
-
-	    componentDidMount: function componentDidMount() {
-	        var wrap = this.refs.wrap;
-	        this._mountNode = ReactDOM.findDOMNode(this).parentNode;
-	        this.props.onComponentMount(this, wrap);
-	        this.setState({
-	            posStyle: {
-	                marginLeft: '-' + wrap.offsetWidth / 2 + 'px',
-	                marginTop: '-' + wrap.offsetHeight / 2 + 'px'
-	            }
-	        });
-	    },
-
-	    onAnimateMount: function onAnimateMount(animate) {
-	        this.__animate = animate;
-	    },
-
-	    onHidden: function onHidden() {
-	        var self = this;
-	        self.setState({ isVisible: false }, function () {
-	            ReactDOM.unmountComponentAtNode(self._mountNode);
-	            self.props.onHidden();
-	        });
-	    },
-
-	    hide: function hide() {
-	        if (!this.isMounted()) return false;
-	        var self = this;
-	        if (self.__animate) {
-	            self.__animate.backToTheStart(function () {
-	                self.onHidden();
-	            });
-	        } else {
-	            self.onHidden();
-	        }
-	        return true;
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-	        var style = assign({}, props.style, this.state.baseStyle, this.state.posStyle);
-	        if (!this.state.isVisible) {
-	            style = assign(style, { display: 'none' });
-	        }
-
-	        return React.createElement(HideOnBodyClick, {
-	            refTarget: props.refTarget,
-	            style: style,
-	            onAnimateMount: this.onAnimateMount,
-	            onHide: this.onHidden }, React.createElement('div', { className: props.className, ref: 'wrap' }));
-	    }
-
-	});
-
-	module.exports = Dialog;
-
-/***/ },
-/* 44 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	function _typeof(obj) {
-	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	}
-
-	/**
-	 * Created by xcp on 2016/4/30.
-	 * 参数
-	 * target
-	 * onMount
-	 *
-	 * 返回对象
-	 * hide
-	 * open
-	 * show
-	 */
-
-	var React = __webpack_require__(2);
-	var ReactDOM = __webpack_require__(15);
-	var noop = __webpack_require__(4);
-	var Popup = __webpack_require__(38);
-	var Bubble = __webpack_require__(41);
-
-	var PositionBubble = React.createClass({
-	    displayName: 'PositionBubble',
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            placement: 'top',
-	            trigger: 'click',
-	            bubbleStyle: {},
-	            symbolStyle: { left: '50%', marginLeft: -10 },
-	            baseElement: null,
-	            onUnMount: noop,
-	            onMount: noop
-	        };
-	    },
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            bubbleStyle: null,
-	            symbolStyle: null
-	        };
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({
-	            bubbleStyle: this.props.bubbleStyle,
-	            symbolStyle: this.props.symbolStyle
-	        });
-	    },
-
-	    unMount: function unMount() {
-	        this._popup.autoVisible();
-	    },
-
-	    show: function show() {
-	        if (this.isMounted()) {
-	            this._popup.showPopup();
-	        }
-	    },
-
-	    onMount: function onMount(inst) {
-	        this._popup = inst;
-	    },
-
-	    onBubbleMount: function onBubbleMount(wrap, inst) {
-	        this.props.onMount(wrap, inst);
-	    },
-
-	    componentWillUnmount: function componentWillUnmount() {
-	        this.props.onUnMount();
-	    },
-
-	    _unmount: function _unmount() {
-	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-	        var state = this.state;
-	        var content = React.createElement(Bubble, {
-	            symbolStyle: state.symbolStyle,
-	            style: state.bubbleStyle,
-	            onComponentMount: this.onBubbleMount });
-	        return React.createElement(Popup, {
-	            placement: props.placement,
-	            trigger: props.trigger,
-	            onHide: this._unmount,
-	            onComponentMount: this.onMount,
-	            triggerHide: noop,
-	            baseElement: props.baseElement,
-	            content: content });
-	    }
-
-	});
-
-	module.exports = function (target, props) {
-	    var body = document && document.body;
-	    if (!body) return {};
-
-	    props = (typeof props === 'undefined' ? 'undefined' : _typeof(props)) === 'object' && props ? props : {};
-
-	    var _props = {};
-
-	    Object.keys(PositionBubble.defaultProps).forEach(function (name) {
-	        if (props.hasOwnProperty(name)) _props[name] = props[name];
-	    });
-
-	    var mountNode = document.createElement('div');
-
-	    body.appendChild(mountNode);
-	    var _onUnMount = _props.onUnMount;
-
-	    _props.onUnMount = function () {
-	        _onUnMount && _onUnMount();
-	        body.removeChild(mountNode);
-	    };
-
-	    _props.baseElement = target;
-
-	    return ReactDOM.render(React.createElement(PositionBubble, _props), mountNode);
-	};
-
-/***/ },
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/4/27.
-	 */
-
-	var React = __webpack_require__(2);
-	var moment = __webpack_require__(46);
-	var DropDown = __webpack_require__(27);
-	var noop = __webpack_require__(4);
-	var DatePicker = __webpack_require__(47);
-	var PickerHeader = __webpack_require__(48);
-
-	// 如果日期在当前日期之前，则禁用掉
-	var disabledDate = function disabledDate(time) {
-	    return time.isBefore(new Date(), 'day');
-	};
-
-	// 如果日期不属于同一月，则表示diff
-	var diffDate = function diffDate(base, comp) {
-	    return !(base.isSame(comp, 'month') && base.isSame(comp, 'year'));
-	};
-
-	var Calendar = React.createClass({
-	    displayName: 'Calendar',
-
-	    propTypes: {
-	        weekDaysMin: React.PropTypes.array
-	    },
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            show: false,
-	            changeFromHeader: false,
-	            currentTime: null,
-	            onlyShowMonth: false
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            // class name
-	            wrapClassName: 'comp-date-picker',
-	            headerClassName: 'date-header',
-	            disabledClassName: 'disabled',
-	            currentClassName: 'curr',
-	            diffMonthClassName: 'diff',
-
-	            // header
-	            startTime: [2010, 0, 1],
-	            endTime: [2020, 0, 1],
-
-	            defaultTime: new Date() * 1,
-	            showDays: 6 * 7,
-	            weekDaysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-
-	            startWeek: 0, // [0-6]
-	            format: 'YYYY-MM-DD HH:mm:ss',
-	            onlyShowMonth: false,
-	            disabledDate: disabledDate,
-	            diffDate: diffDate,
-	            onChange: noop,
-	            onSelect: noop
-	        };
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({
-	            currentTime: moment(this.props.defaultTime),
-	            showDays: this.props.showDays,
-	            onlyShowMonth: this.props.onlyShowMonth
-	        });
-	    },
-
-	    today: function today() {
-	        this.setState({ currentTime: moment() });
-	    },
-
-	    _isSameDate: function _isSameDate(base, comp) {
-	        return base.isSame(comp, 'year') && base.isSame(comp, 'month') && base.isSame(comp, 'day');
-	    },
-
-	    // 如果年份或月分发生了变化
-	    // 则更新
-	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-	        if (!this._isSameDate(nextState.currentTime, this.state.currentTime)) {
-	            this.props.onChange(nextState.currentTime, this.state.currentTime);
-	        }
-	        return nextState.changeFromHeader;
-	    },
-
-	    _spliceArray: function _spliceArray(arr, step) {
-	        var l = arr.length;
-	        var start = 0;
-	        var r = [];
-	        while (start < l) {
-	            r.push(arr.slice(start, start + step));
-	            start += step;
-	        }
-	        return r;
-	    },
-
-	    onHeaderChange: function onHeaderChange(year, month) {
-	        this.setState({
-	            currentTime: moment([year, month, 1]),
-	            changeFromHeader: true
-	        });
-	    },
-
-	    onSelect: function onSelect(cur) {
-	        this.setState({
-	            currentTime: cur,
-	            changeFromHeader: false
-	        });
-	        this.props.onSelect(cur);
-	    },
-
-	    render: function render() {
-	        var self = this;
-	        var props = self.props;
-	        var state = self.state;
-
-	        var m, firstDay, w, start, total, count, list, l, days, week, datePanel;
-
-	        if (!state.onlyShowMonth) {
-	            m = moment(state.currentTime);
-	            // 获得当前月的第一天
-	            firstDay = m.clone().date(1);
-	            // 获得第一天的星期
-	            w = firstDay.day();
-	            // 计算其开始位置的日期
-	            // 从周日开始[默认为0]
-	            start = w > props.startWeek ? firstDay.clone().add(-(w - props.startWeek), 'day') : firstDay;
-
-	            self.__startTime = start;
-
-	            total = props.showDays;
-	            count = 0;
-
-	            // 循环生成每一天
-	            // 日期分成多份，每份长度为一周
-	            list = this._spliceArray(new Array(total).fill(true), 7);
-	            l = list.length - 1;
-	            days = list.map(function (week, index) {
-	                return React.createElement('tr', { key: index }, week.map(function () {
-	                    var time = start.clone().add(count++, 'day');
-
-	                    if (index === l) {
-	                        self.__endTime = time;
-	                    }
-
-	                    return React.createElement('td', { key: count }, React.createElement(DatePicker, {
-	                        className: props.headerClassName,
-	                        onSelect: self.onSelect,
-	                        diffMonthClassName: props.diffMonthClassName,
-	                        disabledClassName: props.disabledClassName,
-	                        currentClassName: props.currentClassName,
-	                        currentTime: m,
-	                        disabledDate: props.disabledDate,
-	                        diffDate: props.diffDate,
-	                        format: props.format,
-	                        time: time }));
-	                }));
-	            });
-
-	            week = [];
-	            total = props.weekDaysMin.length;
-	            count = props.startWeek;
-
-	            while (count < total) {
-	                week.push(React.createElement('td', { key: 'week-' + count }, React.createElement('div', { className: 'date-week' }, props.weekDaysMin[count++])));
-	            }
-
-	            count = 0;
-	            total = props.startWeek;
-	            while (count < total) {
-	                week.push(React.createElement('td', { key: 'week-' + count }, React.createElement('div', null, props.weekDaysMin[count++])));
-	            }
-
-	            week = React.createElement('tr', null, week);
-
-	            datePanel = React.createElement('table', null, React.createElement('thead', null, week), React.createElement('tbody', null, days));
-	        }
-
-	        return React.createElement('div', { className: props.wrapClassName }, React.createElement(PickerHeader, {
-	            className: props.headerClassName,
-	            currentTime: state.currentTime,
-	            startTime: props.startTime,
-	            endTime: props.endTime,
-	            onChange: this.onHeaderChange }), datePanel);
-	    }
-	});
-
-	module.exports = Calendar;
-
-/***/ },
-/* 46 */
-/***/ function(module, exports) {
-
-	(function() { module.exports = this["moment"]; }());
-
-/***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/4/27.
-	 */
-
-	var moment = __webpack_require__(46);
-	var React = __webpack_require__(2);
-	var noop = __webpack_require__(4);
-	var classnames = __webpack_require__(13);
-
-	var DatePicker = React.createClass({
-	    displayName: 'DatePicker',
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            dateItemClassName: 'date-item',
-	            disabledClassName: 'disabled',
-	            currentClassName: 'curr',
-	            diffMonthClassName: 'diff',
-	            currentTime: moment(),
-	            time: moment(),
-	            format: 'YYYY-MM-DD HH:mm:ss',
-	            onSelect: noop,
-	            disabledDate: noop,
-	            diffDate: noop
-	        };
-	    },
-
-	    onSelect: function onSelect() {
-	        this.props.onSelect(this.props.time);
-	    },
-
-	    render: function render() {
-	        var props = this.props;
-	        var disabled = props.disabledDate(props.time);
-	        var className = {};
-	        var current = moment();
-
-	        className[props.dateItemClassName] = true;
-	        className[props.disabledClassName] = disabled;
-	        className[props.currentClassName] = props.time.isSame(current, 'year') && props.time.isSame(current, 'month') && props.time.isSame(current, 'day');
-	        className[props.diffMonthClassName] = props.diffDate(props.currentTime, props.time);
-
-	        return React.createElement('div', {
-	            className: classnames(className),
-	            onClick: disabled ? noop : this.onSelect }, props.time.date());
-	    }
-	});
-
-	module.exports = DatePicker;
-
-/***/ },
-/* 48 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
-	 * Created by xcp on 2016/4/27.
-	 */
-
-	var React = __webpack_require__(2);
-	var moment = __webpack_require__(46);
-	var Selectable = __webpack_require__(25);
-	var noop = __webpack_require__(4);
-	var assert = __webpack_require__(9);
-
-	var getItemContent = function getItemContent(value, props) {
-	    var item = React.createElement('li', { className: 'comp-panel-item' }, value.year());
-	    return React.cloneElement(item, props);
-	};
-
-	var getSelectorContent = function getSelectorContent(value) {
-	    return React.createElement('div', { className: 'comp-select-selector' }, React.createElement('span', { className: 'util-font-12' }, value.year()), React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
-	};
-
-	var PickerHeader = React.createClass({
-	    displayName: 'PickerHeader',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            currentTime: null
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            className: '',
-	            currentTime: moment(),
-	            startTime: [2010, 0, 1],
-	            endTime: [2020, 0, 1],
-	            onChange: noop
-	        };
-	    },
-
-	    setTime: function setTime(time) {
-	        this.setState({ currentTime: time });
-	    },
-
-	    setYear: function setYear(time) {
-	        this.setTime(time.clone().month(this.state.currentTime.month()));
-	    },
-
-	    setMonth: function setMonth(month) {
-	        this.setTime(this.state.currentTime.clone().month(month - 1));
-	    },
-
-	    nextMonth: function nextMonth() {
-	        this.setTime(this.state.currentTime.clone().add(1, 'month'));
-	    },
-
-	    previousMonth: function previousMonth() {
-	        this.setTime(this.state.currentTime.clone().add(-1, 'month'));
-	    },
-
-	    nextYear: function nextYear() {
-	        this.setTime(this.state.currentTime.clone().add(1, 'year'));
-	    },
-
-	    previousYear: function previousYear() {
-	        this.setTime(this.state.currentTime.clone().add(-1, 'year'));
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        var props = this.props;
-	        var start = moment(props.startTime).month(props.currentTime.month());
-	        var end = moment(props.endTime);
-
-	        var sl = start.year();
-	        var el = end.year();
-
-	        assert(sl >= el, 'start year need less than end year');
-
-	        // 年间距
-	        var yearList = [];
-	        var s = 0,
-	            l = el - sl;
-	        while (s <= l) {
-	            yearList.push(start.clone().add(s++, 'year'));
-	        }
-
-	        var monthList = new Array(12).fill(1).map(function (v, i) {
-	            return i + 1;
-	        });
-
-	        this.__yearList = yearList;
-	        this.__monthList = monthList;
-
-	        this.setState({
-	            currentTime: this.props.currentTime
-	        });
-	    },
-
-	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-	        if (nextState.currentTime.year() !== this.state.currentTime.year() || nextState.currentTime.month() !== this.state.currentTime.month()) {
-	            this.props.onChange(nextState.currentTime.year(), nextState.currentTime.month());
-	            return true;
-	        }
-	        return false;
-	    },
-
-	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        this.setState({ currentTime: nextProps.currentTime });
-	    },
-
-	    render: function render() {
-	        var iconStyle = { cursor: 'pointer' };
-
-	        return React.createElement('div', { className: this.props.className }, React.createElement(Selectable.Custom, {
-	            defaultSelectedValue: this.state.currentTime,
-	            getSelectorContent: getSelectorContent,
-	            getItemContent: getItemContent,
-	            onSelect: this.setYear,
-	            itemList: this.__yearList }), React.createElement(Selectable.Importable, {
-	            defaultSelectedValue: this.state.currentTime.month() + 1,
-	            onSelect: this.setMonth,
-	            itemList: this.__monthList }), React.createElement('span', { style: iconStyle,
-	            className: 'icon-img icon-img icon-tran-black-l util-v-m comp-icon-gap',
-	            onClick: this.previousMonth }), React.createElement('span', { style: iconStyle,
-	            className: 'icon-img icon-img icon-tran-black-r util-v-m',
-	            onClick: this.nextMonth }));
-	    }
-
-	});
-
-	module.exports = PickerHeader;
-
-/***/ },
-/* 49 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	/**
 	 * Created by xcp on 2016/4/19.
+	 * TODO
+	 * 该组件为业务所写，不应该放在此处，后面删除
+	 * 放在此处只是为了方便测试
 	 */
 
 	var React = __webpack_require__(2);
@@ -4381,6 +3106,1588 @@ this["EssaComponents"] =
 	});
 
 	module.exports = Cascader;
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/5/5.
+	 * 折叠面板，提供展开和折叠功能
+	 * <Collapse>
+	 *   <Panel title={content} key="1">
+	 *     <h2>1</h2>
+	 *   </Panel>
+	 *   <Panel title={content} key="2">
+	 *     <h2>1</h2>
+	 *   </Panel>
+	 * </Collapse>
+	 *
+	 * var right = <span class="icon-img icon-tran-black-t"/>;
+	 * var left = <span class="icon-img icon-tran-black-d"/>;
+	 */
+
+	var React = __webpack_require__(2);
+	var Animate = __webpack_require__(1);
+	var Panel = __webpack_require__(35);
+	var noop = __webpack_require__(4);
+	var util = __webpack_require__(36);
+
+	var Collapse = React.createClass({
+	    displayName: 'Collapse',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            expandKeys: []
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            expandKeys: [],
+	            className: '',
+	            accordion: false
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        var keys = this.props.expandKeys;
+	        this.setState({ expandKeys: this.props.accordion ? keys.slice(0, 1) : keys });
+	    },
+
+	    addOne: function addOne(key) {
+	        this.setState({ expandKeys: util.add(this.state.expandKeys, key) });
+	    },
+
+	    removeOne: function removeOne(key) {
+	        this.setState({ expandKeys: util.remove(this.state.expandKeys, key) });
+	    },
+
+	    onChange: function onChange(key, collapse) {
+	        if (this.props.accordion) {
+	            this.setState({ expandKeys: collapse ? [] : [key] });
+	        } else {
+	            this[(collapse ? 'remove' : 'add') + 'One'](key);
+	        }
+	    },
+
+	    render: function render() {
+	        var self = this;
+	        var expandKeys = self.state.expandKeys;
+	        var props = self.props;
+
+	        return React.createElement('div', { className: props.className }, React.Children.map(props.children, function (child) {
+	            return React.cloneElement(child, {
+	                mark: child.key,
+	                onChange: self.onChange,
+	                collapse: expandKeys.indexOf(child.key) === -1
+	            });
+	        }));
+	    }
+	});
+
+	Collapse.Node = React.createClass({
+	    displayName: 'Node',
+
+	    getInitialState: function getInitialState() {
+	        return { collapse: true };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            mark: null,
+	            title: null,
+	            collapse: true,
+	            onChange: noop
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ collapse: this.props.collapse });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        if (nextProps.collapse !== this.state.collapse) {
+	            this.setState({ collapse: nextProps.collapse });
+	        }
+	    },
+
+	    toggle: function toggle() {
+	        this.props.onChange(this.props.mark, !this.state.collapse);
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var dir = this.state.collapse ? 't' : 'd';
+
+	        var title = React.createElement('span', null, props.title, React.createElement('span', {
+	            style: { marginLeft: 10, cursor: 'pointer' },
+	            onClick: this.toggle,
+	            className: "inline-block icon-img icon-tran-black-" + dir }));
+
+	        return React.createElement('div', null, React.createElement(Panel, {
+	            collapse: this.state.collapse,
+	            title: title,
+	            onChange: this.onChange }, props.children));
+	    }
+	});
+
+	module.exports = Collapse;
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/5/5.
+	 */
+
+	var React = __webpack_require__(2);
+	var Animate = __webpack_require__(1);
+	var noop = __webpack_require__(4);
+	var assign = __webpack_require__(8);
+
+	var Panel = React.createClass({
+	    displayName: 'Panel',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            collapse: true,
+	            isInitial: true,
+	            from: {},
+	            to: {}
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            isPanel: true,
+	            components: 'div',
+	            className: 'module',
+	            title: null,
+	            collapse: true,
+	            onMount: noop,
+	            onChange: noop,
+	            getContent: noop
+	        };
+	    },
+
+	    _toggleUIState: function _toggleUIState(collapse) {
+	        this.__animate[collapse ? 'backToTheStart' : 'startAnimate']();
+	    },
+
+	    onAnimateMount: function onAnimateMount(inst) {
+	        this.__animate = inst;
+	    },
+
+	    expand: function expand() {
+	        this.setState({ collapse: false });
+	    },
+
+	    collapse: function collapse() {
+	        this.setState({ collapse: true });
+	    },
+
+	    toggle: function toggle() {
+	        this.setState({ collapse: !this.state.collapse });
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ collapse: this.props.collapse });
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        var height = this.__animate.refs.wrap.offsetHeight;
+	        this.setState({
+	            from: { height: 0 },
+	            to: { height: height },
+	            isInitial: false
+	        });
+	        this.props.onMount(this);
+	    },
+
+	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	        if (prevState.collapse !== this.state.collapse) {
+	            this._toggleUIState(this.state.collapse);
+	            this.props.onChange(this.state.collapse);
+	        }
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        if (nextProps.collapse !== this.state.collapse) {
+	            this.setState({ collapse: nextProps.collapse });
+	        }
+	    },
+
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        return nextState.collapse !== this.state.collapse;
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var state = this.state;
+	        var ret = props.getContent(props, this.state, this);
+	        var Components = props.components;
+
+	        var style = { overflow: 'hidden' };
+
+	        // 如果初始状态为展开 -> collapse = false
+	        // 那么容器高度就不用理会
+	        // 如果是折叠状态 -> collapse = true
+	        // 那么高度就需要设置为0
+	        // 如果不是初始状态呢？
+	        // 也就是说要加上一个初始状态判断？
+
+	        if (state.collapse && state.isInitial) {
+	            style.height = 0;
+	        }
+
+	        var getContent = function getContent(p, s, inst) {
+	            return React.createElement('div', { style: inst.styleProps() }, React.cloneElement(ret || props.children, { ref: 'wrap' }));
+	        };
+
+	        return React.createElement(Components, { className: props.className }, React.cloneElement(props.title), React.createElement('div', { style: style }, React.createElement(Animate, {
+	            componentDidMount: this.onAnimateMount,
+	            from: state.from,
+	            to: state.to,
+	            during: 200,
+	            getContent: getContent })));
+	    }
+	});
+
+	module.exports = Panel;
+
+/***/ },
+/* 36 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	/**
+	 * Created by xcp on 2016/5/7.
+	 */
+
+	module.exports = {
+
+	    index: function index(arr, item) {
+	        return arr.indexOf(item);
+	    },
+
+	    contains: function contains(arr, item) {
+	        return this.index(arr, item) !== -1;
+	    },
+
+	    add: function add(arr, item) {
+	        if (!this.contains(arr, item)) {
+	            arr.push(item);
+	        }
+	        return arr;
+	    },
+
+	    remove: function remove(arr, item) {
+	        var index = this.index(arr, item);
+	        if (index !== -1) {
+	            arr.splice(index, 1);
+	        }
+	        return arr;
+	    }
+	};
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/14.
+	 */
+
+	var React = __webpack_require__(2);
+	var assert = __webpack_require__(9);
+	var noop = __webpack_require__(4);
+	var ConditionItem = __webpack_require__(38);
+	var ConditionMixin = __webpack_require__(39);
+
+	var Conditional = React.createClass({
+	    displayName: 'Conditional',
+
+	    mixins: [ConditionMixin],
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            checkedItemValue: null
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            itemList: [],
+	            onChecked: noop,
+	            onChange: noop,
+	            className: 'conditional',
+	            itemClassName: 'cond-item',
+	            checkedClassName: 'checked',
+	            defaultChecked: null
+	        };
+	    },
+
+	    onChecked: function onChecked(isChecked, currentValue) {
+	        var prev = this.state.checkedItemValue;
+
+	        // 无论何时都有一个项被选中
+	        //this.setState({checkedItemValue: isChecked ? currentValue : null});
+	        this.setState({ checkedItemValue: currentValue });
+	        this.props.onChecked(isChecked, currentValue);
+	        if (isChecked && prev !== currentValue) {
+	            this.props.onChange(prev, currentValue);
+	        }
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        var def = this.props.defaultChecked;
+	        this.setState({ checkedItemValue: def !== null ? def : this.props.itemList[0].value });
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+
+	        var items = props.itemList.map(function (item) {
+	            return React.createElement(ConditionItem, {
+	                key: item.value,
+	                isChecked: this.state.checkedItemValue === item.value,
+	                onChecked: this.onChecked,
+	                value: item.value }, item.children);
+	        }, this);
+
+	        return React.createElement('div', { className: props.className }, items);
+	    }
+	});
+
+	module.exports = Conditional;
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/14.
+	 */
+
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var ConditionMixin = __webpack_require__(39);
+	var classNames = __webpack_require__(14);
+
+	var ConditionItem = React.createClass({
+	    displayName: 'ConditionItem',
+
+	    mixins: [ConditionMixin],
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            isChecked: false
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            className: 'cond-item',
+	            checkedClassName: 'checked',
+	            children: null,
+	            value: null,
+	            onChecked: noop,
+	            onChange: noop,
+	            isChecked: false
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ isChecked: this.props.isChecked });
+	    },
+
+	    // TODO 该组件设计得有点绕，得改
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ isChecked: nextProps.isChecked });
+	    },
+
+	    onChecked: function onChecked() {
+	        this.setState({ isChecked: !this.state.isChecked }, function () {
+	            this.props.onChecked(this.state.isChecked, this.props.value);
+	        });
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var className = {};
+
+	        className[props.className] = true;
+	        className[props.checkedClassName] = props.isChecked;
+
+	        return React.createElement('span', {
+	            className: classNames(className),
+	            onClick: this.onChecked }, props.children);
+	    }
+
+	});
+
+	module.exports = ConditionItem;
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/14.
+	 */
+
+	var React = __webpack_require__(2);
+
+	module.exports = {
+	    propTypes: {
+	        itemList: React.PropTypes.array,
+	        onChecked: React.PropTypes.func,
+	        onChange: React.PropTypes.func,
+	        className: React.PropTypes.string,
+	        itemClassName: React.PropTypes.string,
+	        checkedClassName: React.PropTypes.string,
+	        defaultChecked: React.PropTypes.any
+	    }
+	};
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by xcp on 2016/3/19.
+	 */
+	"use strict";
+
+	var runtimeIsNode = __webpack_require__(7)();
+	var noop = __webpack_require__(4);
+	var ReactDOM = __webpack_require__(16);
+	var Message = __webpack_require__(41);
+	var body = __webpack_require__(19);
+
+	if (!runtimeIsNode) {
+
+	    var mountNodeWrap = document.createElement('div');
+	    mountNodeWrap.style.cssText = 'position:absolute;top:20px;left:50%;';
+	    body.appendChild(mountNodeWrap);
+
+	    module.exports = function (message, callback) {
+	        var mountNode = document.createElement('div');
+	        mountNode.style.cssText = 'margin-bottom:10px';
+	        mountNodeWrap.appendChild(mountNode);
+	        var afterClose = function afterClose() {
+	            callback && callback();
+	            mountNodeWrap.removeChild(mountNode);
+	        };
+
+	        ReactDOM.render(React.createElement(Message, {
+	            message: message,
+	            afterClose: afterClose }), mountNode);
+	    };
+	} else {
+	    module.exports = Message;
+	}
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/18.
+	 * 全局提示信息，会自动隐藏掉
+	 * 如果有多个信息同时出现，则依次排成一列
+	 */
+
+	var React = __webpack_require__(2);
+	var Animate = __webpack_require__(1);
+	var AutoUnmountMixin = __webpack_require__(42);
+	var noop = __webpack_require__(4);
+
+	var Message = React.createClass({
+	    displayName: 'Message',
+
+	    mixins: [AutoUnmountMixin],
+
+	    render: function render() {
+	        var props = this.props;
+	        var onComplete = props.closeable ? noop : this.autoUnmount;
+
+	        return React.createElement(Animate, {
+	            component: props.animate.component,
+	            from: props.animate.from,
+	            to: props.animate.to,
+	            during: props.animate.during,
+	            componentDidMount: this.animateDidMount,
+	            onComplete: onComplete }, React.createElement('div', { className: 'inline-block' }, React.createElement('div', { className: 'bub-bill' }, React.createElement('div', { className: 'util-bill-pd' }, props.message))));
+	    }
+	});
+
+	module.exports = Message;
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/18.
+	 */
+
+	var ReactDOM = __webpack_require__(16);
+	var noop = __webpack_require__(4);
+
+	module.exports = {
+
+	    getInitialState: function getInitialState() {
+	        return { isVisible: true };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        this.__backToTheStart = noop;
+	        return {
+	            message: '',
+	            during: 3000,
+	            onComplete: noop,
+	            closeable: false,
+	            afterClose: noop,
+	            animate: {
+	                component: 'span',
+	                from: { opacity: 0 },
+	                to: { opacity: 1 },
+	                during: 500
+	            }
+	        };
+	    },
+
+	    // export animate
+	    animateDidMount: function animateDidMount(animate) {
+	        this.__backToTheStart = animate.backToTheStart;
+	    },
+
+	    unmount: function unmount() {
+	        var self = this;
+	        var mountNode = ReactDOM.findDOMNode(self).parentNode;
+	        if (typeof self.__backToTheStart === 'function') {
+	            self.__backToTheStart(function () {
+	                ReactDOM.unmountComponentAtNode(mountNode);
+	            });
+	        } else {
+	            ReactDOM.unmountComponentAtNode(mountNode);
+	        }
+	        self.props.afterClose();
+	    },
+
+	    autoUnmount: function autoUnmount() {
+	        setTimeout(this.unmount, this.props.during);
+	    }
+	};
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/23.
+	 */
+
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var NotAllowSelect = __webpack_require__(20);
+	var PageInput = __webpack_require__(44);
+	var Selectable = __webpack_require__(23);
+
+	var getContent = function getContent(current) {
+	    return React.createElement('div', { className: 'comp-area-item util-font-12 color-white-bg util-line-14' }, current, React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
+	};
+
+	var getItemContent = function getItemContent(val, props) {
+	    var item = React.createElement('li', { className: 'comp-panel-item util-font-12' }, React.createElement('strong', null, val));
+	    return React.cloneElement(item, props);
+	};
+
+	var Pagination = React.createClass({
+	    displayName: 'Pagination',
+
+	    propTypes: {
+	        defaultCurrent: React.PropTypes.number,
+	        total: React.PropTypes.number,
+	        pageSize: React.PropTypes.number,
+	        itemsInOnePage: React.PropTypes.number,
+	        keepPages: React.PropTypes.number,
+	        onChange: React.PropTypes.func,
+	        onSelect: React.PropTypes.func,
+	        getPage: React.PropTypes.func
+	    },
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            // current page
+	            current: 1,
+	            itemsInOnePage: 60
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            // default page
+	            defaultCurrent: 1,
+	            // item total
+	            total: 0,
+	            itemsInOnePage: 60,
+	            // pages in one item
+	            pageSize: 5,
+	            keepPages: 2,
+	            // 可输入页码
+	            importable: true,
+	            // 可配置 itemsInOnePage
+	            itemsConfigurable: true,
+	            configurableList: [200, 100, 60],
+	            // invoke when page number changed
+	            onChange: noop,
+	            onSelect: noop,
+	            getPage: function getPage(num, isCurrent) {
+	                return React.createElement('span', { className: 'page-item' + (isCurrent ? ' focus' : '') }, num);
+	            }
+	        };
+	    },
+
+	    _computed: function _computed(itemsInOnePage) {
+	        var props = this.props;
+	        var pages = Math.ceil(props.total / itemsInOnePage);
+	        var showPages = pages > props.pageSize ? props.pageSize : pages;
+
+	        this.__computed = {
+	            pages: pages,
+	            showPages: showPages,
+	            currentPageOffset: Math.ceil(showPages / 2) - 1
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this._computed(this.props.itemsInOnePage);
+	        this.setState({
+	            current: this.props.defaultCurrent,
+	            itemsInOnePage: this.props.itemsInOnePage
+	        });
+	    },
+
+	    onSelect: function onSelect(num) {
+	        this.skip(num);
+	    },
+
+	    prev: function prev() {
+	        this.skip(this.state.current - 1);
+	    },
+
+	    next: function next() {
+	        this.skip(this.state.current + 1);
+	    },
+
+	    skip: function skip(num, silent) {
+	        this.props.onSelect(num, this.state.itemsInOnePage);
+	        if (num < 1 || num > this.__computed.pages || num === this.state.current) return;
+
+	        var self = this;
+	        self.setState({ current: num }, function () {
+	            if (!silent) self.props.onChange(num, self.state.itemsInOnePage);
+	        });
+	    },
+
+	    _getCurrentStart: function _getCurrentStart(page) {
+	        // 只需要保持 current 在一个固定位置
+	        // 即可保证鼠标下一次点击的时候不会点击在同一个 number 上
+	        // 点击固定位置的右边 -> next
+	        // 点击因定位置的右边 -> prev
+	        // 该函数需要根据 page 确认当前页码的开始位置
+	        var computed = this.__computed;
+	        var start = page - computed.currentPageOffset;
+
+	        // 衡量边界
+	        return start + computed.showPages >= computed.pages ? computed.pages - computed.showPages + 1 : start > this.props.keepPages ? start : 1;
+	    },
+
+	    _getPage: function _getPage(num, isCurrent) {
+	        return React.cloneElement(this.props.getPage(num, isCurrent), {
+	            onClick: this.onSelect.bind(this, num),
+	            key: num
+	        });
+	    },
+
+	    onItemsInOnePageChange: function onItemsInOnePageChange(num) {
+	        // 每页显示条数改变后，直接跳转到第1页
+	        this.setState({
+	            itemsInOnePage: num,
+	            current: 1
+	        }, this.onSelect.bind(this, 1));
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        this.props.onSelect(this.state.current, this.state.itemsInOnePage);
+	    },
+
+	    componentWillUpdate: function componentWillUpdate(nextProps, nextState) {
+	        if (nextState.itemsInOnePage !== this.state.itemsInOnePage) {
+	            this._computed(nextState.itemsInOnePage);
+	        }
+	    },
+
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        var cur = this.state;
+	        return cur.current !== nextState.current || cur.itemsInOnePage !== nextState.itemsInOnePage;
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var computed = this.__computed;
+	        var current = this.state.current;
+	        var start = this._getCurrentStart(current);
+	        var prev, next;
+
+	        if (start > props.keepPages) {
+	            prev = new Array(props.keepPages).fill(1).map(function (v, i) {
+	                return this._getPage(i + 1, i + 1 === current);
+	            }, this);
+	        }
+
+	        var pageItems = new Array(computed.showPages).fill(1).map(function () {
+	            var num = start++;
+	            return this._getPage(num, current === num);
+	        }, this);
+
+	        if (start < computed.pages) {
+	            next = new Array(props.keepPages).fill(1).map(function (v, i) {
+	                var num = computed.pages - props.keepPages + i + 1;
+	                return this._getPage(num, current === num);
+	            }, this);
+	        }
+
+	        var configurable = null;
+	        if (props.itemsConfigurable) configurable = React.createElement(Selectable.Custom, {
+	            getSelectorContent: getContent,
+	            getItemContent: getItemContent,
+	            onSelect: this.onItemsInOnePageChange,
+	            itemList: props.configurableList,
+	            defaultSelectedValue: this.state.itemsInOnePage });
+
+	        var importable = null;
+	        var nextPage = null;
+	        if (props.importable) {
+	            nextPage = current + 1;
+	            nextPage = nextPage > computed.pages ? computed.pages : nextPage;
+	            importable = React.createElement(PageInput, {
+	                current: nextPage,
+	                max: computed.pages,
+	                onSearch: this.skip });
+	        }
+	        return React.createElement(NotAllowSelect, null, React.createElement('div', { className: 'pagination' }, configurable, prev, prev ? React.createElement('span', { className: 'page-item default' }) : null, pageItems, next ? React.createElement('span', { className: 'page-item default' }) : null, next, importable));
+	    }
+	});
+
+	module.exports = Pagination;
+
+/***/ },
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/4/29.
+	 */
+
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var intReg = /^\d+$/;
+	var getTruth = function getTruth() {
+	    return true;
+	};
+
+	var PageInput = React.createClass({
+	    displayName: 'PageInput',
+
+	    getInitialState: function getInitialState() {
+	        return { current: 1 };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            onSearch: noop,
+	            validate: getTruth,
+	            current: 1,
+	            max: Math.MAX_VALUE,
+	            min: 0,
+	            validateFailedMark: -1
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ current: this.props.current });
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextState) {
+	        this.setState({ current: nextProps.current });
+	    },
+
+	    _validate: function _validate(str) {
+	        var mark = this.props.validateFailedMark;
+	        if (str.length === 0 || !intReg.test(str) || !this.props.validate(str)) {
+	            return mark;
+	        }
+
+	        var num = parseInt(str);
+	        return num >= this.props.min && num <= this.props.max ? num : mark;
+	    },
+
+	    onChange: function onChange() {
+	        var val = this.refs.page.value;
+
+	        if (val) {
+	            var result = this._validate(val);
+
+	            if (result === this.props.validateFailedMark) {
+	                return this.refs.page.value = this.state.current;
+	            }
+
+	            if (result !== this.state.current) {
+	                this.setState({ current: result });
+	            }
+	        }
+	    },
+
+	    onSearch: function onSearch() {
+	        this.props.onSearch(this.state.current);
+	    },
+
+	    render: function render() {
+	        return React.createElement('span', null, React.createElement('input', {
+	            onChange: this.onChange,
+	            ref: 'page',
+	            type: 'number',
+	            style: { padding: 0 },
+	            className: 'input-default page-item',
+	            placeholder: this.state.current }), React.createElement('div', { className: 'page-item comp-search', onClick: this.onSearch }, React.createElement('div', { className: 'icon-img icon-search util-v-m' })));
+	    }
+	});
+
+	module.exports = PageInput;
+
+/***/ },
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/25.
+	 */
+
+	module.exports = {
+	    Popup: __webpack_require__(46),
+	    Bubble: __webpack_require__(49),
+	    Bias: __webpack_require__(50),
+	    Dialog: __webpack_require__(51),
+	    PositionBubble: __webpack_require__(52),
+	    PopupWrap: __webpack_require__(47)
+	};
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/15.
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
+	var PopupWrap = __webpack_require__(47);
+	var absolutePosition = __webpack_require__(48);
+	var body = __webpack_require__(19);
+	var noop = __webpack_require__(4);
+	var POPUP_GAP = 5;
+	var triggerHide = function triggerHide() {
+	    return true;
+	};
+
+	var Popup = React.createClass({
+	    displayName: 'Popup',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            isVisible: true
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            animate: {
+	                from: { opacity: 0 },
+	                to: { opacity: 1 },
+	                during: 500
+	            },
+	            trigger: 'click',
+	            content: null,
+	            placement: null,
+	            baseElement: null,
+	            onHide: noop,
+	            triggerHide: triggerHide,
+	            onComponentMount: noop
+	        };
+	    },
+
+	    getTrigger: function getTrigger() {
+	        return { click: 'onClick', hover: 'onMouseEnter' }[this.props.trigger] || 'onClick';
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.__popupMountNode = null;
+	        this.__position = null;
+	        this.__content = null;
+	        this.__isUnmount = false;
+	    },
+
+	    // Invoked once, only on the client
+	    componentDidMount: function componentDidMount() {
+	        var popupMountNode = this.__popupMountNode = document.createElement('div');
+	        var props = this.props;
+	        body.appendChild(popupMountNode);
+
+	        if (typeof props.content === 'string') props.content = React.createElement('span', null, props.content);
+
+	        this.__content = React.cloneElement(props.content, {
+	            placement: props.placement
+	        });
+
+	        this.props.onComponentMount(this);
+	    },
+
+	    onHide: function onHide() {
+	        if (this.__isUnmount) return;
+	        var self = this;
+	        self.setState({ isVisible: true }, function () {
+	            ReactDOM.unmountComponentAtNode(self.__popupMountNode);
+	            self.props.onHide();
+	        });
+	    },
+
+	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	        if (this.state.isVisible !== prevState.isVisible) this.renderPopup();
+	    },
+
+	    autoVisible: function autoVisible() {
+	        if (this.__isUnmount) return;
+	        var self = this;
+	        if (self.__animate) {
+	            self.__animate.backToTheStart(function () {
+	                self.setState({ isVisible: true }, function () {
+	                    ReactDOM.unmountComponentAtNode(self.__popupMountNode);
+	                    self.props.onHide();
+	                });
+	            });
+	        }
+	    },
+
+	    computedPosition: function computedPosition() {
+	        var props = this.props;
+	        var targetNode = props.baseElement || this.refs.targetNode;
+	        // 左上角的位置
+	        var pos = absolutePosition(targetNode);
+	        var placement = props.placement;
+	        var w = targetNode.offsetWidth;
+	        var h = targetNode.offsetHeight;
+
+	        // 在该组件内，只需将最外层定位到对应位置
+	        // 不用理会内容的size
+	        switch (placement) {
+	            case "top":
+	                pos.y = pos.y - POPUP_GAP;
+	                break;
+	            case "right":
+	                pos.x = pos.x + w + POPUP_GAP;
+	                break;
+	            case "bottom":
+	                pos.y = pos.y + h + POPUP_GAP;
+	                break;
+	            case "left":
+	                pos.x = pos.x - POPUP_GAP;
+	                break;
+	        }
+
+	        return this.__position = pos;
+	    },
+
+	    renderPopup: function renderPopup() {
+	        if (!this.isMounted()) return;
+	        // 渲染的时候才计算位置
+	        // 如果提前计算，在页面布局发生变化的情况下
+	        // 计算的位置是错误的
+	        this.computedPosition();
+
+	        var props = this.props;
+	        ReactDOM.render(React.createElement(PopupWrap, {
+	            baseElement: props.baseElement,
+	            onAnimateMount: this.onAnimateMount,
+	            style: { position: 'absolute', left: this.__position.x, top: this.__position.y },
+	            placement: props.placement,
+	            isVisible: this.state.isVisible,
+	            onHide: this.onHide,
+	            triggerHide: props.triggerHide,
+	            refTarget: this.refs.targetNode }, this.__content), this.__popupMountNode);
+	    },
+
+	    showPopup: function showPopup() {
+	        this.setState({ isVisible: false });
+	    },
+
+	    onAnimateMount: function onAnimateMount(animate) {
+	        this.__animate = animate;
+	    },
+
+	    componentWillUnmount: function componentWillUnmount() {
+	        this.__isUnmount = true;
+	        try {
+	            body.removeChild(this.__popupMountNode);
+	        } catch (e) {}
+	    },
+
+	    render: function render() {
+	        var props = { ref: 'targetNode' };
+	        props[this.getTrigger()] = this.showPopup;
+	        if (props.onMouseEnter) {
+	            props.onMouseLeave = this.autoVisible;
+	        }
+
+	        return React.cloneElement(this.props.children || React.createElement('span', { style: { display: 'none' } }), props);
+	    }
+	});
+
+	module.exports = Popup;
+
+/***/ },
+/* 47 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/15.
+	 * PopupWrap 的作用：
+	 * 1. 确定 popup 的位置
+	 * 2. 监听 body click 事件，卸载元素
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
+	var assign = __webpack_require__(8);
+	var noop = __webpack_require__(4);
+	var DOMEvent = __webpack_require__(18);
+	var HideOnBodyClick = __webpack_require__(15);
+	var triggerHide = function triggerHide() {
+	    return true;
+	};
+
+	var PopupWrap = React.createClass({
+	    displayName: 'PopupWrap',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            left: 0,
+	            top: 0
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+
+	        return {
+	            style: { backgroundColor: '#fff' },
+	            placement: 'top',
+	            refTarget: null,
+	            baseElement: null,
+	            isVisible: false,
+	            onHide: noop,
+	            triggerHide: triggerHide,
+	            onAnimateMount: noop
+	        };
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        var node = ReactDOM.findDOMNode(this.refs.popup);
+	        var position = { x: node.offsetWidth, y: node.offsetHeight };
+	        var baseElement = this.props.baseElement || this.props.refTarget;
+
+	        switch (this.props.placement) {
+	            case "top":
+	                position.x = -(position.x - baseElement.offsetWidth) / 2;
+	                position.y = -position.y;
+	                break;
+	            case "bottom":
+	                position.x = -(position.x - baseElement.offsetWidth) / 2;
+	                position.y = 0;
+	                break;
+	            case "left":
+	                position.x = -position.x;
+	                position.y = 0;
+	                break;
+	            default:
+	                position.x = 0;
+	                position.y = 0;
+	        }
+
+	        this.setState({ left: position.x, top: position.y });
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var style = {
+	            top: this.state.top,
+	            left: this.state.left,
+	            position: 'absolute'
+	        };
+
+	        if (props.isVisible) {
+	            style = assign(style, { display: 'none' });
+	        }
+
+	        var children = React.cloneElement(props.children, {
+	            style: assign(style, props.children.props.style),
+	            placement: props.placement,
+	            ref: 'popup'
+	        });
+
+	        return React.createElement(HideOnBodyClick, {
+	            refTarget: props.refTarget,
+	            style: props.style,
+	            triggerHide: props.triggerHide,
+	            onAnimateMount: props.onAnimateMount,
+	            onHide: props.onHide }, children);
+	    }
+	});
+
+	module.exports = PopupWrap;
+
+/***/ },
+/* 48 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	/**
+	 * Created by xcp on 2016/3/15.
+	 */
+
+	module.exports = function (node) {
+	    var result = { x: 0, y: 0 };
+	    var body = document.body || document.documentElement;
+
+	    if (!(node && node.nodeType === 1)) return result;
+
+	    var offsetLeft = node.offsetLeft;
+	    var offsetTop = node.offsetTop;
+
+	    var parent = node.offsetParent;
+	    if (!parent) return result;
+
+	    while (parent !== body) {
+	        offsetLeft += parent.offsetLeft;
+	        offsetTop += parent.offsetTop;
+	        parent = parent.offsetParent;
+	    }
+	    return {
+	        x: offsetLeft,
+	        y: offsetTop
+	    };
+	};
+
+/***/ },
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/15.
+	 */
+
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var Bubble = React.createClass({
+	    displayName: 'Bubble',
+
+	    propTypes: {
+	        symBolClass: React.PropTypes.array
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            placement: 'top',
+	            symbolStyle: {},
+	            symbolClass: [],
+	            onComponentMount: noop,
+	            style: {}
+	        };
+	    },
+
+	    getClassName: function getClassName() {
+	        var dir = {
+	            top: 'd',
+	            right: 'l',
+	            bottom: 't',
+	            left: 'r'
+	        }[this.props.placement] || 'd';
+
+	        return {
+	            wrapperClass: 'bub bub-dir-' + dir,
+	            symbolClass: 'bub-symbol icon-img icon-arrow-blue-' + dir
+	        };
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        this.props.onComponentMount(this.refs.wrap, this);
+	    },
+
+	    render: function render() {
+
+	        var classNames = this.getClassName();
+	        var symbolClassName = this.props.symbolClass.length > 0 ? ' ' + this.props.symbolClass.join(' ') : '';
+
+	        return React.createElement('div', { className: classNames.wrapperClass, style: this.props.style }, React.createElement('span', { className: classNames.symbolClass + symbolClassName,
+	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-con', ref: 'wrap' }, this.props.children));
+	    }
+	});
+
+	module.exports = Bubble;
+
+/***/ },
+/* 50 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/3/15.
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
+	var noop = __webpack_require__(4);
+
+	var Bias = React.createClass({
+	    displayName: 'Bias',
+
+	    propTypes: {
+	        symBolClass: React.PropTypes.array
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            placement: 'topLeft',
+	            closeable: false,
+	            symbolStyle: {},
+	            symbolClass: [],
+	            onComponentMount: noop,
+	            style: {}
+	        };
+	    },
+
+	    getClassName: function getClassName() {
+	        var symbolDir = {
+	            topLeft: 'd-l',
+	            right: 'r',
+	            topRight: 'd-r',
+	            left: 'l'
+	        }[this.props.placement] || 'd-l';
+
+	        var dir = {
+	            topLeft: 'd',
+	            topRight: 'd',
+	            right: 'r',
+	            left: 'l'
+	        }[this.props.placement] || 'd';
+
+	        return {
+	            wrapperClass: 'bub bub-bias-dir-' + dir,
+	            symbolClass: 'bub-symbol icon-img icon-bias-' + symbolDir
+	        };
+	    },
+
+	    unmount: function unmount() {
+	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        this.props.onComponentMount(this.refs.wrap, this);
+	    },
+
+	    render: function render() {
+
+	        var classNames = this.getClassName();
+	        var symbolClassName = this.props.symbolClass.length > 0 ? ' ' + this.props.symbolClass.join(' ') : '';
+	        var closeElement = null;
+	        if (this.props.closeable) {
+	            closeElement = React.createElement('span', {
+	                className: 'icon-img icon-close-yellow bub-bias-last',
+	                onClick: this.unmount });
+	        }
+
+	        return React.createElement('div', { className: classNames.wrapperClass, style: this.props.style }, React.createElement('span', { className: classNames.symbolClass + symbolClassName,
+	            style: this.props.symbolStyle }), React.createElement('div', { className: 'bub-bias-con', ref: 'wrap' }, React.createElement('div', { className: 'bub-bias-con-text inline-block' }, this.props.children), closeElement));
+	    }
+	});
+
+	module.exports = Bias;
+
+/***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/4/14.
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
+	var assign = __webpack_require__(8);
+	var noop = __webpack_require__(4);
+	var HideOnBodyClick = __webpack_require__(15);
+
+	var Dialog = React.createClass({
+	    displayName: 'Dialog',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            isVisible: true,
+	            baseStyle: {
+	                position: 'fixed',
+	                left: '50%',
+	                top: '50%',
+	                zIndex: 999
+	            },
+	            posStyle: {}
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            style: { backgroundColor: '#fff' },
+	            className: 'bub-dialog bubble-company-staff',
+	            refTarget: null,
+	            isVisible: true,
+	            onHidden: noop,
+	            onComponentMount: noop
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ isVisible: this.props.isVisible });
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        var wrap = this.refs.wrap;
+	        this._mountNode = ReactDOM.findDOMNode(this).parentNode;
+	        this.props.onComponentMount(this, wrap);
+	        this.setState({
+	            posStyle: {
+	                marginLeft: '-' + wrap.offsetWidth / 2 + 'px',
+	                marginTop: '-' + wrap.offsetHeight / 2 + 'px'
+	            }
+	        });
+	    },
+
+	    onAnimateMount: function onAnimateMount(animate) {
+	        this.__animate = animate;
+	    },
+
+	    onHidden: function onHidden() {
+	        var self = this;
+	        self.setState({ isVisible: false }, function () {
+	            ReactDOM.unmountComponentAtNode(self._mountNode);
+	            self.props.onHidden();
+	        });
+	    },
+
+	    hide: function hide() {
+	        if (!this.isMounted()) return false;
+	        var self = this;
+	        if (self.__animate) {
+	            self.__animate.backToTheStart(function () {
+	                self.onHidden();
+	            });
+	        } else {
+	            self.onHidden();
+	        }
+	        return true;
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var style = assign({}, props.style, this.state.baseStyle, this.state.posStyle);
+	        if (!this.state.isVisible) {
+	            style = assign(style, { display: 'none' });
+	        }
+
+	        return React.createElement(HideOnBodyClick, {
+	            refTarget: props.refTarget,
+	            style: style,
+	            onAnimateMount: this.onAnimateMount,
+	            onHide: this.onHidden }, React.createElement('div', { className: props.className, ref: 'wrap' }));
+	    }
+
+	});
+
+	module.exports = Dialog;
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	function _typeof(obj) {
+	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	}
+
+	/**
+	 * Created by xcp on 2016/4/30.
+	 * 参数
+	 * target
+	 * onMount
+	 *
+	 * 返回对象
+	 * hide
+	 * open
+	 * show
+	 */
+
+	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
+	var noop = __webpack_require__(4);
+	var Popup = __webpack_require__(46);
+	var Bubble = __webpack_require__(49);
+
+	var PositionBubble = React.createClass({
+	    displayName: 'PositionBubble',
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            placement: 'top',
+	            trigger: 'click',
+	            bubbleStyle: {},
+	            symbolStyle: { left: '50%', marginLeft: -10 },
+	            baseElement: null,
+	            onUnMount: noop,
+	            onMount: noop
+	        };
+	    },
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            bubbleStyle: null,
+	            symbolStyle: null
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.setState({
+	            bubbleStyle: this.props.bubbleStyle,
+	            symbolStyle: this.props.symbolStyle
+	        });
+	    },
+
+	    unMount: function unMount() {
+	        this._popup.autoVisible();
+	    },
+
+	    show: function show() {
+	        if (this.isMounted()) {
+	            this._popup.showPopup();
+	        }
+	    },
+
+	    onMount: function onMount(inst) {
+	        this._popup = inst;
+	    },
+
+	    onBubbleMount: function onBubbleMount(wrap, inst) {
+	        this.props.onMount(wrap, inst);
+	    },
+
+	    componentWillUnmount: function componentWillUnmount() {
+	        this.props.onUnMount();
+	    },
+
+	    _unmount: function _unmount() {
+	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+	    },
+
+	    render: function render() {
+	        var props = this.props;
+	        var state = this.state;
+	        var content = React.createElement(Bubble, {
+	            symbolStyle: state.symbolStyle,
+	            style: state.bubbleStyle,
+	            onComponentMount: this.onBubbleMount });
+	        return React.createElement(Popup, {
+	            placement: props.placement,
+	            trigger: props.trigger,
+	            onHide: this._unmount,
+	            onComponentMount: this.onMount,
+	            triggerHide: noop,
+	            baseElement: props.baseElement,
+	            content: content });
+	    }
+
+	});
+
+	module.exports = function (target, props) {
+	    var body = document && document.body;
+	    if (!body) return {};
+
+	    props = (typeof props === 'undefined' ? 'undefined' : _typeof(props)) === 'object' && props ? props : {};
+
+	    var _props = {};
+
+	    Object.keys(PositionBubble.defaultProps).forEach(function (name) {
+	        if (props.hasOwnProperty(name)) _props[name] = props[name];
+	    });
+
+	    var mountNode = document.createElement('div');
+
+	    body.appendChild(mountNode);
+	    var _onUnMount = _props.onUnMount;
+
+	    _props.onUnMount = function () {
+	        _onUnMount && _onUnMount();
+	        body.removeChild(mountNode);
+	    };
+
+	    _props.baseElement = target;
+
+	    return ReactDOM.render(React.createElement(PositionBubble, _props), mountNode);
+	};
 
 /***/ }
 /******/ ]);

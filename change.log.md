@@ -1,4 +1,7 @@
-﻿## 2016-05-04 - xcp
+﻿## 2016-05-07 - xcp
+新增 `Collapse` `Collapse.Node` `Panel` 三个组件，详细见文档
+
+## 2016-05-04 - xcp
 1. `DropDown` 组件添加 `disabled` 属性
 2. `Importable` 组件在变为 `input` 状态时，`onSelect` 的回调中传入的值
     为上一次选中的有效值，不再是 `props.rejectValue`。
