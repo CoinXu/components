@@ -3,6 +3,8 @@
 + [Panel](./Panel.html)
 + [Collapse.Node](./Node.html)
 
+### Collapse 不能与 Collapse 嵌套使用！！至少在目前还不能！！
+
 ## Props
 + expandKeys - 需要展开的元素的key - `[]`
 + className - 包装容器的className - ''
@@ -13,6 +15,12 @@
 ```JavaScript
 var Collapse = require('../index');
 var Node = Collapse.Node;
+var content = <div>
+    <p>Panel content</p>
+    <p>Panel content</p>
+    <p>Panel content</p>
+    <p>Panel content</p>
+</div>;
 ReactDOM.render(
     <Collapse expandKeys={["2"]}>
         <Node title={<span>panel title 1</span>} key="1">

@@ -21,5 +21,6 @@ module.exports = {
     Cascader: _path('Cascader'),
     Collapse: _path('Collapse'),
     Calendar: _path('Calendar'),
+    Slider: _path('Slider'),
     Pagination: _path('Pagination')
 };

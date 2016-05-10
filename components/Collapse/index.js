@@ -37,16 +37,30 @@ var Collapse = React.createClass({
     },
 
     componentWillMount: function () {
-        var keys = this.props.expandKeys;
-        this.setState({expandKeys: this.props.accordion ? keys.slice(0, 1) : keys})
+        this.setExpandKeys(this.props.expandKeys);
+        this._allKeys = React.Children.map(this.props.children, function (child) {
+            return child.key
+        });
+    },
+
+    setExpandKeys: function (keys) {
+        this.setState({expandKeys: this.props.accordion ? keys.slice(0, 1) : keys});
     },
 
     addOne: function (key) {
-        this.setState({expandKeys: util.add(this.state.expandKeys, key)})
+        this.setExpandKeys(util.add(this.state.expandKeys, key));
     },
 
     removeOne: function (key) {
-        this.setState({expandKeys: util.remove(this.state.expandKeys, key)})
+        this.setExpandKeys(util.remove(this.state.expandKeys, key));
+    },
+
+    expand: function () {
+        this.setState({expandKeys: this._allKeys})
+    },
+
+    collapse: function () {
+        this.setState({expandKeys: []})
     },
 
     onChange: function (key, collapse) {
