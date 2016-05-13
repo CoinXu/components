@@ -5,7 +5,6 @@
 module.exports = {
     Animate: require('./dist/Animate'),
     Calendar: require('./dist/Calendar'),
-    Cascader: require('./dist/Cascader'),
     Collapse: require('./dist/Collapse'),
     Conditional: require('./dist/Conditional'),
     HideOnBodyClick: require('./dist/HideOnBodyClick'),

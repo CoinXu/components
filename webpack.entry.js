@@ -18,7 +18,6 @@ module.exports = {
     Message: _path('Message'),
     Selectable: _path('Selectable'),
     Register: _path('register'),
-    Cascader: _path('Cascader'),
     Collapse: _path('Collapse'),
     Calendar: _path('Calendar'),
     Slider: _path('Slider'),
