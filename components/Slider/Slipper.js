@@ -80,9 +80,8 @@ var Slipper = React.createClass({
         return num > 0 ? num : ~num + 1
     },
 
-    onMouseDown: function (e) {
+    onMouseDown: function () {
         this._mouseDown = true;
-        this._prevStart = {x: e.pageX, y: e.pageY}
     },
 
     /**
@@ -96,9 +95,14 @@ var Slipper = React.createClass({
         }
 
         var props = this.props;
+        var curPos = this.state.pos;
         var cur = now();
 
-        if (cur - this._prevTime < props.timeGap) {
+        // 如果时间间距不满足、超出范围
+        // 直接返回
+        if (cur - this._prevTime < props.timeGap
+            || curPos < props.min
+            || curPos > props.max) {
             return;
         }
 
@@ -108,12 +112,18 @@ var Slipper = React.createClass({
 
         // 当前位置与基础位置距离的百分比
         var gap = (pos.x - props.base.x) / props.base.w;
-
         gap = gap * 100;
         gap = gap - gap % props.step;
 
-        // TODO 如果超出了位置，但是未到达边界，也应该继续执行
-        if (gap === this.state.pos || gap < props.min || gap > props.max) {
+        if (gap > props.max) {
+            gap = props.max;
+        }
+
+        if (gap < props.min) {
+            gap = props.min
+        }
+
+        if (gap === curPos) {
             return;
         }
 

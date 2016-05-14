@@ -69,14 +69,8 @@ const Calendar = React.createClass({
         });
     },
 
-    today: function () {
-        this.setState({currentTime: moment()})
-    },
-
-    _isSameDate: function (base, comp) {
-        return base.isSame(comp, 'year') &&
-            base.isSame(comp, 'month') &&
-            base.isSame(comp, 'day')
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({currentTime: moment(nextProps.defaultTime)})
     },
 
     // 如果年份或月分发生了变化
@@ -86,6 +80,16 @@ const Calendar = React.createClass({
             this.props.onChange(nextState.currentTime, this.state.currentTime);
         }
         return nextState.changeFromHeader
+    },
+
+    today: function () {
+        this.setState({currentTime: moment()})
+    },
+
+    _isSameDate: function (base, comp) {
+        return base.isSame(comp, 'year') &&
+            base.isSame(comp, 'month') &&
+            base.isSame(comp, 'day')
     },
 
     _spliceArray: function (arr, step) {
