@@ -1,4 +1,7 @@
-﻿## 2016-05-07 - xcp
+﻿## 2016-05-14 - xcp
+新增 `Slider` `Slipper` 组件，详见文档
+
+## 2016-05-07 - xcp
 新增 `Collapse` `Collapse.Node` `Panel` 三个组件，详细见文档
 
 ## 2016-05-04 - xcp
