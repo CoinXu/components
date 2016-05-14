@@ -4,11 +4,21 @@
 
 var React = require('react');
 var NotAllowSelect = React.createClass({
+    getDefaultProps: function () {
+        return {component: 'div'}
+    },
     render: function () {
-        return <div onSelect={function(){return false;}}
-                    style={{MozUserSelect:'none',WebkitUserSelect:'none',msUserSelect:'none',userSelect:'none'}}>
+        var Component = this.props.component;
+        return <Component
+            onSelect={function(){return false;}}
+            style={{
+                MozUserSelect:'none',
+                WebkitUserSelect:'none',
+                msUserSelect:'none',
+                userSelect:'none'
+            }}>
             {this.props.children}
-        </div>
+        </Component>
     }
 });
 module.exports = NotAllowSelect;

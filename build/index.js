@@ -54,13 +54,12 @@ this["EssaComponents"] =
 	module.exports = {
 	    Animate: __webpack_require__(1),
 	    Calendar: __webpack_require__(10),
-	    Cascader: __webpack_require__(33),
-	    Collapse: __webpack_require__(34),
-	    Conditional: __webpack_require__(37),
+	    Collapse: __webpack_require__(33),
+	    Conditional: __webpack_require__(36),
 	    HideOnBodyClick: __webpack_require__(15),
-	    Message: __webpack_require__(40),
-	    Pagination: __webpack_require__(43),
-	    Popup: __webpack_require__(45),
+	    Message: __webpack_require__(39),
+	    Pagination: __webpack_require__(42),
+	    Popup: __webpack_require__(44),
 	    Selectable: __webpack_require__(23)
 	};
 
@@ -1206,12 +1205,8 @@ this["EssaComponents"] =
 	        });
 	    },
 
-	    today: function today() {
-	        this.setState({ currentTime: moment() });
-	    },
-
-	    _isSameDate: function _isSameDate(base, comp) {
-	        return base.isSame(comp, 'year') && base.isSame(comp, 'month') && base.isSame(comp, 'day');
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({ currentTime: moment(nextProps.defaultTime) });
 	    },
 
 	    // 如果年份或月分发生了变化
@@ -1221,6 +1216,14 @@ this["EssaComponents"] =
 	            this.props.onChange(nextState.currentTime, this.state.currentTime);
 	        }
 	        return nextState.changeFromHeader;
+	    },
+
+	    today: function today() {
+	        this.setState({ currentTime: moment() });
+	    },
+
+	    _isSameDate: function _isSameDate(base, comp) {
+	        return base.isSame(comp, 'year') && base.isSame(comp, 'month') && base.isSame(comp, 'day');
 	    },
 
 	    _spliceArray: function _spliceArray(arr, step) {
@@ -1834,11 +1837,21 @@ this["EssaComponents"] =
 	var NotAllowSelect = React.createClass({
 	    displayName: 'NotAllowSelect',
 
+	    getDefaultProps: function getDefaultProps() {
+	        return { component: 'div' };
+	    },
 	    render: function render() {
-	        return React.createElement('div', { onSelect: function onSelect() {
+	        var Component = this.props.component;
+	        return React.createElement(Component, {
+	            onSelect: function onSelect() {
 	                return false;
 	            },
-	            style: { MozUserSelect: 'none', WebkitUserSelect: 'none', msUserSelect: 'none', userSelect: 'none' } }, this.props.children);
+	            style: {
+	                MozUserSelect: 'none',
+	                WebkitUserSelect: 'none',
+	                msUserSelect: 'none',
+	                userSelect: 'none'
+	            } }, this.props.children);
 	    }
 	});
 	module.exports = NotAllowSelect;
@@ -2939,181 +2952,6 @@ this["EssaComponents"] =
 	'use strict';
 
 	/**
-	 * Created by xcp on 2016/4/19.
-	 * TODO
-	 * 该组件为业务所写，不应该放在此处，后面删除
-	 * 放在此处只是为了方便测试
-	 */
-
-	var React = __webpack_require__(2);
-	var noop = __webpack_require__(4);
-
-	var getWrap = function getWrap(props, state, items) {
-	    var style = {
-	        display: state.defaultValue.length > 0 ? 'block' : 'none',
-	        top: 50, left: 0
-	    };
-
-	    return React.createElement('div', { className: 'bub-head', style: style }, React.createElement('i', { className: 'icon-img icon-arrow-up-lg' }), React.createElement('div', { className: 'bubble-nav' }, items));
-	};
-
-	var getContent = function getContent(props, state, models, inst) {
-	    // 一级类目
-	    // 二级类目及下属类目
-	    return [getFirstLevel(props, state, models, inst)].concat(models.map(function (second, index) {
-	        return getSecondLevel(props, state, second[props.children], index, second);
-	    }));
-	};
-
-	var getFirstLevel = function getFirstLevel(props, state, models, inst) {
-	    var className;
-	    var getItem = function getItem(item, i) {
-	        className = state.defaultValue.indexOf(item.id) !== -1 ? 'curr' : '';
-	        return React.createElement(Cascader.Node, {
-	            value: item,
-	            key: i,
-	            trigger: inst.change }, React.createElement('li', { className: className, title: item.name }, item.name, React.createElement('i', { className: 'icon-img icon-arrow-nav-a' })));
-	    };
-	    return React.createElement('ul', { className: 'nav-lg', key: 1 }, models.map(getItem));
-	};
-
-	var getSecondLevel = function getSecondLevel(props, state, models, index, parent) {
-
-	    var getChildren = function getChildren(children, j) {
-	        return React.createElement('ul', { className: 'view', key: 's-s-s-' + j }, children.map(function (child, i) {
-	            return React.createElement('li', { key: j + '-' + i }, React.createElement('a', { href: child.id }, child.name));
-	        }));
-	    };
-
-	    var getItem = function getItem(item, i) {
-	        var children = item[props.children];
-	        var hasChildren = children && children.length > 0;
-	        var title = null;
-
-	        if (hasChildren) {
-	            title = React.createElement('strong', null, React.createElement('a', { href: item.id }, item.name));
-	        }
-
-	        return React.createElement('div', { className: 'ul', key: 's-s-s-' + i }, title, hasChildren ? getChildren(children, i) : getChildren([item], i));
-	    };
-
-	    var moduleItem = function moduleItem(models, i) {
-	        return React.createElement('div', { className: 'module', key: 's-s-' + i }, models.map(getItem));
-	    };
-
-	    // 两个子类压入一个.module里
-
-	    // models 每两个拆成一组
-	    // ui 上是这样设计的....
-	    var len = models.length;
-	    var start = 0;
-	    var r = [];
-
-	    while (start < len) {
-	        r.push(models.slice(start, start += 2));
-	    }
-
-	    var style = {};
-	    if (state.defaultValue.indexOf(parent.id) === -1) {
-	        style.display = 'none';
-	    }
-	    return React.createElement('div', { className: 'nav-sm', key: 's-' + index, style: style }, r.map(moduleItem), React.createElement('a', { href: '', className: 'more a-link' }, '查看更多'));
-	};
-
-	var Cascader = React.createClass({
-	    displayName: 'Cascader',
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            defaultValue: []
-	        };
-	    },
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            defaultValue: [],
-	            // 子集数据键名
-	            children: 'children',
-	            topLevelItems: [],
-	            maps: {},
-	            onSelect: noop,
-	            getWrap: getWrap,
-	            getContent: getContent
-	        };
-	    },
-
-	    onSelect: function onSelect(value) {
-	        console.log(value);
-	    },
-
-	    componentWillMount: function componentWillMount() {
-	        this.setState({ defaultValue: this.props.defaultValue });
-	    },
-
-	    renderOne: function renderOne(model, level) {
-	        var children = model[this.props.children];
-	        if (children && children.length > 0 && level === 0) {
-	            return this.renderOne(children, level + 1);
-	        }
-	        return this.props.getContent(this.props, this.state, model, level);
-	    },
-
-	    change: function change(item) {
-	        this.setState({ defaultValue: item ? [item.id] : this.props.defaultValue });
-	    },
-
-	    hide: function hide() {
-	        this.setState({ defaultValue: [] });
-	    },
-
-	    render: function render() {
-	        var items = this.props.getContent(this.props, this.state, this.props.topLevelItems, this);
-	        return this.props.getWrap(this.props, this.state, items);
-	    }
-	});
-
-	Cascader.Node = React.createClass({
-	    displayName: 'Node',
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            onSelect: noop,
-	            getContent: noop,
-	            trigger: noop,
-	            disabled: false,
-	            value: null
-	        };
-	    },
-
-	    getInitializeState: function getInitializeState() {
-	        return { disabled: false };
-	    },
-
-	    trigger: function trigger() {
-	        this.props.trigger(this.props.value);
-	    },
-
-	    cancel: function cancel() {
-	        this.props.trigger(null);
-	    },
-
-	    render: function render() {
-	        return React.cloneElement(this.props.children, {
-	            onMouseEnter: this.trigger,
-	            onMouseLeave: this.cancel
-	        });
-	    }
-	});
-
-	module.exports = Cascader;
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/**
 	 * Created by xcp on 2016/5/5.
 	 * 折叠面板，提供展开和折叠功能
 	 * <Collapse>
@@ -3131,9 +2969,9 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var Animate = __webpack_require__(1);
-	var Panel = __webpack_require__(35);
+	var Panel = __webpack_require__(34);
 	var noop = __webpack_require__(4);
-	var util = __webpack_require__(36);
+	var util = __webpack_require__(35);
 
 	var Collapse = React.createClass({
 	    displayName: 'Collapse',
@@ -3153,16 +2991,30 @@ this["EssaComponents"] =
 	    },
 
 	    componentWillMount: function componentWillMount() {
-	        var keys = this.props.expandKeys;
+	        this.setExpandKeys(this.props.expandKeys);
+	        this._allKeys = React.Children.map(this.props.children, function (child) {
+	            return child.key;
+	        });
+	    },
+
+	    setExpandKeys: function setExpandKeys(keys) {
 	        this.setState({ expandKeys: this.props.accordion ? keys.slice(0, 1) : keys });
 	    },
 
 	    addOne: function addOne(key) {
-	        this.setState({ expandKeys: util.add(this.state.expandKeys, key) });
+	        this.setExpandKeys(util.add(this.state.expandKeys, key));
 	    },
 
 	    removeOne: function removeOne(key) {
-	        this.setState({ expandKeys: util.remove(this.state.expandKeys, key) });
+	        this.setExpandKeys(util.remove(this.state.expandKeys, key));
+	    },
+
+	    expand: function expand() {
+	        this.setState({ expandKeys: this._allKeys });
+	    },
+
+	    collapse: function collapse() {
+	        this.setState({ expandKeys: [] });
 	    },
 
 	    onChange: function onChange(key, collapse) {
@@ -3237,7 +3089,7 @@ this["EssaComponents"] =
 	module.exports = Collapse;
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3362,7 +3214,7 @@ this["EssaComponents"] =
 	module.exports = Panel;
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3398,7 +3250,7 @@ this["EssaComponents"] =
 	};
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3410,8 +3262,8 @@ this["EssaComponents"] =
 	var React = __webpack_require__(2);
 	var assert = __webpack_require__(9);
 	var noop = __webpack_require__(4);
-	var ConditionItem = __webpack_require__(38);
-	var ConditionMixin = __webpack_require__(39);
+	var ConditionItem = __webpack_require__(37);
+	var ConditionMixin = __webpack_require__(38);
 
 	var Conditional = React.createClass({
 	    displayName: 'Conditional',
@@ -3471,7 +3323,7 @@ this["EssaComponents"] =
 	module.exports = Conditional;
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3482,7 +3334,7 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var noop = __webpack_require__(4);
-	var ConditionMixin = __webpack_require__(39);
+	var ConditionMixin = __webpack_require__(38);
 	var classNames = __webpack_require__(14);
 
 	var ConditionItem = React.createClass({
@@ -3540,7 +3392,7 @@ this["EssaComponents"] =
 	module.exports = ConditionItem;
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3564,7 +3416,7 @@ this["EssaComponents"] =
 	};
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3575,7 +3427,7 @@ this["EssaComponents"] =
 	var runtimeIsNode = __webpack_require__(7)();
 	var noop = __webpack_require__(4);
 	var ReactDOM = __webpack_require__(16);
-	var Message = __webpack_require__(41);
+	var Message = __webpack_require__(40);
 	var body = __webpack_require__(19);
 
 	if (!runtimeIsNode) {
@@ -3602,7 +3454,7 @@ this["EssaComponents"] =
 	}
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3615,7 +3467,7 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var Animate = __webpack_require__(1);
-	var AutoUnmountMixin = __webpack_require__(42);
+	var AutoUnmountMixin = __webpack_require__(41);
 	var noop = __webpack_require__(4);
 
 	var Message = React.createClass({
@@ -3640,7 +3492,7 @@ this["EssaComponents"] =
 	module.exports = Message;
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3699,7 +3551,7 @@ this["EssaComponents"] =
 	};
 
 /***/ },
-/* 43 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3711,7 +3563,7 @@ this["EssaComponents"] =
 	var React = __webpack_require__(2);
 	var noop = __webpack_require__(4);
 	var NotAllowSelect = __webpack_require__(20);
-	var PageInput = __webpack_require__(44);
+	var PageInput = __webpack_require__(43);
 	var Selectable = __webpack_require__(23);
 
 	var getContent = function getContent(current) {
@@ -3904,7 +3756,7 @@ this["EssaComponents"] =
 	module.exports = Pagination;
 
 /***/ },
-/* 44 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3990,7 +3842,7 @@ this["EssaComponents"] =
 	module.exports = PageInput;
 
 /***/ },
-/* 45 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4000,16 +3852,16 @@ this["EssaComponents"] =
 	 */
 
 	module.exports = {
-	    Popup: __webpack_require__(46),
-	    Bubble: __webpack_require__(49),
-	    Bias: __webpack_require__(50),
-	    Dialog: __webpack_require__(51),
-	    PositionBubble: __webpack_require__(52),
-	    PopupWrap: __webpack_require__(47)
+	    Popup: __webpack_require__(45),
+	    Bubble: __webpack_require__(48),
+	    Bias: __webpack_require__(49),
+	    Dialog: __webpack_require__(50),
+	    PositionBubble: __webpack_require__(51),
+	    PopupWrap: __webpack_require__(46)
 	};
 
 /***/ },
-/* 46 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4020,8 +3872,8 @@ this["EssaComponents"] =
 
 	var React = __webpack_require__(2);
 	var ReactDOM = __webpack_require__(16);
-	var PopupWrap = __webpack_require__(47);
-	var absolutePosition = __webpack_require__(48);
+	var PopupWrap = __webpack_require__(46);
+	var absolutePosition = __webpack_require__(47);
 	var body = __webpack_require__(19);
 	var noop = __webpack_require__(4);
 	var POPUP_GAP = 5;
@@ -4184,7 +4036,7 @@ this["EssaComponents"] =
 	module.exports = Popup;
 
 /***/ },
-/* 47 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4286,7 +4138,7 @@ this["EssaComponents"] =
 	module.exports = PopupWrap;
 
 /***/ },
-/* 48 */
+/* 47 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4319,7 +4171,7 @@ this["EssaComponents"] =
 	};
 
 /***/ },
-/* 49 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4378,7 +4230,7 @@ this["EssaComponents"] =
 	module.exports = Bubble;
 
 /***/ },
-/* 50 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4457,7 +4309,7 @@ this["EssaComponents"] =
 	module.exports = Bias;
 
 /***/ },
-/* 51 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4559,7 +4411,7 @@ this["EssaComponents"] =
 	module.exports = Dialog;
 
 /***/ },
-/* 52 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4585,8 +4437,8 @@ this["EssaComponents"] =
 	var React = __webpack_require__(2);
 	var ReactDOM = __webpack_require__(16);
 	var noop = __webpack_require__(4);
-	var Popup = __webpack_require__(46);
-	var Bubble = __webpack_require__(49);
+	var Popup = __webpack_require__(45);
+	var Bubble = __webpack_require__(48);
 
 	var PositionBubble = React.createClass({
 	    displayName: 'PositionBubble',

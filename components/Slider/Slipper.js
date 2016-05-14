@@ -6,6 +6,7 @@ var React = require('react');
 var noop = require('../../com/noop');
 var DOMEvent = require('../../com/DOM/DOMEvent');
 var NotAllowSelect = require('../Pagination/NotAllowSelect');
+var elementAbsPosition = require('../../com/absolutePosition');
 
 var now = function () {
     return new Date() * 1
@@ -31,7 +32,7 @@ var Slipper = React.createClass({
             // 否则不能选择左右两个闭区间
             step: 10,
             start: 0,
-            base: {x: 0, y: 0, w: 200},
+            base: null,
             disabled: false,
             onMount: noop,
             onMove: noop
@@ -46,7 +47,8 @@ var Slipper = React.createClass({
         this.setState({
             disabled: this.props.disabled,
             pos: this.props.start,
-            dir: typeMirror[this.props.type] || 'left'
+            dir: typeMirror[this.props.type] || 'left',
+            base: this.props.base
         })
     },
 
@@ -55,6 +57,14 @@ var Slipper = React.createClass({
         this._prevTime = now();
         this.props.onMount(this);
         var self = this;
+        var wrap, base;
+
+        if (!this.props.base) {
+            wrap = ReactDOM.findDOMNode(this.refs.wrap).parentNode;
+            base = elementAbsPosition(wrap);
+            base.w = wrap.offsetWidth;
+            this.setState({base: base});
+        }
 
         this._onMouseMoveProxy = function (e) {
             self.onMouseMove.call(self, e)
@@ -69,12 +79,20 @@ var Slipper = React.createClass({
     },
 
     componentWillReceiveProps: function (nextProps) {
-        this.setState({pos: nextProps.start, base: nextProps.base})
+        this.setState({
+            pos: nextProps.start,
+            base: nextProps.base,
+            disabled: nextProps.disabled
+        })
     },
 
     componentWillUnmount: function () {
         DOMEvent.off(document.body, 'mousemove', this._onMouseMoveProxy);
         DOMEvent.off(document.body, 'mouseup', this._onMouseUpProxy);
+    },
+
+    shouldComponentUpdate: function (nextProps, nextState) {
+        return this.state.pos !== nextState.pos
     },
 
     _abs: function (num) {
@@ -96,7 +114,8 @@ var Slipper = React.createClass({
         }
 
         var props = this.props;
-        var curPos = this.state.pos;
+        var state = this.state;
+        var curPos = state.pos;
         var cur = now();
 
         // 如果时间间距不满足、超出范围
@@ -112,7 +131,7 @@ var Slipper = React.createClass({
         var pos = {x: e.pageX, y: e.pageY};
 
         // 当前位置与基础位置距离的百分比
-        var gap = (pos.x - props.base.x) / props.base.w;
+        var gap = (pos.x - state.base.x) / state.base.w;
         gap = gap * 100;
         gap = gap - gap % props.step;
 
@@ -152,7 +171,7 @@ var Slipper = React.createClass({
             props.onMouseUp = this.onMouseUp
         }
 
-        return <NotAllowSelect>
+        return <NotAllowSelect ref="wrap" component="span">
             {React.createElement('span', props)}
         </NotAllowSelect>
     }
