@@ -5,6 +5,7 @@
 var React = require('react');
 var noop = require('../../com/noop');
 var DOMEvent = require('../../com/DOM/DOMEvent');
+var NotAllowSelect = require('../Pagination/NotAllowSelect');
 
 var now = function () {
     return new Date() * 1
@@ -151,7 +152,9 @@ var Slipper = React.createClass({
             props.onMouseUp = this.onMouseUp
         }
 
-        return React.createElement('span', props);
+        return <NotAllowSelect>
+            {React.createElement('span', props)}
+        </NotAllowSelect>
     }
 });
 
