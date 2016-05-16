@@ -1,6 +1,7 @@
 ﻿## 2016-05-16 - xcp
-`Popup` `Calendar` 组件添加 `shouldUpdate` 属性。
-外部可以定义组件是否更新。
++ `Popup` `Calendar` 组件添加 `shouldUpdate` 属性。
+  外部可以定义组件是否更新。
++ `Calendar` 从上一月跳转到下一月时，保留上一次选中的日期
 
 ## 2016-05-14 - xcp
 新增 `Slider` `Slipper` 组件，详见文档
