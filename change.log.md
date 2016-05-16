@@ -1,4 +1,8 @@
-﻿## 2016-05-14 - xcp
+﻿## 2016-05-16 - xcp
+`Popup` `Calendar` 组件添加 `shouldUpdate` 属性。
+外部可以定义组件是否更新。
+
+## 2016-05-14 - xcp
 新增 `Slider` `Slipper` 组件，详见文档
 
 ## 2016-05-07 - xcp

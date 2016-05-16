@@ -27,6 +27,7 @@ function (base, comp) {
 ```
 + `onChange(current, prev)` - 前后选择发生变化时回调 - noop
 + `onSelect(selected)` - 选择某个日期的回调 - noop
++ `shouldUpdate()` - 外部定义是否更新组件 - noop
 
 ### Methods
 + `today` - 设置选中的日期为当前系统时间

@@ -33,6 +33,7 @@ var Popup = React.createClass({
             placement: null,
             baseElement: null,
             onHide: noop,
+            shouldUpdate: noop,
             triggerHide: triggerHide,
             onComponentMount: noop
         }
@@ -51,9 +52,13 @@ var Popup = React.createClass({
 
     // Invoked once, only on the client
     componentDidMount: function () {
-        var popupMountNode = this.__popupMountNode = document.createElement('div');
+        this.__popupMountNode = document.createElement('div');
+        body.appendChild(this.__popupMountNode);
+        this.props.onComponentMount(this);
+    },
+
+    _createContent: function () {
         var props = this.props;
-        body.appendChild(popupMountNode);
 
         if (typeof props.content === 'string')
             props.content = <span>{props.content}</span>;
@@ -61,8 +66,6 @@ var Popup = React.createClass({
         this.__content = React.cloneElement(props.content, {
             placement: props.placement
         });
-
-        this.props.onComponentMount(this);
     },
 
     onHide: function () {
@@ -75,8 +78,9 @@ var Popup = React.createClass({
     },
 
     componentDidUpdate: function (prevProps, prevState) {
-        if (this.state.isVisible !== prevState.isVisible)
+        if (this.state.isVisible !== prevState.isVisible || !!this.props.shouldUpdate()) {
             this.renderPopup()
+        }
     },
 
     autoVisible: function () {
@@ -123,6 +127,8 @@ var Popup = React.createClass({
 
     renderPopup: function () {
         if (!this.isMounted()) return;
+
+        this._createContent();
         // 渲染的时候才计算位置
         // 如果提前计算，在页面布局发生变化的情况下
         // 计算的位置是错误的

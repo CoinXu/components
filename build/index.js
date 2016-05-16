@@ -60,7 +60,8 @@ this["EssaComponents"] =
 	    Message: __webpack_require__(39),
 	    Pagination: __webpack_require__(42),
 	    Popup: __webpack_require__(44),
-	    Selectable: __webpack_require__(23)
+	    Selectable: __webpack_require__(23),
+	    slider: __webpack_require__(52)
 	};
 
 /***/ },
@@ -1193,7 +1194,9 @@ this["EssaComponents"] =
 	            disabledDate: disabledDate,
 	            diffDate: diffDate,
 	            onChange: noop,
-	            onSelect: noop
+	            onSelect: noop,
+	            onMount: noop,
+	            shouldUpdate: noop
 	        };
 	    },
 
@@ -1205,8 +1208,8 @@ this["EssaComponents"] =
 	        });
 	    },
 
-	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	        this.setState({ currentTime: moment(nextProps.defaultTime) });
+	    componentDidUpdate: function componentDidUpdate() {
+	        this.props.onMount(this);
 	    },
 
 	    // 如果年份或月分发生了变化
@@ -1215,7 +1218,7 @@ this["EssaComponents"] =
 	        if (!this._isSameDate(nextState.currentTime, this.state.currentTime)) {
 	            this.props.onChange(nextState.currentTime, this.state.currentTime);
 	        }
-	        return nextState.changeFromHeader;
+	        return nextState.changeFromHeader || !!this.props.shouldUpdate();
 	    },
 
 	    today: function today() {
@@ -1897,7 +1900,7 @@ this["EssaComponents"] =
 	        var props = this.props;
 	        var disabled = props.disabledDate(props.time);
 	        var className = {};
-	        var current = moment();
+	        var current = props.currentTime;
 
 	        className[props.dateItemClassName] = true;
 	        className[props.disabledClassName] = disabled;
@@ -3902,6 +3905,7 @@ this["EssaComponents"] =
 	            placement: null,
 	            baseElement: null,
 	            onHide: noop,
+	            shouldUpdate: noop,
 	            triggerHide: triggerHide,
 	            onComponentMount: noop
 	        };
@@ -3920,17 +3924,19 @@ this["EssaComponents"] =
 
 	    // Invoked once, only on the client
 	    componentDidMount: function componentDidMount() {
-	        var popupMountNode = this.__popupMountNode = document.createElement('div');
+	        this.__popupMountNode = document.createElement('div');
+	        body.appendChild(this.__popupMountNode);
+	        this.props.onComponentMount(this);
+	    },
+
+	    _createContent: function _createContent() {
 	        var props = this.props;
-	        body.appendChild(popupMountNode);
 
 	        if (typeof props.content === 'string') props.content = React.createElement('span', null, props.content);
 
 	        this.__content = React.cloneElement(props.content, {
 	            placement: props.placement
 	        });
-
-	        this.props.onComponentMount(this);
 	    },
 
 	    onHide: function onHide() {
@@ -3943,7 +3949,9 @@ this["EssaComponents"] =
 	    },
 
 	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-	        if (this.state.isVisible !== prevState.isVisible) this.renderPopup();
+	        if (this.state.isVisible !== prevState.isVisible || !!this.props.shouldUpdate()) {
+	            this.renderPopup();
+	        }
 	    },
 
 	    autoVisible: function autoVisible() {
@@ -3990,6 +3998,8 @@ this["EssaComponents"] =
 
 	    renderPopup: function renderPopup() {
 	        if (!this.isMounted()) return;
+
+	        this._createContent();
 	        // 渲染的时候才计算位置
 	        // 如果提前计算，在页面布局发生变化的情况下
 	        // 计算的位置是错误的
@@ -4540,6 +4550,310 @@ this["EssaComponents"] =
 
 	    return ReactDOM.render(React.createElement(PositionBubble, _props), mountNode);
 	};
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/5/14.
+	 */
+
+	module.exports = {
+	  Slider: __webpack_require__(53),
+	  Slipper: __webpack_require__(54)
+	};
+
+/***/ },
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/5/10.
+	 */
+
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var Slipper = __webpack_require__(54);
+	var elementAbsPosition = __webpack_require__(47);
+
+	var Slider = React.createClass({
+	    displayName: 'Slider',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            currentValue: 0,
+	            disabled: false,
+	            left: 0,
+	            right: 100,
+	            median: 50,
+	            min: 0,
+	            max: 100,
+	            base: { x: 0, y: 0, w: 0 }
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            min: 0,
+	            max: 200,
+	            step: 2,
+	            defaultValue: 0,
+	            disabled: false,
+	            onChange: noop
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        var props = this.props;
+	        this.setState({
+	            disabled: props.disabled,
+	            currentValue: props.defaultValue
+	        });
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        var base = this.refs.wrap;
+	        var pos = elementAbsPosition(base);
+	        pos.w = base.offsetWidth;
+
+	        // 将值转换为0~100区间
+	        var props = this.props;
+	        var step = this._step = (props.max - props.min) / 100;
+
+	        this.setState({
+	            base: pos,
+	            min: props.min / step,
+	            max: props.max / step,
+	            median: 50
+	        });
+	    },
+
+	    componentDidUpdate: function componentDidUpdate() {
+	        this.props.onChange(this.state.left, this.state.right, this._step);
+	    },
+
+	    leftMove: function leftMove(pos) {
+	        this.setState({ left: pos });
+	    },
+
+	    rightMove: function rightMove(pos) {
+	        this.setState({ right: pos });
+	    },
+
+	    render: function render() {
+	        var state = this.state;
+	        var props = this.props;
+	        var rangeStyle = { width: state.right - state.left + '%', left: state.left + '%' };
+
+	        return React.createElement('div', { className: 'li' }, React.createElement('div', { className: 'price-move', ref: 'wrap' }, React.createElement('div', { className: 'move-bg', style: rangeStyle }), React.createElement(Slipper, {
+	            base: state.base,
+	            type: 'left',
+	            min: state.min,
+	            max: state.median,
+	            start: state.left,
+	            step: props.step,
+	            onMove: this.leftMove }), React.createElement(Slipper, {
+	            base: state.base,
+	            type: 'right',
+	            min: state.median,
+	            max: state.max,
+	            start: state.right,
+	            step: props.step,
+	            onMove: this.rightMove })));
+	    }
+	});
+
+	module.exports = Slider;
+
+/***/ },
+/* 54 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * Created by xcp on 2016/5/10.
+	 */
+
+	var React = __webpack_require__(2);
+	var noop = __webpack_require__(4);
+	var DOMEvent = __webpack_require__(18);
+	var NotAllowSelect = __webpack_require__(20);
+	var elementAbsPosition = __webpack_require__(47);
+
+	var now = function now() {
+	    return new Date() * 1;
+	};
+
+	var Slipper = React.createClass({
+	    displayName: 'Slipper',
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            disabled: false,
+	            pos: 0,
+	            dir: 'right',
+	            base: { x: 0, y: 0, w: 200 }
+	        };
+	    },
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            type: 'left',
+	            timeGap: 50,
+	            min: 0,
+	            max: 100,
+	            // step 要能被 min 和 max 整除
+	            // 否则不能选择左右两个闭区间
+	            step: 10,
+	            start: 0,
+	            base: null,
+	            disabled: false,
+	            onMount: noop,
+	            onMove: noop
+	        };
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        var typeMirror = {
+	            left: 'right',
+	            right: 'left'
+	        };
+	        this.setState({
+	            disabled: this.props.disabled,
+	            pos: this.props.start,
+	            dir: typeMirror[this.props.type] || 'left',
+	            base: this.props.base
+	        });
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        this._mouseDown = false;
+	        this._prevTime = now();
+	        this.props.onMount(this);
+	        var self = this;
+	        var wrap, base;
+
+	        if (!this.props.base) {
+	            wrap = ReactDOM.findDOMNode(this.refs.wrap).parentNode;
+	            base = elementAbsPosition(wrap);
+	            base.w = wrap.offsetWidth;
+	            this.setState({ base: base });
+	        }
+
+	        this._onMouseMoveProxy = function (e) {
+	            self.onMouseMove.call(self, e);
+	        };
+
+	        this._onMouseUpProxy = function (e) {
+	            self.onMouseUp.call(self, e);
+	        };
+
+	        DOMEvent.on(document.body, 'mousemove', this._onMouseMoveProxy);
+	        DOMEvent.on(document.body, 'mouseup', this._onMouseUpProxy);
+	    },
+
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        this.setState({
+	            pos: nextProps.start,
+	            base: nextProps.base,
+	            disabled: nextProps.disabled
+	        });
+	    },
+
+	    componentWillUnmount: function componentWillUnmount() {
+	        DOMEvent.off(document.body, 'mousemove', this._onMouseMoveProxy);
+	        DOMEvent.off(document.body, 'mouseup', this._onMouseUpProxy);
+	    },
+
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        return this.state.pos !== nextState.pos;
+	    },
+
+	    _abs: function _abs(num) {
+	        return num > 0 ? num : ~num + 1;
+	    },
+
+	    onMouseDown: function onMouseDown() {
+	        this._mouseDown = true;
+	    },
+
+	    /**
+	     * 该函数需要绑定到body上面，就算鼠标离开了icon
+	     * 只要没有mouseUp，也还是可以拖的
+	     * @param e
+	     */
+	    onMouseMove: function onMouseMove(e) {
+	        if (!this._mouseDown) {
+	            return;
+	        }
+
+	        var props = this.props;
+	        var state = this.state;
+	        var curPos = state.pos;
+	        var cur = now();
+
+	        // 如果时间间距不满足、超出范围
+	        // 直接返回
+	        if (cur - this._prevTime < props.timeGap || curPos < props.min || curPos > props.max) {
+	            return;
+	        }
+
+	        this._prevTime = cur;
+
+	        var pos = { x: e.pageX, y: e.pageY };
+
+	        // 当前位置与基础位置距离的百分比
+	        var gap = (pos.x - state.base.x) / state.base.w;
+	        gap = gap * 100;
+	        gap = gap - gap % props.step;
+
+	        if (gap > props.max) {
+	            gap = props.max;
+	        }
+
+	        if (gap < props.min) {
+	            gap = props.min;
+	        }
+
+	        if (gap === curPos) {
+	            return;
+	        }
+
+	        this.setState({ pos: gap });
+	        this.props.onMove(gap);
+	    },
+
+	    onMouseUp: function onMouseUp() {
+	        this._mouseDown = false;
+	    },
+
+	    render: function render() {
+	        var props = {
+	            ref: 'icon',
+	            style: {
+	                position: 'absolute',
+	                left: this.state.pos + '%'
+	            },
+	            className: "icon-img icon-price-" + this.state.dir
+	        };
+
+	        if (!this.state.disabled) {
+	            props.onMouseDown = this.onMouseDown;
+	            props.onMouseMove = this.onMouseMove;
+	            props.onMouseUp = this.onMouseUp;
+	        }
+
+	        return React.createElement(NotAllowSelect, { ref: 'wrap', component: 'span' }, React.createElement('span', props));
+	    }
+	});
+
+	module.exports = Slipper;
 
 /***/ }
 /******/ ]);

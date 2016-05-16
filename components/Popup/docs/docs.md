@@ -17,6 +17,7 @@
  + onComponentMount - `Function` 组件挂载后调用，传入组件实例。
  + baseElement - `HTMLElement` - 定位依赖元素，如果传入该值，则忽略
    `props.children` 的值，不会被渲染。
+ + `shouldUpdate()` - 外部定义是否更新组件 - noop
 
 ## 最简单的调用
 目前封装性较低，所以最简单的也比较复杂~

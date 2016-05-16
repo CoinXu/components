@@ -57,7 +57,9 @@ const Calendar = React.createClass({
             disabledDate: disabledDate,
             diffDate: diffDate,
             onChange: noop,
-            onSelect: noop
+            onSelect: noop,
+            onMount: noop,
+            shouldUpdate: noop
         }
     },
 
@@ -69,8 +71,8 @@ const Calendar = React.createClass({
         });
     },
 
-    componentWillReceiveProps: function (nextProps) {
-        this.setState({currentTime: moment(nextProps.defaultTime)})
+    componentDidUpdate: function () {
+        this.props.onMount(this)
     },
 
     // 如果年份或月分发生了变化
@@ -79,7 +81,7 @@ const Calendar = React.createClass({
         if (!this._isSameDate(nextState.currentTime, this.state.currentTime)) {
             this.props.onChange(nextState.currentTime, this.state.currentTime);
         }
-        return nextState.changeFromHeader
+        return nextState.changeFromHeader || !!this.props.shouldUpdate()
     },
 
     today: function () {

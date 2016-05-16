@@ -32,7 +32,7 @@ const DatePicker = React.createClass({
         var props = this.props;
         var disabled = props.disabledDate(props.time);
         var className = {};
-        var current = moment();
+        var current = props.currentTime;
 
         className[props.dateItemClassName] = true;
         className[props.disabledClassName] = disabled;
