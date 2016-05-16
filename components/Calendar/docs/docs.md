@@ -73,20 +73,29 @@ const WrapCalendar = React.createClass({
         }
     },
     componentWillMount: function () {
-        this.setState({currentTime: this.props.defaultTime})
+        this._prevTime = this.props.defaultTime;
+        this.setState({currentTime: this.props.defaultTime});
+    },
+    componentWillUpdate: function (nextProps, nextState) {
+        this._prevTime = this.state.currentTime
     },
     onChange: function (cur, prev) {
         this.setState({currentTime: cur});
         this.props.onChange(cur, prev);
     },
+    shouldUpdate: function () {
+        return this._prevTime.valueOf() !== this.state.currentTime.valueOf();
+    },
     render: function () {
         var state = this.state;
         var props = this.props;
         var content = <Calendar
-            defaultTime={props.defaultTime}
+            shouldUpdate={this.shouldUpdate}
+            defaultTime={state.currentTime}
             onSelect={props.onSelect}
             onChange={this.onChange}/>;
         return <Popup
+            shouldUpdate={this.shouldUpdate}
             content={content}
             placement="bottom">
             <div className="comp-custom-select">

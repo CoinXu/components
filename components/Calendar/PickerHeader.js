@@ -74,7 +74,7 @@ const PickerHeader = React.createClass({
         var sl = start.year();
         var el = end.year();
 
-        assert(sl >= el, 'start year need less than end year');
+        assert(sl <= el, 'start year need less than end year');
 
         // 年间距
         var yearList = [];

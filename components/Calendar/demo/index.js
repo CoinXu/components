@@ -14,14 +14,14 @@ ReactDOM.render(<Calendar
         onChange={function(c, p){console.log(c.format(), p.format())}}/>,
     document.getElementById('demo')
 );
-//
-//// 不要日期，只要年月
-//ReactDOM.render(<Calendar
-//        onlyShowMonth
-//        onSelect={function(time){console.log(time.format())}}
-//        onChange={function(c, p){console.log(c.format(), p.format())}}/>,
-//    document.getElementById('demo-only-show-month')
-//);
+
+// 不要日期，只要年月
+ReactDOM.render(<Calendar
+        onlyShowMonth
+        onSelect={function(time){console.log(time.format())}}
+        onChange={function(c, p){console.log(c.format(), p.format())}}/>,
+    document.getElementById('demo-only-show-month')
+);
 
 // 用Popup包装弹出
 const Popup = require('../../Popup').Popup;

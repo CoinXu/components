@@ -106,8 +106,16 @@ const Calendar = React.createClass({
     },
 
     onHeaderChange: function (year, month) {
+        // 如果当前选中的时间和下一次更新的时间的月份相同
+        // 那么设置下一次的天为当前的天数
+        // 也就是说下一个月显示时，当前选中的日期，在下一次UI刷新时，依然为选中状态
+        var cur = this.state.currentTime;
+        var nextDate = 1;
+        if (month === cur.month()) {
+            nextDate = cur.date()
+        }
         this.setState({
-            currentTime: moment([year, month, 1]),
+            currentTime: moment([year, month, nextDate]),
             changeFromHeader: true
         })
     },
