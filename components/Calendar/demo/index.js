@@ -25,6 +25,7 @@ ReactDOM.render(<Calendar
 
 // 用Popup包装弹出
 const Popup = require('../../Popup').Popup;
+const baseDate = moment(new Date());
 const WrapCalendar = React.createClass({
     getInitialState: function () {
         return {currentTime: null}
@@ -37,26 +38,36 @@ const WrapCalendar = React.createClass({
         }
     },
     componentWillMount: function () {
-        this._prevTime = this.props.defaultTime;
+        this._useableTime = this._prevTime = this.props.defaultTime;
         this.setState({currentTime: this.props.defaultTime});
     },
-    componentWillUpdate: function (nextProps, nextState) {
-        this._prevTime = this.state.currentTime
+    componentDidUpdate: function (prevProps, prevState) {
+        this._prevTime = prevState.currentTime;
     },
     onChange: function (cur, prev) {
-        this.setState({currentTime: cur});
+        // 前日期的月份与上一次缓存的可用日期年月相同，则将当前日期设置为上一次缓存的日期
+        if (cur.month() === this._useableTime.month() &&
+            cur.year() === this._useableTime.year()) {
+            this.setState({currentTime: this._useableTime})
+        }
         this.props.onChange(cur, prev);
+    },
+    onSelect: function (cur) {
+        if (cur.valueOf() >= baseDate.valueOf()) {
+            this._useableTime = cur;
+            this.setState({currentTime: cur})
+        }
+        this.props.onSelect(cur);
     },
     shouldUpdate: function () {
         return this._prevTime.valueOf() !== this.state.currentTime.valueOf();
     },
     render: function () {
         var state = this.state;
-        var props = this.props;
         var content = <Calendar
             shouldUpdate={this.shouldUpdate}
             defaultTime={state.currentTime}
-            onSelect={props.onSelect}
+            onSelect={this.onSelect}
             onChange={this.onChange}/>;
         return <Popup
             shouldUpdate={this.shouldUpdate}

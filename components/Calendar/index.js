@@ -71,16 +71,21 @@ const Calendar = React.createClass({
         });
     },
 
-    componentDidUpdate: function () {
+    componentWillReceiveProps: function (nextProps) {
+        this.setState({
+            currentTime: moment(nextProps.defaultTime),
+            showDays: nextProps.showDays,
+            onlyShowMonth: nextProps.onlyShowMonth
+        });
+    },
+
+    componentDidMount: function () {
         this.props.onMount(this)
     },
 
     // 如果年份或月分发生了变化
     // 则更新
     shouldComponentUpdate: function (nextProps, nextState) {
-        if (!this._isSameDate(nextState.currentTime, this.state.currentTime)) {
-            this.props.onChange(nextState.currentTime, this.state.currentTime);
-        }
         return nextState.changeFromHeader || !!this.props.shouldUpdate()
     },
 
@@ -108,24 +113,34 @@ const Calendar = React.createClass({
     onHeaderChange: function (year, month) {
         // 如果当前选中的时间和下一次更新的时间的月份相同
         // 那么设置下一次的天为当前的天数
-        // 也就是说下一个月显示时，当前选中的日期，在下一次UI刷新时，依然为选中状态
+        // 也就是说当前选中的日期，在下一次UI刷新时[月分相同]，依然为选中状态
         var cur = this.state.currentTime;
         var nextDate = 1;
         if (month === cur.month()) {
             nextDate = cur.date()
         }
-        this.setState({
-            currentTime: moment([year, month, nextDate]),
-            changeFromHeader: true
-        })
+        var next = moment([year, month, nextDate]);
+
+        this.setState({currentTime: next, changeFromHeader: true},
+            function () {
+                this._onChange(next, cur);
+            }.bind(this));
     },
 
     onSelect: function (cur) {
-        this.setState({
-            currentTime: cur,
-            changeFromHeader: false
-        });
-        this.props.onSelect(cur);
+        var prev = this.state.currentTime;
+
+        this.setState({currentTime: cur, changeFromHeader: false},
+            function () {
+                this.props.onSelect(cur);
+                this._onChange(cur, prev);
+            }.bind(this));
+    },
+
+    _onChange: function (cur, prev) {
+        if (!this._isSameDate(cur, prev)) {
+            this.props.onChange(cur, prev);
+        }
     },
 
     render: function () {
