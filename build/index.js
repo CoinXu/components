@@ -1697,6 +1697,7 @@ this["EssaComponents"] =
 	var body = __webpack_require__(19);
 	var noop = __webpack_require__(4);
 	var assert = __webpack_require__(9);
+
 	var triggerHide = function triggerHide() {
 	    return true;
 	};
@@ -1715,7 +1716,7 @@ this["EssaComponents"] =
 	            component: 'div',
 	            refTarget: null,
 	            isVisible: true,
-	            style: { background: '#fff' },
+	            style: {},
 	            onHide: noop,
 	            onAnimateMount: noop,
 	            triggerHide: triggerHide
@@ -1758,7 +1759,7 @@ this["EssaComponents"] =
 	        var Components = props.component;
 	        assert(props.children, 'children required in HideOnBodyClick');
 
-	        return React.createElement(Components, { style: props.style }, React.createElement(Animate, {
+	        return React.createElement(Components, { style: { background: '#fff' } }, React.createElement(Animate, {
 	            style: props.style,
 	            component: props.component,
 	            from: { opacity: 0 },

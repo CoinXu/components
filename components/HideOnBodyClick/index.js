@@ -9,6 +9,7 @@ var DOMEvent = require('../../com/DOM/DOMEvent');
 var body = require('../../com/DOM/DOMBody');
 var noop = require('../../com/noop');
 var assert = require('../../com/assert');
+
 var triggerHide = function () {
     return true;
 };
@@ -26,7 +27,7 @@ var HideOnBodyClick = React.createClass({
             component: 'div',
             refTarget: null,
             isVisible: true,
-            style: {background: '#fff'},
+            style: {},
             onHide: noop,
             onAnimateMount: noop,
             triggerHide: triggerHide
@@ -72,7 +73,7 @@ var HideOnBodyClick = React.createClass({
         var Components = props.component;
         assert(props.children, 'children required in HideOnBodyClick');
 
-        return <Components style={props.style}>
+        return <Components style={{background: '#fff'}}>
             <Animate
                 style={props.style}
                 component={props.component}
