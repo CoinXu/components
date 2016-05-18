@@ -1755,10 +1755,10 @@ this["EssaComponents"] =
 
 	    render: function render() {
 	        var props = this.props;
-	        var Components = props.components;
+	        var Components = props.component;
 	        assert(props.children, 'children required in HideOnBodyClick');
 
-	        return React.createElement(Components, null, React.createElement(Animate, {
+	        return React.createElement(Components, { style: props.style }, React.createElement(Animate, {
 	            style: props.style,
 	            component: props.component,
 	            from: { opacity: 0 },
