@@ -275,713 +275,713 @@ this["EssaComponents"] =
 
 	// performance.now polyfill
 	(function (root) {
-	        root = this;
-	        if ('performance' in root === false) {
-	                root.performance = {};
-	        }
+	    root = this;
+	    if ('performance' in root === false) {
+	        root.performance = {};
+	    }
 
-	        // IE 8
-	        Date.now = Date.now || function () {
-	                return new Date().getTime();
+	    // IE 8
+	    Date.now = Date.now || function () {
+	        return new Date().getTime();
+	    };
+
+	    if ('now' in root.performance === false) {
+	        var offset = root.performance.timing && root.performance.timing.navigationStart ? performance.timing.navigationStart : Date.now();
+
+	        root.performance.now = function () {
+	            return Date.now() - offset;
 	        };
-
-	        if ('now' in root.performance === false) {
-	                var offset = root.performance.timing && root.performance.timing.navigationStart ? performance.timing.navigationStart : Date.now();
-
-	                root.performance.now = function () {
-	                        return Date.now() - offset;
-	                };
-	        }
+	    }
 	})();
 
 	var TWEEN = TWEEN || function () {
 
-	        var _tweens = [];
+	    var _tweens = [];
 
-	        return {
+	    return {
 
-	                REVISION: '14',
+	        REVISION: '14',
 
-	                getAll: function getAll() {
+	        getAll: function getAll() {
 
-	                        return _tweens;
-	                },
+	            return _tweens;
+	        },
 
-	                removeAll: function removeAll() {
+	        removeAll: function removeAll() {
 
-	                        _tweens = [];
-	                },
+	            _tweens = [];
+	        },
 
-	                add: function add(tween) {
+	        add: function add(tween) {
 
-	                        _tweens.push(tween);
-	                },
+	            _tweens.push(tween);
+	        },
 
-	                remove: function remove(tween) {
+	        remove: function remove(tween) {
 
-	                        var i = _tweens.indexOf(tween);
+	            var i = _tweens.indexOf(tween);
 
-	                        if (i !== -1) {
+	            if (i !== -1) {
 
-	                                _tweens.splice(i, 1);
-	                        }
-	                },
+	                _tweens.splice(i, 1);
+	            }
+	        },
 
-	                update: function update(time) {
+	        update: function update(time) {
 
-	                        if (_tweens.length === 0) return false;
+	            if (_tweens.length === 0) return false;
 
-	                        var i = 0;
+	            var i = 0;
 
-	                        time = time !== undefined ? time : window.performance.now();
+	            time = time !== undefined ? time : window.performance.now();
 
-	                        while (i < _tweens.length) {
+	            while (i < _tweens.length) {
 
-	                                if (_tweens[i].update(time)) {
+	                if (_tweens[i].update(time)) {
 
-	                                        i++;
-	                                } else {
+	                    i++;
+	                } else {
 
-	                                        _tweens.splice(i, 1);
-	                                }
-	                        }
-
-	                        return true;
+	                    _tweens.splice(i, 1);
 	                }
-	        };
+	            }
+
+	            return true;
+	        }
+	    };
 	}();
 
 	TWEEN.Tween = function (object) {
 
-	        var _object = object;
-	        var _valuesStart = {};
-	        var _valuesEnd = {};
-	        var _valuesStartRepeat = {};
-	        var _duration = 1000;
-	        var _repeat = 0;
-	        var _yoyo = false;
-	        var _isPlaying = false;
-	        var _reversed = false;
-	        var _delayTime = 0;
-	        var _startTime = null;
-	        var _easingFunction = TWEEN.Easing.Linear.None;
-	        var _interpolationFunction = TWEEN.Interpolation.Linear;
-	        var _chainedTweens = [];
-	        var _onStartCallback = null;
-	        var _onStartCallbackFired = false;
-	        var _onUpdateCallback = null;
-	        var _onCompleteCallback = null;
-	        var _onStopCallback = null;
+	    var _object = object;
+	    var _valuesStart = {};
+	    var _valuesEnd = {};
+	    var _valuesStartRepeat = {};
+	    var _duration = 1000;
+	    var _repeat = 0;
+	    var _yoyo = false;
+	    var _isPlaying = false;
+	    var _reversed = false;
+	    var _delayTime = 0;
+	    var _startTime = null;
+	    var _easingFunction = TWEEN.Easing.Linear.None;
+	    var _interpolationFunction = TWEEN.Interpolation.Linear;
+	    var _chainedTweens = [];
+	    var _onStartCallback = null;
+	    var _onStartCallbackFired = false;
+	    var _onUpdateCallback = null;
+	    var _onCompleteCallback = null;
+	    var _onStopCallback = null;
 
-	        // Set all starting values present on the target object
-	        for (var field in object) {
+	    // Set all starting values present on the target object
+	    for (var field in object) {
 
-	                _valuesStart[field] = parseFloat(object[field], 10);
+	        _valuesStart[field] = parseFloat(object[field], 10);
+	    }
+
+	    this.to = function (properties, duration) {
+
+	        if (duration !== undefined) {
+
+	            _duration = duration;
 	        }
 
-	        this.to = function (properties, duration) {
+	        _valuesEnd = properties;
 
-	                if (duration !== undefined) {
+	        return this;
+	    };
 
-	                        _duration = duration;
+	    this.start = function (time) {
+
+	        TWEEN.add(this);
+
+	        _isPlaying = true;
+
+	        _onStartCallbackFired = false;
+
+	        _startTime = time !== undefined ? time : window.performance.now();
+	        _startTime += _delayTime;
+
+	        for (var property in _valuesEnd) {
+
+	            // check if an Array was provided as property value
+	            if (_valuesEnd[property] instanceof Array) {
+
+	                if (_valuesEnd[property].length === 0) {
+
+	                    continue;
 	                }
 
-	                _valuesEnd = properties;
+	                // create a local copy of the Array with the start value at the front
+	                _valuesEnd[property] = [_object[property]].concat(_valuesEnd[property]);
+	            }
 
-	                return this;
-	        };
+	            _valuesStart[property] = _object[property];
 
-	        this.start = function (time) {
+	            if (_valuesStart[property] instanceof Array === false) {
+	                _valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+	            }
 
-	                TWEEN.add(this);
+	            _valuesStartRepeat[property] = _valuesStart[property] || 0;
+	        }
 
-	                _isPlaying = true;
+	        return this;
+	    };
 
-	                _onStartCallbackFired = false;
+	    this.stop = function () {
 
-	                _startTime = time !== undefined ? time : window.performance.now();
-	                _startTime += _delayTime;
+	        if (!_isPlaying) {
+	            return this;
+	        }
 
-	                for (var property in _valuesEnd) {
+	        TWEEN.remove(this);
+	        _isPlaying = false;
 
-	                        // check if an Array was provided as property value
-	                        if (_valuesEnd[property] instanceof Array) {
+	        if (_onStopCallback !== null) {
 
-	                                if (_valuesEnd[property].length === 0) {
+	            _onStopCallback.call(_object);
+	        }
 
-	                                        continue;
-	                                }
+	        this.stopChainedTweens();
+	        return this;
+	    };
 
-	                                // create a local copy of the Array with the start value at the front
-	                                _valuesEnd[property] = [_object[property]].concat(_valuesEnd[property]);
-	                        }
+	    this.stopChainedTweens = function () {
 
-	                        _valuesStart[property] = _object[property];
+	        for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
 
-	                        if (_valuesStart[property] instanceof Array === false) {
-	                                _valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
-	                        }
+	            _chainedTweens[i].stop();
+	        }
+	    };
 
-	                        _valuesStartRepeat[property] = _valuesStart[property] || 0;
+	    this.delay = function (amount) {
+
+	        _delayTime = amount;
+	        return this;
+	    };
+
+	    this.repeat = function (times) {
+
+	        _repeat = times;
+	        return this;
+	    };
+
+	    this.yoyo = function (yoyo) {
+
+	        _yoyo = yoyo;
+	        return this;
+	    };
+
+	    this.easing = function (easing) {
+
+	        _easingFunction = easing;
+	        return this;
+	    };
+
+	    this.interpolation = function (interpolation) {
+
+	        _interpolationFunction = interpolation;
+	        return this;
+	    };
+
+	    this.chain = function () {
+
+	        _chainedTweens = arguments;
+	        return this;
+	    };
+
+	    this.onStart = function (callback) {
+
+	        _onStartCallback = callback;
+	        return this;
+	    };
+
+	    this.onUpdate = function (callback) {
+
+	        _onUpdateCallback = callback;
+	        return this;
+	    };
+
+	    this.onComplete = function (callback) {
+
+	        _onCompleteCallback = callback;
+	        return this;
+	    };
+
+	    this.onStop = function (callback) {
+
+	        _onStopCallback = callback;
+	        return this;
+	    };
+
+	    this.update = function (time) {
+
+	        var property;
+
+	        if (time < _startTime) {
+
+	            return true;
+	        }
+
+	        if (_onStartCallbackFired === false) {
+
+	            if (_onStartCallback !== null) {
+
+	                _onStartCallback.call(_object);
+	            }
+
+	            _onStartCallbackFired = true;
+	        }
+
+	        var elapsed = (time - _startTime) / _duration;
+	        elapsed = elapsed > 1 ? 1 : elapsed;
+
+	        var value = _easingFunction(elapsed);
+
+	        for (property in _valuesEnd) {
+
+	            var start = _valuesStart[property] || 0;
+	            var end = _valuesEnd[property];
+
+	            if (end instanceof Array) {
+
+	                _object[property] = _interpolationFunction(end, value);
+	            } else {
+
+	                // Parses relative end values with start as base (e.g.: +10, -3)
+	                if (typeof end === "string") {
+	                    end = start + parseFloat(end, 10);
 	                }
 
-	                return this;
-	        };
+	                // protect against non numeric properties.
+	                if (typeof end === "number") {
+	                    _object[property] = start + (end - start) * value;
+	                }
+	            }
+	        }
 
-	        this.stop = function () {
+	        if (_onUpdateCallback !== null) {
 
-	                if (!_isPlaying) {
-	                        return this;
+	            _onUpdateCallback.call(_object, value);
+	        }
+
+	        if (elapsed == 1) {
+
+	            if (_repeat > 0) {
+
+	                if (isFinite(_repeat)) {
+	                    _repeat--;
 	                }
 
-	                TWEEN.remove(this);
-	                _isPlaying = false;
+	                // reassign starting values, restart by making startTime = now
+	                for (property in _valuesStartRepeat) {
 
-	                if (_onStopCallback !== null) {
+	                    if (typeof _valuesEnd[property] === "string") {
+	                        _valuesStartRepeat[property] = _valuesStartRepeat[property] + parseFloat(_valuesEnd[property], 10);
+	                    }
 
-	                        _onStopCallback.call(_object);
+	                    if (_yoyo) {
+	                        var tmp = _valuesStartRepeat[property];
+	                        _valuesStartRepeat[property] = _valuesEnd[property];
+	                        _valuesEnd[property] = tmp;
+	                    }
+
+	                    _valuesStart[property] = _valuesStartRepeat[property];
 	                }
 
-	                this.stopChainedTweens();
-	                return this;
-	        };
+	                if (_yoyo) {
+	                    _reversed = !_reversed;
+	                }
 
-	        this.stopChainedTweens = function () {
+	                _startTime = time + _delayTime;
+
+	                return true;
+	            } else {
+
+	                if (_onCompleteCallback !== null) {
+
+	                    _onCompleteCallback.call(_object);
+	                }
 
 	                for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
 
-	                        _chainedTweens[i].stop();
-	                }
-	        };
-
-	        this.delay = function (amount) {
-
-	                _delayTime = amount;
-	                return this;
-	        };
-
-	        this.repeat = function (times) {
-
-	                _repeat = times;
-	                return this;
-	        };
-
-	        this.yoyo = function (yoyo) {
-
-	                _yoyo = yoyo;
-	                return this;
-	        };
-
-	        this.easing = function (easing) {
-
-	                _easingFunction = easing;
-	                return this;
-	        };
-
-	        this.interpolation = function (interpolation) {
-
-	                _interpolationFunction = interpolation;
-	                return this;
-	        };
-
-	        this.chain = function () {
-
-	                _chainedTweens = arguments;
-	                return this;
-	        };
-
-	        this.onStart = function (callback) {
-
-	                _onStartCallback = callback;
-	                return this;
-	        };
-
-	        this.onUpdate = function (callback) {
-
-	                _onUpdateCallback = callback;
-	                return this;
-	        };
-
-	        this.onComplete = function (callback) {
-
-	                _onCompleteCallback = callback;
-	                return this;
-	        };
-
-	        this.onStop = function (callback) {
-
-	                _onStopCallback = callback;
-	                return this;
-	        };
-
-	        this.update = function (time) {
-
-	                var property;
-
-	                if (time < _startTime) {
-
-	                        return true;
+	                    _chainedTweens[i].start(time);
 	                }
 
-	                if (_onStartCallbackFired === false) {
+	                return false;
+	            }
+	        }
 
-	                        if (_onStartCallback !== null) {
-
-	                                _onStartCallback.call(_object);
-	                        }
-
-	                        _onStartCallbackFired = true;
-	                }
-
-	                var elapsed = (time - _startTime) / _duration;
-	                elapsed = elapsed > 1 ? 1 : elapsed;
-
-	                var value = _easingFunction(elapsed);
-
-	                for (property in _valuesEnd) {
-
-	                        var start = _valuesStart[property] || 0;
-	                        var end = _valuesEnd[property];
-
-	                        if (end instanceof Array) {
-
-	                                _object[property] = _interpolationFunction(end, value);
-	                        } else {
-
-	                                // Parses relative end values with start as base (e.g.: +10, -3)
-	                                if (typeof end === "string") {
-	                                        end = start + parseFloat(end, 10);
-	                                }
-
-	                                // protect against non numeric properties.
-	                                if (typeof end === "number") {
-	                                        _object[property] = start + (end - start) * value;
-	                                }
-	                        }
-	                }
-
-	                if (_onUpdateCallback !== null) {
-
-	                        _onUpdateCallback.call(_object, value);
-	                }
-
-	                if (elapsed == 1) {
-
-	                        if (_repeat > 0) {
-
-	                                if (isFinite(_repeat)) {
-	                                        _repeat--;
-	                                }
-
-	                                // reassign starting values, restart by making startTime = now
-	                                for (property in _valuesStartRepeat) {
-
-	                                        if (typeof _valuesEnd[property] === "string") {
-	                                                _valuesStartRepeat[property] = _valuesStartRepeat[property] + parseFloat(_valuesEnd[property], 10);
-	                                        }
-
-	                                        if (_yoyo) {
-	                                                var tmp = _valuesStartRepeat[property];
-	                                                _valuesStartRepeat[property] = _valuesEnd[property];
-	                                                _valuesEnd[property] = tmp;
-	                                        }
-
-	                                        _valuesStart[property] = _valuesStartRepeat[property];
-	                                }
-
-	                                if (_yoyo) {
-	                                        _reversed = !_reversed;
-	                                }
-
-	                                _startTime = time + _delayTime;
-
-	                                return true;
-	                        } else {
-
-	                                if (_onCompleteCallback !== null) {
-
-	                                        _onCompleteCallback.call(_object);
-	                                }
-
-	                                for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
-
-	                                        _chainedTweens[i].start(time);
-	                                }
-
-	                                return false;
-	                        }
-	                }
-
-	                return true;
-	        };
+	        return true;
+	    };
 	};
 
 	TWEEN.Easing = {
 
-	        Linear: {
+	    Linear: {
 
-	                None: function None(k) {
+	        None: function None(k) {
 
-	                        return k;
-	                }
-
-	        },
-
-	        Quadratic: {
-
-	                In: function In(k) {
-
-	                        return k * k;
-	                },
-
-	                Out: function Out(k) {
-
-	                        return k * (2 - k);
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if ((k *= 2) < 1) return 0.5 * k * k;
-	                        return -0.5 * (--k * (k - 2) - 1);
-	                }
-
-	        },
-
-	        Cubic: {
-
-	                In: function In(k) {
-
-	                        return k * k * k;
-	                },
-
-	                Out: function Out(k) {
-
-	                        return --k * k * k + 1;
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if ((k *= 2) < 1) return 0.5 * k * k * k;
-	                        return 0.5 * ((k -= 2) * k * k + 2);
-	                }
-
-	        },
-
-	        Quartic: {
-
-	                In: function In(k) {
-
-	                        return k * k * k * k;
-	                },
-
-	                Out: function Out(k) {
-
-	                        return 1 - --k * k * k * k;
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if ((k *= 2) < 1) return 0.5 * k * k * k * k;
-	                        return -0.5 * ((k -= 2) * k * k * k - 2);
-	                }
-
-	        },
-
-	        Quintic: {
-
-	                In: function In(k) {
-
-	                        return k * k * k * k * k;
-	                },
-
-	                Out: function Out(k) {
-
-	                        return --k * k * k * k * k + 1;
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if ((k *= 2) < 1) return 0.5 * k * k * k * k * k;
-	                        return 0.5 * ((k -= 2) * k * k * k * k + 2);
-	                }
-
-	        },
-
-	        Sinusoidal: {
-
-	                In: function In(k) {
-
-	                        return 1 - Math.cos(k * Math.PI / 2);
-	                },
-
-	                Out: function Out(k) {
-
-	                        return Math.sin(k * Math.PI / 2);
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        return 0.5 * (1 - Math.cos(Math.PI * k));
-	                }
-
-	        },
-
-	        Exponential: {
-
-	                In: function In(k) {
-
-	                        return k === 0 ? 0 : Math.pow(1024, k - 1);
-	                },
-
-	                Out: function Out(k) {
-
-	                        return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if (k === 0) return 0;
-	                        if (k === 1) return 1;
-	                        if ((k *= 2) < 1) return 0.5 * Math.pow(1024, k - 1);
-	                        return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
-	                }
-
-	        },
-
-	        Circular: {
-
-	                In: function In(k) {
-
-	                        return 1 - Math.sqrt(1 - k * k);
-	                },
-
-	                Out: function Out(k) {
-
-	                        return Math.sqrt(1 - --k * k);
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if ((k *= 2) < 1) return -0.5 * (Math.sqrt(1 - k * k) - 1);
-	                        return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
-	                }
-
-	        },
-
-	        Elastic: {
-
-	                In: function In(k) {
-
-	                        var s,
-	                            a = 0.1,
-	                            p = 0.4;
-	                        if (k === 0) return 0;
-	                        if (k === 1) return 1;
-	                        if (!a || a < 1) {
-	                                a = 1;
-	                                s = p / 4;
-	                        } else s = p * Math.asin(1 / a) / (2 * Math.PI);
-	                        return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
-	                },
-
-	                Out: function Out(k) {
-
-	                        var s,
-	                            a = 0.1,
-	                            p = 0.4;
-	                        if (k === 0) return 0;
-	                        if (k === 1) return 1;
-	                        if (!a || a < 1) {
-	                                a = 1;
-	                                s = p / 4;
-	                        } else s = p * Math.asin(1 / a) / (2 * Math.PI);
-	                        return a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1;
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        var s,
-	                            a = 0.1,
-	                            p = 0.4;
-	                        if (k === 0) return 0;
-	                        if (k === 1) return 1;
-	                        if (!a || a < 1) {
-	                                a = 1;
-	                                s = p / 4;
-	                        } else s = p * Math.asin(1 / a) / (2 * Math.PI);
-	                        if ((k *= 2) < 1) return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
-	                        return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
-	                }
-
-	        },
-
-	        Back: {
-
-	                In: function In(k) {
-
-	                        var s = 1.70158;
-	                        return k * k * ((s + 1) * k - s);
-	                },
-
-	                Out: function Out(k) {
-
-	                        var s = 1.70158;
-	                        return --k * k * ((s + 1) * k + s) + 1;
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        var s = 1.70158 * 1.525;
-	                        if ((k *= 2) < 1) return 0.5 * (k * k * ((s + 1) * k - s));
-	                        return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-	                }
-
-	        },
-
-	        Bounce: {
-
-	                In: function In(k) {
-
-	                        return 1 - TWEEN.Easing.Bounce.Out(1 - k);
-	                },
-
-	                Out: function Out(k) {
-
-	                        if (k < 1 / 2.75) {
-
-	                                return 7.5625 * k * k;
-	                        } else if (k < 2 / 2.75) {
-
-	                                return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
-	                        } else if (k < 2.5 / 2.75) {
-
-	                                return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
-	                        } else {
-
-	                                return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
-	                        }
-	                },
-
-	                InOut: function InOut(k) {
-
-	                        if (k < 0.5) return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
-	                        return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
-	                }
-
+	            return k;
 	        }
+
+	    },
+
+	    Quadratic: {
+
+	        In: function In(k) {
+
+	            return k * k;
+	        },
+
+	        Out: function Out(k) {
+
+	            return k * (2 - k);
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if ((k *= 2) < 1) return 0.5 * k * k;
+	            return -0.5 * (--k * (k - 2) - 1);
+	        }
+
+	    },
+
+	    Cubic: {
+
+	        In: function In(k) {
+
+	            return k * k * k;
+	        },
+
+	        Out: function Out(k) {
+
+	            return --k * k * k + 1;
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if ((k *= 2) < 1) return 0.5 * k * k * k;
+	            return 0.5 * ((k -= 2) * k * k + 2);
+	        }
+
+	    },
+
+	    Quartic: {
+
+	        In: function In(k) {
+
+	            return k * k * k * k;
+	        },
+
+	        Out: function Out(k) {
+
+	            return 1 - --k * k * k * k;
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if ((k *= 2) < 1) return 0.5 * k * k * k * k;
+	            return -0.5 * ((k -= 2) * k * k * k - 2);
+	        }
+
+	    },
+
+	    Quintic: {
+
+	        In: function In(k) {
+
+	            return k * k * k * k * k;
+	        },
+
+	        Out: function Out(k) {
+
+	            return --k * k * k * k * k + 1;
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if ((k *= 2) < 1) return 0.5 * k * k * k * k * k;
+	            return 0.5 * ((k -= 2) * k * k * k * k + 2);
+	        }
+
+	    },
+
+	    Sinusoidal: {
+
+	        In: function In(k) {
+
+	            return 1 - Math.cos(k * Math.PI / 2);
+	        },
+
+	        Out: function Out(k) {
+
+	            return Math.sin(k * Math.PI / 2);
+	        },
+
+	        InOut: function InOut(k) {
+
+	            return 0.5 * (1 - Math.cos(Math.PI * k));
+	        }
+
+	    },
+
+	    Exponential: {
+
+	        In: function In(k) {
+
+	            return k === 0 ? 0 : Math.pow(1024, k - 1);
+	        },
+
+	        Out: function Out(k) {
+
+	            return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if (k === 0) return 0;
+	            if (k === 1) return 1;
+	            if ((k *= 2) < 1) return 0.5 * Math.pow(1024, k - 1);
+	            return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+	        }
+
+	    },
+
+	    Circular: {
+
+	        In: function In(k) {
+
+	            return 1 - Math.sqrt(1 - k * k);
+	        },
+
+	        Out: function Out(k) {
+
+	            return Math.sqrt(1 - --k * k);
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if ((k *= 2) < 1) return -0.5 * (Math.sqrt(1 - k * k) - 1);
+	            return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+	        }
+
+	    },
+
+	    Elastic: {
+
+	        In: function In(k) {
+
+	            var s,
+	                a = 0.1,
+	                p = 0.4;
+	            if (k === 0) return 0;
+	            if (k === 1) return 1;
+	            if (!a || a < 1) {
+	                a = 1;
+	                s = p / 4;
+	            } else s = p * Math.asin(1 / a) / (2 * Math.PI);
+	            return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+	        },
+
+	        Out: function Out(k) {
+
+	            var s,
+	                a = 0.1,
+	                p = 0.4;
+	            if (k === 0) return 0;
+	            if (k === 1) return 1;
+	            if (!a || a < 1) {
+	                a = 1;
+	                s = p / 4;
+	            } else s = p * Math.asin(1 / a) / (2 * Math.PI);
+	            return a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1;
+	        },
+
+	        InOut: function InOut(k) {
+
+	            var s,
+	                a = 0.1,
+	                p = 0.4;
+	            if (k === 0) return 0;
+	            if (k === 1) return 1;
+	            if (!a || a < 1) {
+	                a = 1;
+	                s = p / 4;
+	            } else s = p * Math.asin(1 / a) / (2 * Math.PI);
+	            if ((k *= 2) < 1) return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+	            return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
+	        }
+
+	    },
+
+	    Back: {
+
+	        In: function In(k) {
+
+	            var s = 1.70158;
+	            return k * k * ((s + 1) * k - s);
+	        },
+
+	        Out: function Out(k) {
+
+	            var s = 1.70158;
+	            return --k * k * ((s + 1) * k + s) + 1;
+	        },
+
+	        InOut: function InOut(k) {
+
+	            var s = 1.70158 * 1.525;
+	            if ((k *= 2) < 1) return 0.5 * (k * k * ((s + 1) * k - s));
+	            return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+	        }
+
+	    },
+
+	    Bounce: {
+
+	        In: function In(k) {
+
+	            return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+	        },
+
+	        Out: function Out(k) {
+
+	            if (k < 1 / 2.75) {
+
+	                return 7.5625 * k * k;
+	            } else if (k < 2 / 2.75) {
+
+	                return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+	            } else if (k < 2.5 / 2.75) {
+
+	                return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+	            } else {
+
+	                return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+	            }
+	        },
+
+	        InOut: function InOut(k) {
+
+	            if (k < 0.5) return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+	            return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+	        }
+
+	    }
 
 	};
 
 	TWEEN.Interpolation = {
 
-	        Linear: function Linear(v, k) {
+	    Linear: function Linear(v, k) {
 
-	                var m = v.length - 1,
-	                    f = m * k,
-	                    i = Math.floor(f),
-	                    fn = TWEEN.Interpolation.Utils.Linear;
+	        var m = v.length - 1,
+	            f = m * k,
+	            i = Math.floor(f),
+	            fn = TWEEN.Interpolation.Utils.Linear;
 
-	                if (k < 0) return fn(v[0], v[1], f);
-	                if (k > 1) return fn(v[m], v[m - 1], m - f);
+	        if (k < 0) return fn(v[0], v[1], f);
+	        if (k > 1) return fn(v[m], v[m - 1], m - f);
 
-	                return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-	        },
+	        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+	    },
 
-	        Bezier: function Bezier(v, k) {
+	    Bezier: function Bezier(v, k) {
 
-	                var b = 0,
-	                    n = v.length - 1,
-	                    pw = Math.pow,
-	                    bn = TWEEN.Interpolation.Utils.Bernstein,
-	                    i;
+	        var b = 0,
+	            n = v.length - 1,
+	            pw = Math.pow,
+	            bn = TWEEN.Interpolation.Utils.Bernstein,
+	            i;
 
-	                for (i = 0; i <= n; i++) {
-	                        b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-	                }
-
-	                return b;
-	        },
-
-	        CatmullRom: function CatmullRom(v, k) {
-
-	                var m = v.length - 1,
-	                    f = m * k,
-	                    i = Math.floor(f),
-	                    fn = TWEEN.Interpolation.Utils.CatmullRom;
-
-	                if (v[0] === v[m]) {
-
-	                        if (k < 0) i = Math.floor(f = m * (1 + k));
-
-	                        return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-	                } else {
-
-	                        if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-	                        if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-
-	                        return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-	                }
-	        },
-
-	        Utils: {
-
-	                Linear: function Linear(p0, p1, t) {
-
-	                        return (p1 - p0) * t + p0;
-	                },
-
-	                Bernstein: function Bernstein(n, i) {
-
-	                        var fc = TWEEN.Interpolation.Utils.Factorial;
-	                        return fc(n) / fc(i) / fc(n - i);
-	                },
-
-	                Factorial: function () {
-
-	                        var a = [1];
-
-	                        return function (n) {
-
-	                                var s = 1,
-	                                    i;
-	                                if (a[n]) return a[n];
-	                                for (i = n; i > 1; i--) {
-	                                        s *= i;
-	                                }return a[n] = s;
-	                        };
-	                }(),
-
-	                CatmullRom: function CatmullRom(p0, p1, p2, p3, t) {
-
-	                        var v0 = (p2 - p0) * 0.5,
-	                            v1 = (p3 - p1) * 0.5,
-	                            t2 = t * t,
-	                            t3 = t * t2;
-	                        return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-	                }
-
+	        for (i = 0; i <= n; i++) {
+	            b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
 	        }
+
+	        return b;
+	    },
+
+	    CatmullRom: function CatmullRom(v, k) {
+
+	        var m = v.length - 1,
+	            f = m * k,
+	            i = Math.floor(f),
+	            fn = TWEEN.Interpolation.Utils.CatmullRom;
+
+	        if (v[0] === v[m]) {
+
+	            if (k < 0) i = Math.floor(f = m * (1 + k));
+
+	            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+	        } else {
+
+	            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+	            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+
+	            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+	        }
+	    },
+
+	    Utils: {
+
+	        Linear: function Linear(p0, p1, t) {
+
+	            return (p1 - p0) * t + p0;
+	        },
+
+	        Bernstein: function Bernstein(n, i) {
+
+	            var fc = TWEEN.Interpolation.Utils.Factorial;
+	            return fc(n) / fc(i) / fc(n - i);
+	        },
+
+	        Factorial: function () {
+
+	            var a = [1];
+
+	            return function (n) {
+
+	                var s = 1,
+	                    i;
+	                if (a[n]) return a[n];
+	                for (i = n; i > 1; i--) {
+	                    s *= i;
+	                }return a[n] = s;
+	            };
+	        }(),
+
+	        CatmullRom: function CatmullRom(p0, p1, p2, p3, t) {
+
+	            var v0 = (p2 - p0) * 0.5,
+	                v1 = (p3 - p1) * 0.5,
+	                t2 = t * t,
+	                t3 = t * t2;
+	            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+	        }
+
+	    }
 
 	};
 
 	// UMD (Universal Module Definition)
 	(function (root) {
-	        root = this;
-	        if (true) {
+	    root = this;
+	    if (true) {
 
-	                // AMD
-	                !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-	                        return TWEEN;
-	                }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	        } else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') {
+	        // AMD
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	            return TWEEN;
+	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') {
 
-	                // Node.js
-	                module.exports = TWEEN;
-	        } else {
+	        // Node.js
+	        module.exports = TWEEN;
+	    } else {
 
-	                // Global variable
-	                root.TWEEN = TWEEN;
-	        }
+	        // Global variable
+	        root.TWEEN = TWEEN;
+	    }
 	})();
 
 /***/ },
@@ -1715,6 +1715,7 @@ this["EssaComponents"] =
 	            component: 'div',
 	            refTarget: null,
 	            isVisible: true,
+	            style: { background: '#fff' },
 	            onHide: noop,
 	            onAnimateMount: noop,
 	            triggerHide: triggerHide
@@ -1754,15 +1755,16 @@ this["EssaComponents"] =
 
 	    render: function render() {
 	        var props = this.props;
+	        var Components = props.components;
 	        assert(props.children, 'children required in HideOnBodyClick');
 
-	        return React.createElement(Animate, {
+	        return React.createElement(Components, null, React.createElement(Animate, {
 	            style: props.style,
 	            component: props.component,
 	            from: { opacity: 0 },
 	            to: { opacity: 1 },
 	            during: 200,
-	            componentDidMount: this.holdAnimate }, props.children);
+	            componentDidMount: this.holdAnimate }, props.children));
 	    }
 	});
 
@@ -2661,9 +2663,11 @@ this["EssaComponents"] =
 
 	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	function _typeof(obj) {
-	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	}
+	var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+	    return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	} : function (obj) {
+	    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	};
 
 	/**
 	 * Created by xcp on 2016/3/23.
@@ -2762,9 +2766,11 @@ this["EssaComponents"] =
 
 	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	function _typeof(obj) {
-	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	}
+	var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+	    return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	} : function (obj) {
+	    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	};
 
 	/**
 	 * Created by xcp on 2016/4/10.
@@ -4449,9 +4455,11 @@ this["EssaComponents"] =
 
 	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	function _typeof(obj) {
-	    return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	}
+	var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+	    return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	} : function (obj) {
+	    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+	};
 
 	/**
 	 * Created by xcp on 2016/4/30.

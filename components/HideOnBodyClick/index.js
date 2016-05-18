@@ -26,6 +26,7 @@ var HideOnBodyClick = React.createClass({
             component: 'div',
             refTarget: null,
             isVisible: true,
+            style: {background: '#fff'},
             onHide: noop,
             onAnimateMount: noop,
             triggerHide: triggerHide
@@ -68,17 +69,20 @@ var HideOnBodyClick = React.createClass({
 
     render: function () {
         var props = this.props;
+        var Components = props.component;
         assert(props.children, 'children required in HideOnBodyClick');
 
-        return <Animate
-            style={props.style}
-            component={props.component}
-            from={{opacity:0}}
-            to={{opacity:1}}
-            during={200}
-            componentDidMount={this.holdAnimate}>
-            {props.children}
-        </Animate>
+        return <Components style={props.style}>
+            <Animate
+                style={props.style}
+                component={props.component}
+                from={{opacity:0}}
+                to={{opacity:1}}
+                during={200}
+                componentDidMount={this.holdAnimate}>
+                {props.children}
+            </Animate>
+        </Components>
     }
 });
 
