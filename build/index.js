@@ -61,7 +61,7 @@ this["EssaComponents"] =
 	    Pagination: __webpack_require__(42),
 	    Popup: __webpack_require__(44),
 	    Selectable: __webpack_require__(23),
-	    slider: __webpack_require__(52)
+	    Slider: __webpack_require__(52)
 	};
 
 /***/ },

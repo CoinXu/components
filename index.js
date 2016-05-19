@@ -12,5 +12,5 @@ module.exports = {
     Pagination: require('./dist/Pagination'),
     Popup: require('./dist/Popup'),
     Selectable: require('./dist/Selectable'),
-    slider: require('./dist/slider')
+    Slider: require('./dist/Slider')
 };
