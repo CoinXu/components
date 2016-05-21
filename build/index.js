@@ -3933,7 +3933,7 @@ this["EssaComponents"] =
 	            placement: null,
 	            baseElement: null,
 	            onHide: noop,
-	            shouldUpdate: noop,
+	            shouldUpdate: triggerHide,
 	            triggerHide: triggerHide,
 	            onComponentMount: noop
 	        };
@@ -3977,7 +3977,7 @@ this["EssaComponents"] =
 	    },
 
 	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-	        if (this.state.isVisible !== prevState.isVisible || !!this.props.shouldUpdate()) {
+	        if (!!this.props.shouldUpdate() && this.state.isVisible !== prevState.isVisible) {
 	            this.renderPopup();
 	        }
 	    },
