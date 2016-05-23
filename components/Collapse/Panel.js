@@ -35,7 +35,7 @@ var Panel = React.createClass({
         this.__animate[collapse ? 'backToTheStart' : 'startAnimate']();
     },
 
-    onAnimateMount: function (inst) {
+    onMount: function (inst) {
         this.__animate = inst;
     },
 
@@ -111,7 +111,7 @@ var Panel = React.createClass({
             {React.cloneElement(props.title)}
             <div style={style}>
                 <Animate
-                    componentDidMount={this.onAnimateMount}
+                    onMount={this.onMount}
                     from={state.from}
                     to={state.to}
                     during={200}

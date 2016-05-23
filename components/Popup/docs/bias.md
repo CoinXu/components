@@ -7,6 +7,8 @@
 + closeable - `Boolean` - 是否可关闭
 + style - `Object` - 外层容器 style，一般不用传
 + onComponentMount(warpNode, inst) - `Function` - 组件挂载后回调
+  <div class="warning">即将废弃,请用 `onMount` 代替</div>
++ onMount(warpNode, inst) - `Function` - 组件挂载后回调
 
 ## 调用方式
 
@@ -35,7 +37,7 @@ ReactDOM.render(
 ```JavaScript
 ReactDOM.render(
     <Bias 
-        onComponentMount={log}
+        onMount={log}
         placement="top"
         closeable>
         Bias 内容

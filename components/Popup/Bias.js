@@ -19,6 +19,7 @@ var Bias = React.createClass({
             symbolStyle: {},
             symbolClass: [],
             onComponentMount: noop,
+            onMount: noop,
             style: {}
         }
     },
@@ -49,7 +50,9 @@ var Bias = React.createClass({
     },
 
     componentDidMount: function () {
+        // TODO 将要废弃 onComponentMount 属性
         this.props.onComponentMount(this.refs.wrap, this);
+        this.props.onMount(this.refs.wrap, this);
     },
 
     render: function () {
@@ -65,14 +68,16 @@ var Bias = React.createClass({
                 onClick={this.unmount}/>
         }
 
-        return (<div className={classNames.wrapperClass} style={this.props.style}>
+        return (
+            <div className={classNames.wrapperClass} style={this.props.style}>
             <span className={classNames.symbolClass + symbolClassName}
                   style={this.props.symbolStyle}/>
-            <div className="bub-bias-con" ref="wrap">
-                <div className="bub-bias-con-text inline-block">{this.props.children}</div>
-                {closeElement}
-            </div>
-        </div>);
+                <div className="bub-bias-con" ref="wrap">
+                    <div
+                        className="bub-bias-con-text inline-block">{this.props.children}</div>
+                    {closeElement}
+                </div>
+            </div>);
     }
 });
 

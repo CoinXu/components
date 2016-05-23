@@ -45,7 +45,7 @@ var PositionBubble = React.createClass({
     },
 
     unMount: function () {
-        this._popup.autoVisible();
+        this._popup.hide();
     },
 
     show: function () {
@@ -81,8 +81,8 @@ var PositionBubble = React.createClass({
             placement={props.placement}
             trigger={props.trigger}
             onHide={this._unmount}
-            onComponentMount={this.onMount}
-            triggerHide={noop}
+            onMount={this.onMount}
+            shouldHide={noop}
             baseElement={props.baseElement}
             content={content}/>
     }
@@ -115,5 +115,8 @@ module.exports = function (target, props) {
 
     _props.baseElement = target;
 
-    return ReactDOM.render(React.createElement(PositionBubble, _props), mountNode);
+    return ReactDOM.render(
+        React.createElement(PositionBubble, _props),
+        mountNode
+    );
 };

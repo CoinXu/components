@@ -41,7 +41,7 @@ ReactDOM.render(
 ```JavaScript
 ReactDOM.render(
     <Bias 
-        onComponentMount={log} 
+        onMount={log} 
         closeable 
         placement="right">{biasContent}</Bias>,
     mountNode

@@ -1,0 +1,25 @@
+.warning {
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+
+.error {
+    background-color: #d9534f;
+    border-color: #d43f3a;
+}
+
+.info {
+    background-color: #5bc0de;
+    border-color: #46b8da;
+}
+
+.warning,
+.error {
+    vertical-align: text-top;
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1;
+    padding: 2px 4px;
+    color: #fff;
+    border: 1px solid;
+}

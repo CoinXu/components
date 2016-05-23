@@ -77,7 +77,7 @@ ReactDOM.render(
 
 
 ReactDOM.render(
-    <Bias onComponentMount={log} closeable placement="right">{biasContent}</Bias>,
+    <Bias onMount={log} closeable placement="right">{biasContent}</Bias>,
     document.getElementById('bias-right')
 );
 
@@ -113,7 +113,7 @@ ReactDOM.render(
 
     ReactDOM.render(
         <Popup
-            onComponentMount={holdPopup}
+            onMount={holdPopup}
             placement="top"
             content={Confirm}>
             <span className="color-link">取消采购</span>
@@ -192,7 +192,7 @@ var MountDialog = React.createClass({
 
         ReactDOM.render(<Dialog
                 onComponentMount={this.dialogOnMount}
-                onHidden={this.onHidden}/>,
+                onHide={this.onHide}/>,
             this.__dialogNode
         );
     },
@@ -201,7 +201,7 @@ var MountDialog = React.createClass({
         wrapNode.innerHTML = '<h2>Dialog Content</h2>';
     },
 
-    onHidden: function () {
+    onHide: function () {
         var self = this;
         this.setState({show: false}, function () {
             document.body.removeChild(self.__dialogNode);

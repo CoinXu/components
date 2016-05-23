@@ -11,7 +11,7 @@ var Dialog = React.createClass({
 
     getInitialState: function () {
         return {
-            isVisible: true,
+            visible: true,
             baseStyle: {
                 position: 'fixed',
                 left: '50%',
@@ -27,20 +27,25 @@ var Dialog = React.createClass({
             style: {backgroundColor: '#fff'},
             className: 'bub-dialog bubble-company-staff',
             refTarget: null,
-            isVisible: true,
-            onHidden: noop,
+            visible: true,
+            onHide: noop,
+            onMount: noop,
             onComponentMount: noop
         }
     },
 
     componentWillMount: function () {
-        this.setState({isVisible: this.props.isVisible});
+        this.setState({visible: this.props.visible});
     },
 
     componentDidMount: function () {
         var wrap = this.refs.wrap;
         this._mountNode = ReactDOM.findDOMNode(this).parentNode;
+
+        // TODO 将要废弃 onComponentMount 属性
         this.props.onComponentMount(this, wrap);
+        this.props.onMount(this, wrap);
+
         this.setState({
             posStyle: {
                 marginLeft: `-${wrap.offsetWidth / 2}px`,
@@ -54,22 +59,18 @@ var Dialog = React.createClass({
     },
 
     onHidden: function () {
-        var self = this;
-        self.setState({isVisible: false}, function () {
-            ReactDOM.unmountComponentAtNode(self._mountNode);
-            self.props.onHidden();
+        this.setState({visible: false}, function () {
+            ReactDOM.unmountComponentAtNode(this._mountNode);
+            this.props.onHide();
         });
     },
 
     hide: function () {
         if (!this.isMounted()) return false;
-        var self = this;
-        if (self.__animate) {
-            self.__animate.backToTheStart(function () {
-                self.onHidden()
-            })
+        if (this.__animate) {
+            this.__animate.backToTheStart(this.onHidden)
         } else {
-            self.onHidden()
+            this.onHidden()
         }
         return true;
     },
@@ -82,14 +83,14 @@ var Dialog = React.createClass({
             this.state.baseStyle,
             this.state.posStyle
         );
-        if (!this.state.isVisible) {
+        if (!this.state.visible) {
             style = assign(style, {display: 'none'})
         }
 
         return <HideOnBodyClick
             refTarget={props.refTarget}
             style={style}
-            onAnimateMount={this.onAnimateMount}
+            onMount={this.onAnimateMount}
             onHide={this.onHidden}>
             <div className={props.className} ref="wrap"></div>
         </HideOnBodyClick>

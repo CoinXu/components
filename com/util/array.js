@@ -2,7 +2,15 @@
  * Created by xcp on 2016/5/7.
  */
 
+var isArray = Object.isArray || function (any) {
+        return any && (typeof any === 'object') && any.constructor === Array;
+    };
+
 module.exports = {
+
+    isArray: function (any) {
+        return isArray(any)
+    },
 
     index: function (arr, item) {
         return arr.indexOf(item);

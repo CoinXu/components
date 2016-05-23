@@ -10,7 +10,7 @@ var body = require('../../com/DOM/DOMBody');
 var noop = require('../../com/noop');
 var assert = require('../../com/assert');
 
-var triggerHide = function () {
+var shouldHide = function () {
     return true;
 };
 
@@ -18,7 +18,7 @@ var HideOnBodyClick = React.createClass({
 
     getInitialState: function () {
         return {
-            isVisible: true
+            visible: true
         }
     },
 
@@ -26,35 +26,32 @@ var HideOnBodyClick = React.createClass({
         return {
             component: 'div',
             refTarget: null,
-            isVisible: true,
             style: {},
+            visible: true,
             onHide: noop,
-            onAnimateMount: noop,
-            triggerHide: triggerHide
+            onMount: noop,
+            shouldHide: shouldHide
         }
     },
 
     componentDidMount: function () {
-        var self = this;
 
         this.__bodyHandle = function (e) {
             var target = e.target || e.srcElement;
-            var mountNode = ReactDOM.findDOMNode(self);
-            var props = self.props;
+            var mountNode = ReactDOM.findDOMNode(this);
+            var props = this.props;
 
-            if (!props.triggerHide()
+            if (!props.shouldHide()
                 || ( props.refTarget
                 && contains(props.refTarget, target))
                 || contains(mountNode, target)) {
                 return
             }
 
-            if (self.__animate && self.__animate.backToTheStart) {
-                self.__animate.backToTheStart(function () {
-                    props.onHide();
-                });
+            if (this.__animate && this.__animate.backToTheStart) {
+                this.__animate.backToTheStart(this.onHide);
             }
-        };
+        }.bind(this);
 
         DOMEvent.on(body, 'click', this.__bodyHandle, false);
     },
@@ -63,9 +60,13 @@ var HideOnBodyClick = React.createClass({
         DOMEvent.off(body, 'click', this.__bodyHandle, false);
     },
 
-    holdAnimate: function (animate) {
+    onHide: function () {
+        this.props.onHide()
+    },
+
+    onMount: function (animate) {
         this.__animate = animate;
-        this.props.onAnimateMount(animate);
+        this.props.onMount(this);
     },
 
     render: function () {
@@ -80,7 +81,7 @@ var HideOnBodyClick = React.createClass({
                 from={{opacity:0}}
                 to={{opacity:1}}
                 during={200}
-                componentDidMount={this.holdAnimate}>
+                onMount={this.onMount}>
                 {props.children}
             </Animate>
         </Components>

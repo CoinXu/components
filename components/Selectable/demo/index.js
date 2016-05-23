@@ -39,9 +39,10 @@ ReactDOM.render(
 );
 
 // 输入内容验证
-var validation = function (val, input) {
+var validation = function (val, input, inst) {
     if (!/^[0-9]+$/.test(val)) {
         alert('请输入数字');
+        input.value = inst.getCurrent();
         return false;
     }
     return true;
@@ -119,7 +120,10 @@ ReactDOM.render(
 
 var checkboxItemList = function () {
     return new Array(10).fill(1).map(function (v, i) {
-        return {value: i, content: {name: 'name-' + i, widget: '(123' + i + ')'}}
+        return {
+            value: i,
+            content: {name: 'name-' + i, widget: '(123' + i + ')'}
+        }
     })
 }();
 
@@ -164,7 +168,8 @@ var CheckWrap = React.createClass({
                     onChange={log}
                     checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>
             </div>
-            <button className="btn btn-default btn-xs" onClick={this.getCheckedValue}>
+            <button className="btn btn-default btn-xs"
+                    onClick={this.getCheckedValue}>
                 点击log当前选中的值
             </button>
         </div>

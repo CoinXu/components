@@ -13,8 +13,13 @@
  + placement - `String` 目前可选 `top` `right` `bottom` `left`
  + content - `String | React.Element` 弹窗内容
  + onHide - `Function` 弹窗关闭后回调
+ + shouldUpdate - `Function` - 是否需要重新渲染 <div class="info">新属性</div>
  + triggerHide - `Function` 如果该函数返回false，则弹窗不会关闭，返回true，关闭
- + onComponentMount - `Function` 组件挂载后调用，传入组件实例。
+   <div class="error">已废弃,请用 `shouldHide` 代替</div>
+ + shouldHide - `Function` 如果该函数返回false，则弹窗不会关闭，返回true，关闭
+ + onComponentMount - `Function` 组件挂载后调用，传入组件实例
+   <div class="warning">将会被废弃,请用 `onMount` 代替</div>
+ + onMount - `Function` 组件挂载后调用，传入组件实例。
  + baseElement - `HTMLElement` - 定位依赖元素，如果传入该值，则忽略
    `props.children` 的值，不会被渲染。
  + `shouldUpdate()` - 外部定义是否更新组件 - noop

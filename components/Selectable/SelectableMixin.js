@@ -3,7 +3,7 @@
  */
 var React = require('react');
 var noop = require('../../com/noop');
-var triggerHide = function () {
+var shouldHide = function () {
     return true;
 };
 
@@ -28,7 +28,7 @@ module.exports = {
             itemList: itemList,
             selectorClassName: '',
             selectorStyle: {},
-            triggerHide: triggerHide,
+            shouldHide: shouldHide,
             defaultSelectedValue: itemList[0],
             onSelect: noop
         }
@@ -48,12 +48,12 @@ module.exports = {
         this.setState({panelStateIsShow: false});
     },
 
-    triggerHide: function () {
+    shouldHide: function () {
         return this.state.panelStateIsShow;
     },
 
-    onAnimateMount: function (animate) {
-        this.__animate = animate;
+    onAnimateMount: function (inst) {
+        this.__animate = inst.__animate;
     },
 
     showPanel: function () {

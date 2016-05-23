@@ -16,6 +16,7 @@ var Bubble = React.createClass({
             symbolStyle: {},
             symbolClass: [],
             onComponentMount: noop,
+            onMount: noop,
             style: {}
         }
     },
@@ -35,7 +36,9 @@ var Bubble = React.createClass({
     },
 
     componentDidMount: function () {
+        // TODO 将要废弃 onComponentMount 属性
         this.props.onComponentMount(this.refs.wrap, this);
+        this.props.onMount(this.refs.wrap, this);
     },
 
     render: function () {

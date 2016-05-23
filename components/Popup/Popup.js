@@ -9,7 +9,7 @@ var absolutePosition = require('../../com/absolutePosition');
 var body = require('../../com/DOM/DOMBody');
 var noop = require('../../com/noop');
 var POPUP_GAP = 5;
-var triggerHide = function () {
+var shouldHide = function () {
     return true;
 };
 
@@ -17,7 +17,7 @@ var Popup = React.createClass({
 
     getInitialState: function () {
         return {
-            isVisible: true
+            visible: false
         }
     },
 
@@ -33,14 +33,19 @@ var Popup = React.createClass({
             placement: null,
             baseElement: null,
             onHide: noop,
-            shouldUpdate: triggerHide,
-            triggerHide: triggerHide,
-            onComponentMount: noop
+            onChange: noop,
+            shouldUpdate: shouldHide,
+            shouldHide: shouldHide,
+            onComponentMount: noop,
+            onMount: noop
         }
     },
 
     getTrigger: function () {
-        return {click: 'onClick', hover: 'onMouseEnter'}[this.props.trigger] || 'onClick'
+        return {
+                click: 'onClick',
+                hover: 'onMouseEnter'
+            }[this.props.trigger] || 'onClick'
     },
 
     componentWillMount: function () {
@@ -54,7 +59,9 @@ var Popup = React.createClass({
     componentDidMount: function () {
         this.__popupMountNode = document.createElement('div');
         body.appendChild(this.__popupMountNode);
+        // TODO 将要废弃 onComponentMount 属性
         this.props.onComponentMount(this);
+        this.props.onMount(this);
     },
 
     _createContent: function () {
@@ -70,30 +77,29 @@ var Popup = React.createClass({
 
     onHide: function () {
         if (this.__isUnmount) return;
-        var self = this;
-        self.setState({isVisible: true}, function () {
-            ReactDOM.unmountComponentAtNode(self.__popupMountNode);
-            self.props.onHide()
+        this.setState({visible: false}, function () {
+            ReactDOM.unmountComponentAtNode(this.__popupMountNode);
+            this.props.onHide()
         })
     },
 
     componentDidUpdate: function (prevProps, prevState) {
-        if (!!this.props.shouldUpdate() && this.state.isVisible !== prevState.isVisible) {
-            this.renderPopup()
+        if (this.state.visible !== prevState.visible
+            && !!this.props.shouldUpdate()) {
+            this.renderPopup();
+            this.props.onChange();
+        }
+    },
+
+    hide: function () {
+        if (this.__isUnmount) return;
+        if (this.__animate) {
+            this.__animate.backToTheStart(this.onHide)
         }
     },
 
     autoVisible: function () {
-        if (this.__isUnmount) return;
-        var self = this;
-        if (self.__animate) {
-            self.__animate.backToTheStart(function () {
-                self.setState({isVisible: true}, function () {
-                    ReactDOM.unmountComponentAtNode(self.__popupMountNode);
-                    self.props.onHide()
-                })
-            })
-        }
+        this.hide();
     },
 
     computedPosition: function () {
@@ -135,15 +141,20 @@ var Popup = React.createClass({
         this.computedPosition();
 
         var props = this.props;
+        var style = {
+            position: 'absolute',
+            left: this.__position.x,
+            top: this.__position.y
+        };
         ReactDOM.render(
             <PopupWrap
                 baseElement={props.baseElement}
-                onAnimateMount={this.onAnimateMount}
-                style={{position:'absolute',left: this.__position.x, top: this.__position.y}}
+                onMount={this.onAnimateMount}
+                style={style}
                 placement={props.placement}
-                isVisible={this.state.isVisible}
+                visible={this.state.visible}
                 onHide={this.onHide}
-                triggerHide={props.triggerHide}
+                shouldHide={props.shouldHide}
                 refTarget={this.refs.targetNode}>
                 {this.__content}
             </PopupWrap>,
@@ -152,11 +163,11 @@ var Popup = React.createClass({
     },
 
     showPopup: function () {
-        this.setState({isVisible: false});
+        this.setState({visible: true});
     },
 
-    onAnimateMount: function (animate) {
-        this.__animate = animate;
+    onAnimateMount: function (inst) {
+        this.__animate = inst.__animate;
     },
 
     componentWillUnmount: function () {
@@ -171,7 +182,7 @@ var Popup = React.createClass({
         var props = {ref: 'targetNode'};
         props[this.getTrigger()] = this.showPopup;
         if (props.onMouseEnter) {
-            props.onMouseLeave = this.autoVisible
+            props.onMouseLeave = this.hide
         }
 
         return React.cloneElement(

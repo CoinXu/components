@@ -46,7 +46,7 @@ module.exports = {
             during: 1000,
             delay: 0,
             repeat: 0,
-            componentDidMount: noop,
+            onMount: noop,
             getContent: noop,
             easing: TWEEN.Easing.Linear.None
         });
@@ -123,7 +123,7 @@ module.exports = {
     },
 
     componentDidMount: function () {
-        this.props.componentDidMount(this);
+        this.props.onMount(this);
         this.startAnimate(this.props.onComplete);
     }
 };

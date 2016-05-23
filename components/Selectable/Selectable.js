@@ -15,6 +15,7 @@ var Selectable = React.createClass({
             wrapClassName: null,
             onSelect: noop,
             onComponentMount: noop,
+            onMount: noop,
             selectorBindEvent: true,
             selectorContent: null,
             disabled: false,
@@ -38,35 +39,33 @@ var Selectable = React.createClass({
     },
 
     componentDidMount: function () {
+        // TODO 废弃属性,用onMount代替
         this.props.onComponentMount(this);
+        this.props.onMount(this);
     },
 
     showPanel: function () {
-        var self = this;
-        self.setState({visible: true}, function () {
-            var animate = self.__animate;
+        this.setState({visible: true}, function () {
+            var animate = this.__animate;
             var animateProps = animate.props;
             animate.animate(animateProps.from, animateProps.to)
         })
     },
 
-    onAnimateMount: function (animate) {
-        this.__animate = animate;
+    onAnimateMount: function (inst) {
+        this.__animate = inst.__animate;
     },
 
     onSelect: function (item) {
-        var self = this;
-        self.props.onSelect(item);
-        self.__animate.backToTheStart(function () {
-            self.onHide();
-        })
+        this.props.onSelect(item);
+        this.__animate.backToTheStart(this.onHide)
     },
 
     onHide: function () {
         this.setState({visible: false});
     },
 
-    triggerHide: function () {
+    shouldHide: function () {
         return this.state.visible;
     },
 
@@ -102,8 +101,8 @@ var Selectable = React.createClass({
             <HideOnBodyClick
                 refTarget={this.refs.selectable}
                 onHide={this.onHide}
-                onAnimateMount={this.onAnimateMount}
-                triggerHide={this.triggerHide}>
+                onMount={this.onAnimateMount}
+                shouldHide={this.shouldHide}>
                 <div className="comp-select-panel">
                     {props.panelContent}
                 </div>

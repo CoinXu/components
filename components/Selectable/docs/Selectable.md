@@ -12,6 +12,8 @@
 + onSelect - noop -默认给 `content` 中的元素被选中时调用，
   通过将实例传给 `onComponentMount` 实现外部组件调用。
 + onComponentMount - noop - 组件挂载时调用，参数为组件实例。
+  <div class="error">将要被废弃,请用 `onMount` 代替</div>
++ onMount - noop - 组件挂载时调用，参数为组件实例。
 + selectorBindEvent - true - 是否给 `selector` 绑定事件(显示组件事件)。
 + selectorContent - null - `selector` 内容。
 + panelContent - null - `conte+++nt` 内容。

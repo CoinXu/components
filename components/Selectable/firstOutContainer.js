@@ -81,8 +81,8 @@ var FOContainer = React.createClass({
             <HideOnBodyClick
                 refTarget={this.refs.selectable}
                 onHide={this.onHide}
-                onAnimateMount={this.onAnimateMount}
-                triggerHide={this.triggerHide}>
+                onMount={this.onAnimateMount}
+                shouldHide={this.shouldHide}>
                 <div className="comp-select-panel comp-progress-panel">
                     <div className="bub-bd-b">
                         <div className="bub-pd-l-lg bub-pd-r-lg">

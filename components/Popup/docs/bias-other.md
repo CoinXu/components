@@ -19,7 +19,7 @@
     // 所以可以通过一个变量持有该实例
     ReactDOM.render(
         <Popup
-            onComponentMount={holdPopup}
+            onMount={holdPopup}
             placement="top"
             content={Confirm}>
             <span className="color-link">取消采购</span>
@@ -53,7 +53,7 @@
             // 需要继承父级传入的 style
             // 用于指定绝对位置
             return <Bubble
-                onComponentMount={log}
+                onMount={log}
                 style={assign(this.props.style, {width:210})}
                 symbolStyle={{left:'50%',marginLeft:-10}}>
                 <button
@@ -66,7 +66,7 @@
     });
     ReactDOM.render(
         <Popup
-            onComponentMount={holdPopup}
+            onMount={holdPopup}
             placement="top"
             content={<ComplexPanel/>}>
             <span className="color-link">憋说话，点我！看源码！</span>

@@ -56,6 +56,10 @@ var Importable = React.createClass({
         }
     },
 
+    getCurrent: function () {
+        return this.state.currentSelectedValue;
+    },
+
     onSelect: function (value) {
         var isReject = value === this.props.rejectValue;
         var next = isReject ?
@@ -72,7 +76,8 @@ var Importable = React.createClass({
     },
 
     onChange: function (e) {
-        if (this.props.validate(e.target.value, this.refs.inputNode)) {
+        this._inputNode = e.target;
+        if (this.props.validate(e.target.value, e.target, this)) {
             this.setState({
                 currentSelectedValue: e.target.value,
                 fromInput: true
@@ -81,7 +86,7 @@ var Importable = React.createClass({
     },
 
     validate: function () {
-        var inputNode = this.refs.inputNode;
+        var inputNode = this._inputNode;
         return inputNode ?
             this.props.validate(inputNode.value, inputNode) :
             true;

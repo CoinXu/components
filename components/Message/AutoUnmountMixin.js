@@ -8,7 +8,7 @@ var noop = require('../../com/noop');
 module.exports = {
 
     getInitialState: function () {
-        return {isVisible: true}
+        return {visible: true}
     },
 
     getDefaultProps: function () {
@@ -16,9 +16,9 @@ module.exports = {
         return {
             message: '',
             during: 3000,
-            onComplete: noop,
             closeable: false,
-            afterClose: noop,
+            onMount: noop,
+            onUnmout: noop,
             animate: {
                 component: 'span',
                 from: {opacity: 0},
@@ -33,17 +33,20 @@ module.exports = {
         this.__backToTheStart = animate.backToTheStart;
     },
 
+    componentDidMount: function () {
+        this.props.onMount(this)
+    },
+
     unmount: function () {
-        var self = this;
-        var mountNode = ReactDOM.findDOMNode(self).parentNode;
-        if (typeof self.__backToTheStart === 'function') {
-            self.__backToTheStart(function () {
+        var mountNode = ReactDOM.findDOMNode(this).parentNode;
+        if (typeof this.__backToTheStart === 'function') {
+            this.__backToTheStart(function () {
                 ReactDOM.unmountComponentAtNode(mountNode);
             })
         } else {
             ReactDOM.unmountComponentAtNode(mountNode)
         }
-        self.props.afterClose();
+        this.props.onUnmout();
     },
 
     autoUnmount: function () {

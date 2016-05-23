@@ -16,6 +16,8 @@
 + defaultSelectedValue - null - 默认选中的值
 + onSelect - noop - 当Item被选中后的回调
 + onComponentMount - noop - 组件挂载后回调，传入参数为组件实例。
+  <div class="error">已废弃,请用 `onMount` 代替</div>
++ onMount - noop - 组件挂载后回调，传入参数为组件实例。
 + getSelectorContent - noop - 同 `DropDown.Item` 的 `getItemContent`
 
 ## DropDown Props

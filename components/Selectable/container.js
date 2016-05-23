@@ -63,8 +63,8 @@ var Container = React.createClass({
             <HideOnBodyClick
                 refTarget={this.refs.selectable}
                 onHide={this.onHide}
-                onAnimateMount={this.onAnimateMount}
-                triggerHide={this.triggerHide}>
+                onMount={this.onAnimateMount}
+                shouldHide={this.shouldHide}>
                 <div className="comp-select-panel comp-progress-panel">
                     <ol className="comp-select-m-t">
                         {itemList}

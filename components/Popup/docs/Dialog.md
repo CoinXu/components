@@ -4,8 +4,8 @@
 + style - 外层容器style - {backgroundColor: '#fff'}
 + className - 外层容器className - 'bub-dialog bubble-company-staff'
 + refTarget - 依赖节点，点击依赖节点时，不会触发弹层关闭行为 - null
-+ isVisible - 是否显示 - true - 暂时不要改动该配置，因为该组件隐藏后会卸载，所以show也show不出来...
-+ onHidden - 关闭后的回调 - noop
++ visible - 是否显示 - true - 暂时不要改动该配置，因为该组件隐藏后会卸载，所以show也show不出来...
++ onHide - 关闭后的回调 - noop
 + onComponentMount(inst, wrap) - 组件挂载时回调 - noop
   - `inst` 为组件实例
   - `wrap` 为包装容器， 是一个 `Node` 对象，可以往里塞内容，
@@ -26,14 +26,14 @@ var MountDialog = React.createClass({
         document.body.appendChild(this.__dialogNode);
         ReactDOM.render(<Dialog
                 onComponentMount={this.dialogOnMount}
-                onHidden={this.onHidden}/>,
+                onHide={this.onHide}/>,
             this.__dialogNode
         );
     },
     dialogOnMount: function (inst, wrapNode) {
         wrapNode.innerHTML = '<h2>Dialog Content</h2>';
     },
-    onHidden: function () {
+    onHide: function () {
         var self = this;
         this.setState({show: false}, function () {
             document.body.removeChild(self.__dialogNode);

@@ -11,7 +11,7 @@ var assign = require('object-assign');
 var noop = require('../../com/noop');
 var DOMEvent = require('../../com/DOM/DOMEvent');
 var HideOnBodyClick = require('../HideOnBodyClick');
-var triggerHide = function () {
+var shouldHide = function () {
     return true;
 };
 
@@ -31,10 +31,10 @@ var PopupWrap = React.createClass({
             placement: 'top',
             refTarget: null,
             baseElement: null,
-            isVisible: false,
+            visible: false,
             onHide: noop,
-            triggerHide: triggerHide,
-            onAnimateMount: noop
+            shouldHide: shouldHide,
+            onMount: noop
         }
     },
 
@@ -72,7 +72,7 @@ var PopupWrap = React.createClass({
             position: 'absolute'
         };
 
-        if (props.isVisible) {
+        if (!props.visible) {
             style = assign(style, {display: 'none'})
         }
 
@@ -85,8 +85,8 @@ var PopupWrap = React.createClass({
         return (<HideOnBodyClick
             refTarget={props.refTarget}
             style={props.style}
-            triggerHide={props.triggerHide}
-            onAnimateMount={props.onAnimateMount}
+            shouldHide={props.shouldHide}
+            onMount={props.onMount}
             onHide={props.onHide}>
             {children}
         </HideOnBodyClick>)

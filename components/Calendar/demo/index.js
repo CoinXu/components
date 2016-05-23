@@ -38,7 +38,8 @@ const WrapCalendar = React.createClass({
         }
     },
     componentWillMount: function () {
-        this._useableTime = this._prevTime = this.props.defaultTime;
+        this._prevTime = null;
+        this._useableTime = this.props.defaultTime;
         this.setState({currentTime: this.props.defaultTime});
     },
     componentDidUpdate: function (prevProps, prevState) {
@@ -60,7 +61,7 @@ const WrapCalendar = React.createClass({
         this.props.onSelect(cur);
     },
     shouldUpdate: function () {
-        return this._prevTime.valueOf() !== this.state.currentTime.valueOf();
+        return !this._prevTime || this._prevTime.valueOf() !== this.state.currentTime.valueOf();
     },
     render: function () {
         var state = this.state;

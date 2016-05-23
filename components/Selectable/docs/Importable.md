@@ -7,7 +7,8 @@
 + onSelect - 选择某个Item时的回调 - noop
 + rejectValue - 触发`selector`变为`input`的值 - '10+'
 + disabled - 是否禁用 - `false`
-+ validate(inputValue, inputNode) - 
++ getCurrent - 获取当前选中或输入的值
++ validate(inputValue, inputNode, inst) - 
   验证函数，当组件变为input时，input `onChange` 事件触发，
   如果该函数返回的值不为真，那么当前的 `inputValue` 不会设置为组件的当前值；
   如果返回真，则设置。

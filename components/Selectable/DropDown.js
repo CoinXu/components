@@ -68,14 +68,14 @@ var DropDown = React.createClass({
             </ol>;
 
         var selectorContent = React.cloneElement(props.selectorContent, {
-            onComponentMount: this.onSelectorMount
+            onMount: this.onSelectorMount
         });
 
         return <Selectable
             disabled={this.state.disabled}
             wrapClassName={props.wrapClassName}
             selectorBindEvent={props.selectorBindEvent}
-            onComponentMount={this.onSelectableMount}
+            onMount={this.onSelectableMount}
             selectorContent={selectorContent}
             panelContent={panelContent}/>
     }
@@ -117,13 +117,13 @@ DropDown.Selector = React.createClass({
         return {
             defaultSelectedValue: null,
             onSelect: noop,
-            onComponentMount: noop,
+            onMount: noop,
             getSelectorContent: noop
         }
     },
 
     componentDidMount: function () {
-        this.props.onComponentMount(this);
+        this.props.onMount(this);
     },
 
     componentWillMount: function () {

@@ -9,7 +9,8 @@
   + repeat `React.PropTypes.number` 
   + easing `React.PropTypes.func`
   + className `React.PropTypes.string`
- 
+  + onMount(inst) `React.PropTypes.string` - 组件挂载后的回调
+
 ## 最简单的调用
 1. 引入
 ```JavaScript
