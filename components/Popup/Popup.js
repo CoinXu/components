@@ -9,7 +9,7 @@ var absolutePosition = require('../../com/absolutePosition');
 var body = require('../../com/DOM/DOMBody');
 var noop = require('../../com/noop');
 var POPUP_GAP = 5;
-var shouldHide = function () {
+var truth = function () {
     return true;
 };
 
@@ -34,8 +34,8 @@ var Popup = React.createClass({
             baseElement: null,
             onHide: noop,
             onChange: noop,
-            shouldUpdate: shouldHide,
-            shouldHide: shouldHide,
+            shouldUpdate: truth,
+            shouldHide: truth,
             onComponentMount: noop,
             onMount: noop
         }

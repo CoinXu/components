@@ -13,6 +13,7 @@
  + placement - `String` 目前可选 `top` `right` `bottom` `left`
  + content - `String | React.Element` 弹窗内容
  + onHide - `Function` 弹窗关闭后回调
+ + onChange - `Function` 弹窗切换后的回调 <div class="info">新属性</div>
  + shouldUpdate - `Function` - 是否需要重新渲染 <div class="info">新属性</div>
  + triggerHide - `Function` 如果该函数返回false，则弹窗不会关闭，返回true，关闭
    <div class="error">已废弃,请用 `shouldHide` 代替</div>
@@ -23,6 +24,9 @@
  + baseElement - `HTMLElement` - 定位依赖元素，如果传入该值，则忽略
    `props.children` 的值，不会被渲染。
  + `shouldUpdate()` - 外部定义是否更新组件 - noop
+
+### Methods
++ hide
 
 ## 最简单的调用
 目前封装性较低，所以最简单的也比较复杂~

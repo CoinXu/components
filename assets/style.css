@@ -14,7 +14,8 @@
 }
 
 .warning,
-.error {
+.error,
+.info {
     vertical-align: text-top;
     display: inline-block;
     font-size: 12px;
