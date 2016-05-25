@@ -90,6 +90,17 @@ var Collapse = React.createClass({
     }
 });
 
+const getTitle = function(props, state, inst){
+    var dir = state.collapse ? 't' : 'd';
+    return <span>
+            {props.title}
+            <span
+                style={{marginLeft:10,cursor:'pointer'}}
+                onClick={inst.toggle}
+                className={"inline-block icon-img icon-tran-black-" + dir}/>
+        </span>;
+};
+
 Collapse.Node = React.createClass({
 
     getInitialState: function () {
@@ -101,7 +112,9 @@ Collapse.Node = React.createClass({
             mark: null,
             title: null,
             collapse: true,
-            onChange: noop
+            component: 'div',
+            onChange: noop,
+            getTitle: getTitle
         }
     },
 
@@ -120,25 +133,15 @@ Collapse.Node = React.createClass({
     },
 
     render: function () {
-        var props = this.props;
-        var dir = this.state.collapse ? 't' : 'd';
-
-        var title = <span>
-            {props.title}
-            <span
-                style={{marginLeft:10,cursor:'pointer'}}
-                onClick={this.toggle}
-                className={"inline-block icon-img icon-tran-black-" + dir}/>
-        </span>;
-
-        return <div>
+        var Component = this.props.component;
+        return <Component>
             <Panel
                 collapse={this.state.collapse}
-                title={title}
+                title={this.props.getTitle(this.props, this.state, this)}
                 onChange={this.onChange}>
-                {props.children}
+                {this.props.children}
             </Panel>
-        </div>
+        </Component>
     }
 });
 
