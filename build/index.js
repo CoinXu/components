@@ -2119,7 +2119,7 @@ this["EssaComponents"] =
 	                onChange: onChange,
 	                className: 'input-default',
 	                style: { width: 60 },
-	                placeholder: value });
+	                defaultValue: value });
 	        }
 	        return React.createElement('div', { className: 'comp-select-selector' }, React.createElement('span', { className: 'util-font-12' }, value), React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
 	    };
@@ -3757,7 +3757,8 @@ this["EssaComponents"] =
 	var Selectable = __webpack_require__(23);
 
 	var getContent = function getContent(current) {
-	    return React.createElement('div', { className: 'comp-area-item util-font-12 color-white-bg util-line-14' }, current, React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
+	    return React.createElement('div', {
+	        className: 'comp-area-item util-font-12 color-white-bg util-line-14' }, current, React.createElement('span', { className: 'icon-img icon-tran-black-d' }));
 	};
 
 	var getItemContent = function getItemContent(val, props) {
@@ -3806,7 +3807,8 @@ this["EssaComponents"] =
 	            onChange: noop,
 	            onSelect: noop,
 	            getPage: function getPage(num, isCurrent) {
-	                return React.createElement('span', { className: 'page-item' + (isCurrent ? ' focus' : '') }, num);
+	                return React.createElement('span', {
+	                    className: 'page-item' + (isCurrent ? ' focus' : '') }, num);
 	            }
 	        };
 	    },
@@ -3823,14 +3825,6 @@ this["EssaComponents"] =
 	        };
 	    },
 
-	    componentWillMount: function componentWillMount() {
-	        this._computed(this.props.itemsInOnePage);
-	        this.setState({
-	            current: this.props.defaultCurrent,
-	            itemsInOnePage: this.props.itemsInOnePage
-	        });
-	    },
-
 	    onSelect: function onSelect(num) {
 	        this.skip(num);
 	    },
@@ -3843,14 +3837,12 @@ this["EssaComponents"] =
 	        this.skip(this.state.current + 1);
 	    },
 
-	    skip: function skip(num, silent) {
+	    skip: function skip(num) {
 	        this.props.onSelect(num, this.state.itemsInOnePage);
+
 	        if (num < 1 || num > this.__computed.pages || num === this.state.current) return;
 
-	        var self = this;
-	        self.setState({ current: num }, function () {
-	            if (!silent) self.props.onChange(num, self.state.itemsInOnePage);
-	        });
+	        this.setState({ current: num });
 	    },
 
 	    _getCurrentStart: function _getCurrentStart(page) {
@@ -3875,10 +3867,15 @@ this["EssaComponents"] =
 
 	    onItemsInOnePageChange: function onItemsInOnePageChange(num) {
 	        // 每页显示条数改变后，直接跳转到第1页
+	        this.setState({ itemsInOnePage: num, current: 1 });
+	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this._computed(this.props.itemsInOnePage);
 	        this.setState({
-	            itemsInOnePage: num,
-	            current: 1
-	        }, this.onSelect.bind(this, 1));
+	            current: this.props.defaultCurrent,
+	            itemsInOnePage: this.props.itemsInOnePage
+	        });
 	    },
 
 	    componentDidMount: function componentDidMount() {
@@ -3894,6 +3891,12 @@ this["EssaComponents"] =
 	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
 	        var cur = this.state;
 	        return cur.current !== nextState.current || cur.itemsInOnePage !== nextState.itemsInOnePage;
+	    },
+
+	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	        if (prevState.current !== this.state.current || prevState.itemsInOnePage !== this.state.itemsInOnePage) {
+	            this.props.onChange(this.state.current, this.state.itemsInOnePage);
+	        }
 	    },
 
 	    render: function render() {
@@ -4067,7 +4070,7 @@ this["EssaComponents"] =
 	var body = __webpack_require__(19);
 	var noop = __webpack_require__(4);
 	var POPUP_GAP = 5;
-	var shouldHide = function shouldHide() {
+	var truth = function truth() {
 	    return true;
 	};
 
@@ -4093,8 +4096,8 @@ this["EssaComponents"] =
 	            baseElement: null,
 	            onHide: noop,
 	            onChange: noop,
-	            shouldUpdate: shouldHide,
-	            shouldHide: shouldHide,
+	            shouldUpdate: truth,
+	            shouldHide: truth,
 	            onComponentMount: noop,
 	            onMount: noop
 	        };

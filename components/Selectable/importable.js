@@ -14,7 +14,7 @@ var getSelectorContent = function (props, state, onChange) {
                 onChange={onChange}
                 className="input-default"
                 style={{width:60}}
-                placeholder={value}/>
+                defaultValue={value}/>
         }
         return <div className="comp-select-selector">
             <span className="util-font-12">{value}</span>

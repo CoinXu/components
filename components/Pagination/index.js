@@ -9,14 +9,16 @@ var PageInput = require('./PageInput');
 var Selectable = require('../Selectable');
 
 var getContent = function (current) {
-    return <div className="comp-area-item util-font-12 color-white-bg util-line-14">
+    return <div
+        className="comp-area-item util-font-12 color-white-bg util-line-14">
         {current}
         <span className="icon-img icon-tran-black-d"/>
     </div>
 };
 
 var getItemContent = function (val, props) {
-    var item = <li className="comp-panel-item util-font-12"><strong>{val}</strong></li>;
+    var item = <li className="comp-panel-item util-font-12">
+        <strong>{val}</strong></li>;
     return React.cloneElement(item, props);
 };
 
@@ -60,7 +62,8 @@ var Pagination = React.createClass({
             onChange: noop,
             onSelect: noop,
             getPage: function (num, isCurrent) {
-                return <span className={'page-item' + (isCurrent ? ' focus' : '')}>{num}</span>
+                return <span
+                    className={'page-item' + (isCurrent ? ' focus' : '')}>{num}</span>
             }
         }
     },
@@ -77,14 +80,6 @@ var Pagination = React.createClass({
         };
     },
 
-    componentWillMount: function () {
-        this._computed(this.props.itemsInOnePage);
-        this.setState({
-            current: this.props.defaultCurrent,
-            itemsInOnePage: this.props.itemsInOnePage
-        });
-    },
-
     onSelect: function (num) {
         this.skip(num);
     },
@@ -97,18 +92,15 @@ var Pagination = React.createClass({
         this.skip(this.state.current + 1)
     },
 
-    skip: function (num, silent) {
+    skip: function (num) {
         this.props.onSelect(num, this.state.itemsInOnePage);
+
         if (num < 1
             || num > this.__computed.pages
             || num === this.state.current)
             return;
 
-        var self = this;
-        self.setState({current: num}, function () {
-            if (!silent)
-                self.props.onChange(num, self.state.itemsInOnePage)
-        })
+        this.setState({current: num})
     },
 
     _getCurrentStart: function (page) {
@@ -135,14 +127,15 @@ var Pagination = React.createClass({
 
     onItemsInOnePageChange: function (num) {
         // 每页显示条数改变后，直接跳转到第1页
-        this.setState(
-            {
-                itemsInOnePage: num,
-                current: 1
-            },
-            this.onSelect.bind(this, 1)
-        );
+        this.setState({itemsInOnePage: num, current: 1});
+    },
 
+    componentWillMount: function () {
+        this._computed(this.props.itemsInOnePage);
+        this.setState({
+            current: this.props.defaultCurrent,
+            itemsInOnePage: this.props.itemsInOnePage
+        });
     },
 
     componentDidMount: function () {
@@ -159,6 +152,13 @@ var Pagination = React.createClass({
         var cur = this.state;
         return cur.current !== nextState.current ||
             cur.itemsInOnePage !== nextState.itemsInOnePage
+    },
+
+    componentDidUpdate: function (prevProps, prevState) {
+        if (prevState.current !== this.state.current ||
+            prevState.itemsInOnePage !== this.state.itemsInOnePage) {
+            this.props.onChange(this.state.current, this.state.itemsInOnePage)
+        }
     },
 
     render: function () {

@@ -41,7 +41,7 @@ ReactDOM.render(
 // 输入内容验证
 var validation = function (val, input, inst) {
     if (!/^[0-9]+$/.test(val)) {
-        alert('请输入数字');
+        console.log('请输入数字');
         input.value = inst.getCurrent();
         return false;
     }
