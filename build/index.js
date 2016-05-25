@@ -3076,6 +3076,14 @@ this["EssaComponents"] =
 	    }
 	});
 
+	var getTitle = function getTitle(props, state, inst) {
+	    var dir = state.collapse ? 't' : 'd';
+	    return React.createElement('span', null, props.title, React.createElement('span', {
+	        style: { marginLeft: 10, cursor: 'pointer' },
+	        onClick: inst.toggle,
+	        className: "inline-block icon-img icon-tran-black-" + dir }));
+	};
+
 	Collapse.Node = React.createClass({
 	    displayName: 'Node',
 
@@ -3088,7 +3096,9 @@ this["EssaComponents"] =
 	            mark: null,
 	            title: null,
 	            collapse: true,
-	            onChange: noop
+	            component: 'div',
+	            onChange: noop,
+	            getTitle: getTitle
 	        };
 	    },
 
@@ -3106,19 +3116,14 @@ this["EssaComponents"] =
 	        this.props.onChange(this.props.mark, !this.state.collapse);
 	    },
 
+	    onChange: function onChange() {},
+
 	    render: function render() {
-	        var props = this.props;
-	        var dir = this.state.collapse ? 't' : 'd';
-
-	        var title = React.createElement('span', null, props.title, React.createElement('span', {
-	            style: { marginLeft: 10, cursor: 'pointer' },
-	            onClick: this.toggle,
-	            className: "inline-block icon-img icon-tran-black-" + dir }));
-
-	        return React.createElement('div', null, React.createElement(Panel, {
+	        var Component = this.props.component;
+	        return React.createElement(Component, null, React.createElement(Panel, {
 	            collapse: this.state.collapse,
-	            title: title,
-	            onChange: this.onChange }, props.children));
+	            title: this.props.getTitle(this.props, this.state, this),
+	            onChange: this.onChange }, this.props.children));
 	    }
 	});
 

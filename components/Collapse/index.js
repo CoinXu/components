@@ -90,7 +90,7 @@ var Collapse = React.createClass({
     }
 });
 
-const getTitle = function(props, state, inst){
+const getTitle = function (props, state, inst) {
     var dir = state.collapse ? 't' : 'd';
     return <span>
             {props.title}
@@ -130,6 +130,10 @@ Collapse.Node = React.createClass({
 
     toggle: function () {
         this.props.onChange(this.props.mark, !this.state.collapse);
+    },
+
+    onChange: function () {
+
     },
 
     render: function () {
