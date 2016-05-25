@@ -139,7 +139,8 @@ var Pagination = React.createClass({
     },
 
     componentDidMount: function () {
-        this.props.onSelect(this.state.current, this.state.itemsInOnePage)
+        // 经讨论,初始化时不执行onSelect
+        // this.props.onSelect(this.state.current, this.state.itemsInOnePage)
     },
 
     componentWillUpdate: function (nextProps, nextState) {
