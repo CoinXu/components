@@ -1861,24 +1861,33 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
+	var assign = __webpack_require__(8);
+	var returnFalse = function returnFalse() {
+	    return false;
+	};
 	var NotAllowSelect = React.createClass({
 	    displayName: 'NotAllowSelect',
 
 	    getDefaultProps: function getDefaultProps() {
-	        return { component: 'div' };
+	        return {
+	            style: {}
+	        };
 	    },
+
+	    componentWillMount: function componentWillMount() {
+	        this.style = {
+	            MozUserSelect: 'none',
+	            WebkitUserSelect: 'none',
+	            msUserSelect: 'none',
+	            userSelect: 'none'
+	        };
+	    },
+
 	    render: function render() {
-	        var Component = this.props.component;
-	        return React.createElement(Component, {
-	            onSelect: function onSelect() {
-	                return false;
-	            },
-	            style: {
-	                MozUserSelect: 'none',
-	                WebkitUserSelect: 'none',
-	                msUserSelect: 'none',
-	                userSelect: 'none'
-	            } }, this.props.children);
+	        return React.cloneElement(this.props.children, {
+	            onSelect: returnFalse,
+	            style: assign({}, this.style, this.props.style)
+	        });
 	    }
 	});
 	module.exports = NotAllowSelect;
@@ -4793,6 +4802,7 @@ this["EssaComponents"] =
 	 */
 
 	var React = __webpack_require__(2);
+	var ReactDOM = __webpack_require__(16);
 	var noop = __webpack_require__(4);
 	var Slipper = __webpack_require__(55);
 	var elementAbsPosition = __webpack_require__(48);
@@ -4809,14 +4819,15 @@ this["EssaComponents"] =
 	            median: 50,
 	            min: 0,
 	            max: 100,
-	            base: { x: 0, y: 0, w: 0 }
+	            base: { x: 0, y: 0, w: 0 },
+	            rightStyle: {}
 	        };
 	    },
 
 	    getDefaultProps: function getDefaultProps() {
 	        return {
 	            min: 0,
-	            max: 200,
+	            max: 100,
 	            step: 2,
 	            defaultValue: 0,
 	            disabled: false,
@@ -4826,8 +4837,13 @@ this["EssaComponents"] =
 
 	    componentWillMount: function componentWillMount() {
 	        var props = this.props;
+	        // 将最大值和最小值的区间数均分为100份
+	        this._step = (props.max - props.min) / 100;
+	        // 计算props.step约为多少份
+	        var _step = parseInt(props.step / this._step) || 1;
 	        this.setState({
 	            disabled: props.disabled,
+	            step: _step,
 	            currentValue: props.defaultValue
 	        });
 	    },
@@ -4838,19 +4854,20 @@ this["EssaComponents"] =
 	        pos.w = base.offsetWidth;
 
 	        // 将值转换为0~100区间
-	        var props = this.props;
-	        var step = this._step = (props.max - props.min) / 100;
+	        var right = ReactDOM.findDOMNode(this.refs.right);
 
 	        this.setState({
 	            base: pos,
-	            min: props.min / step,
-	            max: props.max / step,
-	            median: 50
+	            // 右边的元素不能超出窗口范围
+	            rightStyle: { marginLeft: -parseInt(right.clientWidth / 2) }
 	        });
 	    },
 
-	    componentDidUpdate: function componentDidUpdate() {
-	        this.props.onChange(this.state.left, this.state.right, this._step);
+	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	        var state = this.state;
+	        if (prevState.left !== this.state.left || prevState.right !== this.state.right) {
+	            this.props.onChange(state.left, state.right, (state.left || 1) * this._step, (state.right || 1) * this._step);
+	        }
 	    },
 
 	    leftMove: function leftMove(pos) {
@@ -4863,8 +4880,10 @@ this["EssaComponents"] =
 
 	    render: function render() {
 	        var state = this.state;
-	        var props = this.props;
-	        var rangeStyle = { width: state.right - state.left + '%', left: state.left + '%' };
+	        var rangeStyle = {
+	            width: state.right - state.left + '%',
+	            left: state.left + '%'
+	        };
 
 	        return React.createElement('div', { className: 'li' }, React.createElement('div', { className: 'price-move', ref: 'wrap' }, React.createElement('div', { className: 'move-bg', style: rangeStyle }), React.createElement(Slipper, {
 	            base: state.base,
@@ -4872,14 +4891,16 @@ this["EssaComponents"] =
 	            min: state.min,
 	            max: state.median,
 	            start: state.left,
-	            step: props.step,
+	            step: state.step,
 	            onMove: this.leftMove }), React.createElement(Slipper, {
+	            style: state.rightStyle,
 	            base: state.base,
+	            ref: 'right',
 	            type: 'right',
 	            min: state.median,
 	            max: state.max,
 	            start: state.right,
-	            step: props.step,
+	            step: state.step,
 	            onMove: this.rightMove })));
 	    }
 	});
@@ -4901,6 +4922,7 @@ this["EssaComponents"] =
 	var DOMEvent = __webpack_require__(18);
 	var NotAllowSelect = __webpack_require__(20);
 	var elementAbsPosition = __webpack_require__(48);
+	var assign = __webpack_require__(8);
 
 	var now = function now() {
 	    return new Date() * 1;
@@ -4911,6 +4933,7 @@ this["EssaComponents"] =
 
 	    getInitialState: function getInitialState() {
 	        return {
+	            style: {},
 	            disabled: false,
 	            pos: 0,
 	            dir: 'right',
@@ -4920,6 +4943,7 @@ this["EssaComponents"] =
 
 	    getDefaultProps: function getDefaultProps() {
 	        return {
+	            style: {},
 	            type: 'left',
 	            timeGap: 50,
 	            min: 0,
@@ -4977,8 +5001,9 @@ this["EssaComponents"] =
 	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
 	        this.setState({
 	            pos: nextProps.start,
-	            base: nextProps.base,
-	            disabled: nextProps.disabled
+	            disabled: nextProps.disabled,
+	            style: nextProps.style,
+	            base: nextProps.base
 	        });
 	    },
 
@@ -4988,7 +5013,7 @@ this["EssaComponents"] =
 	    },
 
 	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-	        return this.state.pos !== nextState.pos;
+	        return this.state.pos !== nextState.pos || Object.keys(nextState.style).length || Object.keys(nextState.base).length;
 	    },
 
 	    _abs: function _abs(num) {
@@ -5025,7 +5050,8 @@ this["EssaComponents"] =
 	        var pos = { x: e.pageX, y: e.pageY };
 
 	        // 当前位置与基础位置距离的百分比
-	        var gap = (pos.x - state.base.x) / state.base.w;
+	        // 避免0为分母的情况
+	        var gap = (pos.x - state.base.x) / (state.base.w || 1);
 	        gap = gap * 100;
 	        gap = gap - gap % props.step;
 
@@ -5041,6 +5067,8 @@ this["EssaComponents"] =
 	            return;
 	        }
 
+	        console.log('base=%s, gap=%s, step=%s', JSON.stringify(state.base), gap, props.step);
+
 	        this.setState({ pos: gap });
 	        this.props.onMove(gap);
 	    },
@@ -5050,12 +5078,14 @@ this["EssaComponents"] =
 	    },
 
 	    render: function render() {
+
+	        var style = assign({
+	            position: 'absolute',
+	            left: this.state.pos + '%'
+	        }, this.state.style);
+
 	        var props = {
 	            ref: 'icon',
-	            style: {
-	                position: 'absolute',
-	                left: this.state.pos + '%'
-	            },
 	            className: "icon-img icon-price-" + this.state.dir
 	        };
 
@@ -5065,7 +5095,7 @@ this["EssaComponents"] =
 	            props.onMouseUp = this.onMouseUp;
 	        }
 
-	        return React.createElement(NotAllowSelect, { ref: 'wrap', component: 'span' }, React.createElement('span', props));
+	        return React.createElement(NotAllowSelect, { ref: 'wrap', style: style }, React.createElement('span', props));
 	    }
 	});
 
