@@ -3,22 +3,31 @@
  */
 
 var React = require('react');
+var assign = require('object-assign');
+var returnFalse = function () {
+    return false
+};
 var NotAllowSelect = React.createClass({
     getDefaultProps: function () {
-        return {component: 'div'}
+        return {
+            style: {}
+        }
     },
+
+    componentWillMount: function () {
+        this.style = {
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
+            userSelect: 'none'
+        }
+    },
+
     render: function () {
-        var Component = this.props.component;
-        return <Component
-            onSelect={function(){return false;}}
-            style={{
-                MozUserSelect:'none',
-                WebkitUserSelect:'none',
-                msUserSelect:'none',
-                userSelect:'none'
-            }}>
-            {this.props.children}
-        </Component>
+        return React.cloneElement(this.props.children, {
+            onSelect: returnFalse,
+            style: assign({}, this.style, this.props.style)
+        });
     }
 });
 module.exports = NotAllowSelect;

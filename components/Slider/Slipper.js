@@ -7,6 +7,7 @@ var noop = require('../../com/noop');
 var DOMEvent = require('../../com/DOM/DOMEvent');
 var NotAllowSelect = require('../Pagination/NotAllowSelect');
 var elementAbsPosition = require('../../com/absolutePosition');
+var assign = require('object-assign');
 
 var now = function () {
     return new Date() * 1
@@ -15,6 +16,7 @@ var now = function () {
 var Slipper = React.createClass({
     getInitialState: function () {
         return {
+            style: {},
             disabled: false,
             pos: 0,
             dir: 'right',
@@ -24,6 +26,7 @@ var Slipper = React.createClass({
 
     getDefaultProps: function () {
         return {
+            style: {},
             type: 'left',
             timeGap: 50,
             min: 0,
@@ -81,8 +84,9 @@ var Slipper = React.createClass({
     componentWillReceiveProps: function (nextProps) {
         this.setState({
             pos: nextProps.start,
-            base: nextProps.base,
-            disabled: nextProps.disabled
+            disabled: nextProps.disabled,
+            style: nextProps.style,
+            base: nextProps.base
         })
     },
 
@@ -92,7 +96,9 @@ var Slipper = React.createClass({
     },
 
     shouldComponentUpdate: function (nextProps, nextState) {
-        return this.state.pos !== nextState.pos
+        return this.state.pos !== nextState.pos ||
+            Object.keys(nextState.style).length ||
+            Object.keys(nextState.base).length
     },
 
     _abs: function (num) {
@@ -131,7 +137,8 @@ var Slipper = React.createClass({
         var pos = {x: e.pageX, y: e.pageY};
 
         // 当前位置与基础位置距离的百分比
-        var gap = (pos.x - state.base.x) / state.base.w;
+        // 避免0为分母的情况
+        var gap = (pos.x - state.base.x) / (state.base.w || 1);
         gap = gap * 100;
         gap = gap - gap % props.step;
 
@@ -147,6 +154,9 @@ var Slipper = React.createClass({
             return;
         }
 
+        console.log('base=%s, gap=%s, step=%s',
+            JSON.stringify(state.base), gap, props.step);
+
         this.setState({pos: gap});
         this.props.onMove(gap)
     },
@@ -156,12 +166,14 @@ var Slipper = React.createClass({
     },
 
     render: function () {
+
+        var style = assign({
+            position: 'absolute',
+            left: this.state.pos + '%'
+        }, this.state.style);
+
         var props = {
             ref: 'icon',
-            style: {
-                position: 'absolute',
-                left: this.state.pos + '%'
-            },
             className: "icon-img icon-price-" + this.state.dir
         };
 
@@ -171,7 +183,7 @@ var Slipper = React.createClass({
             props.onMouseUp = this.onMouseUp
         }
 
-        return <NotAllowSelect ref="wrap" component="span">
+        return <NotAllowSelect ref="wrap" style={style}>
             {React.createElement('span', props)}
         </NotAllowSelect>
     }
