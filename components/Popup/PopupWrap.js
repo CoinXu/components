@@ -38,7 +38,7 @@ var PopupWrap = React.createClass({
         }
     },
 
-    componentDidMount: function () {
+    recompute: function (callback) {
         var node = ReactDOM.findDOMNode(this.refs.popup);
         var position = {x: node.offsetWidth, y: node.offsetHeight};
         var baseElement = this.props.baseElement || this.props.refTarget;
@@ -60,8 +60,11 @@ var PopupWrap = React.createClass({
                 position.x = 0;
                 position.y = 0;
         }
+        this.setState({left: position.x, top: position.y}, callback || noop)
+    },
 
-        this.setState({left: position.x, top: position.y})
+    componentDidMount: function () {
+        this.recompute();
     },
 
     render: function () {

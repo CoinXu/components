@@ -241,7 +241,6 @@ this["EssaComponents"] =
 
 	    componentDidMount: function componentDidMount() {
 	        this.props.onMount(this);
-	        this.startAnimate(this.props.onComplete);
 	    }
 	};
 
@@ -1722,6 +1721,10 @@ this["EssaComponents"] =
 	        };
 	    },
 
+	    componentWillMount: function componentWillMount() {
+	        this.setState({ visible: this.props.visible });
+	    },
+
 	    componentDidMount: function componentDidMount() {
 
 	        this.__bodyHandle = function (e) {
@@ -1752,6 +1755,9 @@ this["EssaComponents"] =
 	    onMount: function onMount(animate) {
 	        this.__animate = animate;
 	        this.props.onMount(this);
+	        if (this.state.visible) {
+	            animate.startAnimate();
+	        }
 	    },
 
 	    render: function render() {
@@ -4109,6 +4115,7 @@ this["EssaComponents"] =
 	            content: null,
 	            placement: null,
 	            baseElement: null,
+	            unMountOnHide: true,
 	            onHide: noop,
 	            onChange: noop,
 	            shouldUpdate: truth,
@@ -4141,6 +4148,10 @@ this["EssaComponents"] =
 	        this.props.onMount(this);
 	    },
 
+	    update: function update(props) {
+	        this.setState(props);
+	    },
+
 	    _createContent: function _createContent() {
 	        var props = this.props;
 
@@ -4154,9 +4165,15 @@ this["EssaComponents"] =
 	    onHide: function onHide() {
 	        if (this.__isUnmount) return;
 	        this.setState({ visible: false }, function () {
-	            ReactDOM.unmountComponentAtNode(this.__popupMountNode);
+	            if (this.props.unMountOnHide) this.unMount();
 	            this.props.onHide();
 	        });
+	    },
+
+	    unMount: function unMount() {
+	        try {
+	            ReactDOM.unmountComponentAtNode(this.__popupMountNode);
+	        } catch (e) {}
 	    },
 
 	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
@@ -4166,15 +4183,16 @@ this["EssaComponents"] =
 	        }
 	    },
 
-	    hide: function hide() {
-	        if (this.__isUnmount) return;
-	        if (this.__animate) {
-	            this.__animate.backToTheStart(this.onHide);
-	        }
+	    hide: function hide(callback) {
+	        if (this.__isUnmount || !this.state.visible) return;
+
+	        this.__animate.backToTheStart(function () {
+	            this.setState({ visible: false }, callback);
+	        }.bind(this));
 	    },
 
 	    autoVisible: function autoVisible() {
-	        this.hide();
+	        this.hide(this.onHide);
 	    },
 
 	    computedPosition: function computedPosition() {
@@ -4221,6 +4239,8 @@ this["EssaComponents"] =
 	            left: this.__position.x,
 	            top: this.__position.y
 	        };
+	        // 生成后总是隐藏的
+	        // 根据state来自行调用显示隐藏
 	        ReactDOM.render(React.createElement(PopupWrap, {
 	            baseElement: props.baseElement,
 	            onMount: this.onAnimateMount,
@@ -4233,10 +4253,14 @@ this["EssaComponents"] =
 	    },
 
 	    showPopup: function showPopup() {
-	        this.setState({ visible: true });
+	        this.setState({ visible: true }, function () {
+	            this.__animate.startAnimate();
+	        });
 	    },
 
 	    onAnimateMount: function onAnimateMount(inst) {
+	        this._popupWrap = inst;
+	        // TODO 兼容代码,下个大版本删除
 	        this.__animate = inst.__animate;
 	    },
 
@@ -4307,7 +4331,7 @@ this["EssaComponents"] =
 	        };
 	    },
 
-	    componentDidMount: function componentDidMount() {
+	    recompute: function recompute(callback) {
 	        var node = ReactDOM.findDOMNode(this.refs.popup);
 	        var position = { x: node.offsetWidth, y: node.offsetHeight };
 	        var baseElement = this.props.baseElement || this.props.refTarget;
@@ -4329,8 +4353,11 @@ this["EssaComponents"] =
 	                position.x = 0;
 	                position.y = 0;
 	        }
+	        this.setState({ left: position.x, top: position.y }, callback || noop);
+	    },
 
-	        this.setState({ left: position.x, top: position.y });
+	    componentDidMount: function componentDidMount() {
+	        this.recompute();
 	    },
 
 	    render: function render() {
@@ -4659,98 +4686,158 @@ this["EssaComponents"] =
 
 	/**
 	 * Created by xcp on 2016/4/30.
-	 * 参数
-	 * target
-	 * onMount
-	 *
-	 * 返回对象
-	 * hide
-	 * open
-	 * show
 	 */
 
 	var React = __webpack_require__(2);
 	var ReactDOM = __webpack_require__(16);
-	var noop = __webpack_require__(4);
-	var Popup = __webpack_require__(46);
 	var Bubble = __webpack_require__(49);
+	var PopupWrap = __webpack_require__(47);
+
+	var noop = __webpack_require__(4);
+	var body = __webpack_require__(19);
+	var absolutePosition = __webpack_require__(48);
+	var POPUP_GAP = 5;
 
 	var PositionBubble = React.createClass({
 	    displayName: 'PositionBubble',
 
-	    getDefaultProps: function getDefaultProps() {
+	    getInitialState: function getInitialState() {
 	        return {
-	            placement: 'top',
-	            trigger: 'click',
-	            bubbleStyle: {},
-	            symbolStyle: { left: '50%', marginLeft: -10 },
-	            baseElement: null,
-	            onUnMount: noop,
-	            onMount: noop
+	            visible: false,
+	            baseElement: body
 	        };
 	    },
 
-	    getInitialState: function getInitialState() {
+	    getDefaultProps: function getDefaultProps() {
 	        return {
-	            bubbleStyle: null,
-	            symbolStyle: null
+	            visible: false,
+	            baseElement: body,
+	            onUnMount: noop,
+	            onMount: noop,
+	            getContent: function getContent(props, state, inst) {
+	                var style = { left: '50%', marginLeft: -10 };
+	                return React.createElement(Bubble, {
+	                    placement: 'top',
+	                    symbolStyle: style,
+	                    onMount: inst.onMount });
+	            }
 	        };
 	    },
 
 	    componentWillMount: function componentWillMount() {
 	        this.setState({
-	            bubbleStyle: this.props.bubbleStyle,
-	            symbolStyle: this.props.symbolStyle
+	            visible: this.props.visible,
+	            baseElement: this.props.baseElement
 	        });
 	    },
 
-	    unMount: function unMount() {
-	        this._popup.hide();
-	    },
-
-	    show: function show() {
-	        if (this.isMounted()) {
-	            this._popup.showPopup();
+	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	        var fn = noop;
+	        if (prevState.visible !== this.state.visible) {
+	            fn = function () {
+	                var fn = this.state.visible ? 'startAnimate' : 'backToTheStart';
+	                this._animation[fn]();
+	            }.bind(this);
 	        }
+	        this.refs.popupWrap.recompute(fn);
 	    },
 
-	    onMount: function onMount(inst) {
-	        this._popup = inst;
+	    computePosition: function computePosition() {
+	        var props = this.props;
+	        var target = this.state.baseElement;
+	        var pos = absolutePosition(target);
+	        var placement = props.placement;
+	        var w = target.offsetWidth;
+	        var h = target.offsetHeight;
+
+	        switch (placement) {
+	            case "top":
+	                pos.y = pos.y - POPUP_GAP;
+	                break;
+	            case "right":
+	                pos.x = pos.x + w + POPUP_GAP;
+	                break;
+	            case "bottom":
+	                pos.y = pos.y + h + POPUP_GAP;
+	                break;
+	            case "left":
+	                pos.x = pos.x - POPUP_GAP;
+	                break;
+	        }
+	        return pos;
 	    },
 
-	    onBubbleMount: function onBubbleMount(wrap, inst) {
+	    shouldHide: function shouldHide() {
+	        return false;
+	    },
+
+	    update: function update(props) {
+	        this.setState(props);
+	    },
+
+	    updateBaseElement: function updateBaseElement(elem) {
+	        if (elem === this.state.baseElement) return;
+	        this._animation.backToTheStart(function () {
+	            this.setState({ visible: false }, function () {
+	                this.setState({
+	                    visible: true,
+	                    baseElement: elem
+	                });
+	            });
+	        }.bind(this));
+	    },
+
+	    onMount: function onMount(wrap, inst) {
 	        this.props.onMount(wrap, inst);
 	    },
 
-	    componentWillUnmount: function componentWillUnmount() {
-	        this.props.onUnMount();
+	    onWrapMount: function onWrapMount(inst) {
+	        this._animation = inst.__animate;
 	    },
 
-	    _unmount: function _unmount() {
-	        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+	    show: function show() {
+	        this.setState({ visible: true });
+	    },
+
+	    hide: function hide() {
+	        this.setState({ visible: false });
+	    },
+
+	    unMount: function unMount() {
+	        if (this.__isUnmount) return;
+
+	        var fn = function () {
+	            this.__isUnmount = true;
+	            ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+	        }.bind(this);
+
+	        if (this.state.visible) {
+	            this._animation.backToTheStart(fn);
+	        } else {
+	            fn();
+	        }
 	    },
 
 	    render: function render() {
 	        var props = this.props;
-	        var state = this.state;
-	        var content = React.createElement(Bubble, {
-	            symbolStyle: state.symbolStyle,
-	            style: state.bubbleStyle,
-	            onComponentMount: this.onBubbleMount });
-	        return React.createElement(Popup, {
-	            placement: props.placement,
-	            trigger: props.trigger,
-	            onHide: this._unmount,
-	            onMount: this.onMount,
-	            shouldHide: noop,
-	            baseElement: props.baseElement,
-	            content: content });
+	        var pos = this.computePosition();
+	        var style = {
+	            top: pos.y,
+	            left: pos.x,
+	            position: 'absolute'
+	        };
+	        return React.createElement(PopupWrap, {
+	            ref: 'popupWrap',
+	            shouldHide: this.shouldHide,
+	            style: style,
+	            baseElement: this.state.baseElement,
+	            visible: this.state.visible,
+	            onMount: this.onWrapMount }, props.getContent(props, this.state, this));
 	    }
 
 	});
 
 	module.exports = function (target, props) {
-	    var body = document && document.body;
 	    if (!body) return {};
 
 	    props = (typeof props === 'undefined' ? 'undefined' : _typeof(props)) === 'object' && props ? props : {};

@@ -34,6 +34,10 @@ var HideOnBodyClick = React.createClass({
         }
     },
 
+    componentWillMount: function () {
+        this.setState({visible: this.props.visible})
+    },
+
     componentDidMount: function () {
 
         this.__bodyHandle = function (e) {
@@ -42,8 +46,7 @@ var HideOnBodyClick = React.createClass({
             var props = this.props;
 
             if (!props.shouldHide()
-                || ( props.refTarget
-                && contains(props.refTarget, target))
+                || (props.refTarget && contains(props.refTarget, target))
                 || contains(mountNode, target)) {
                 return
             }
@@ -67,6 +70,9 @@ var HideOnBodyClick = React.createClass({
     onMount: function (animate) {
         this.__animate = animate;
         this.props.onMount(this);
+        if (this.state.visible) {
+            animate.startAnimate();
+        }
     },
 
     render: function () {

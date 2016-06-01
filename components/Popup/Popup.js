@@ -32,6 +32,7 @@ var Popup = React.createClass({
             content: null,
             placement: null,
             baseElement: null,
+            unMountOnHide: true,
             onHide: noop,
             onChange: noop,
             shouldUpdate: truth,
@@ -64,6 +65,10 @@ var Popup = React.createClass({
         this.props.onMount(this);
     },
 
+    update: function (props) {
+        this.setState(props)
+    },
+
     _createContent: function () {
         var props = this.props;
 
@@ -78,9 +83,16 @@ var Popup = React.createClass({
     onHide: function () {
         if (this.__isUnmount) return;
         this.setState({visible: false}, function () {
-            ReactDOM.unmountComponentAtNode(this.__popupMountNode);
+            if (this.props.unMountOnHide) this.unMount();
             this.props.onHide()
         })
+    },
+
+    unMount: function () {
+        try {
+            ReactDOM.unmountComponentAtNode(this.__popupMountNode);
+        } catch (e) {
+        }
     },
 
     componentDidUpdate: function (prevProps, prevState) {
@@ -91,15 +103,16 @@ var Popup = React.createClass({
         }
     },
 
-    hide: function () {
-        if (this.__isUnmount) return;
-        if (this.__animate) {
-            this.__animate.backToTheStart(this.onHide)
-        }
+    hide: function (callback) {
+        if (this.__isUnmount || !this.state.visible) return;
+
+        this.__animate.backToTheStart(function () {
+            this.setState({visible: false}, callback)
+        }.bind(this));
     },
 
     autoVisible: function () {
-        this.hide();
+        this.hide(this.onHide);
     },
 
     computedPosition: function () {
@@ -146,6 +159,8 @@ var Popup = React.createClass({
             left: this.__position.x,
             top: this.__position.y
         };
+        // 生成后总是隐藏的
+        // 根据state来自行调用显示隐藏
         ReactDOM.render(
             <PopupWrap
                 baseElement={props.baseElement}
@@ -163,10 +178,14 @@ var Popup = React.createClass({
     },
 
     showPopup: function () {
-        this.setState({visible: true});
+        this.setState({visible: true}, function () {
+            this.__animate.startAnimate()
+        });
     },
 
     onAnimateMount: function (inst) {
+        this._popupWrap = inst;
+        // TODO 兼容代码,下个大版本删除
         this.__animate = inst.__animate;
     },
 

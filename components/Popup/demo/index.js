@@ -106,8 +106,10 @@ ReactDOM.render(
         }
     };
 
-    var Confirm = <Bubble style={{width:210}} symbolStyle={{left:'50%',marginLeft:-10}}>
-        <button className="btn btn-sm btn-primary" onClick={unmountPopup}>删除</button>
+    var Confirm = <Bubble style={{width:210}}
+                          symbolStyle={{left:'50%',marginLeft:-10}}>
+        <button className="btn btn-sm btn-primary" onClick={unmountPopup}>删除
+        </button>
         <span className="bub-text-gap-lg">确定删除该贴纸吗?</span>
     </Bubble>;
 
@@ -242,6 +244,10 @@ ReactDOM.render(
 // 指定一个元素，弹出Popup
 var baseElement = document.querySelector('#demo-special-position');
 var closeElement = document.querySelector('#demo-special-position-close');
+var updateElement = document.querySelector('#demo-special-position-update');
+var updateElement1 = document.querySelector('#demo-special-position-update-1');
+var unmountElement = document.querySelector('#demo-special-position-unmount');
+
 var positionBubble = require('../PositionBubble');
 // 组件挂载后，插入内容
 var onMount = function (wrap, inst) {
@@ -249,11 +255,21 @@ var onMount = function (wrap, inst) {
 };
 var popup = positionBubble(baseElement, {
     onMount: onMount,
-    placement: 'left',
+    placement: 'top',
     symbolStyle: {top: 6}
 });
 
 // 显示
 baseElement.addEventListener('click', popup.show, false);
 // 关闭
-closeElement.addEventListener('click', popup.unMount, false);
+closeElement.addEventListener('click', popup.hide, false);
+// 更新位置
+updateElement.addEventListener('click', function () {
+    popup.updateBaseElement(updateElement)
+}, false);
+updateElement1.addEventListener('click', function () {
+    popup.updateBaseElement(updateElement1)
+}, false);
+// 卸载
+unmountElement.addEventListener('click', popup.unMount, false);
+

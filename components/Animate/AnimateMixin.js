@@ -124,6 +124,5 @@ module.exports = {
 
     componentDidMount: function () {
         this.props.onMount(this);
-        this.startAnimate(this.props.onComplete);
     }
 };

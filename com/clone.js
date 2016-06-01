@@ -2,6 +2,17 @@
  * Created by xcp on 2016/4/19.
  */
 
+var toString = Object.prototype.toString;
+var OBJECT_TYPE = '[object Object]';
+var ARRAY_TYPE = '[object Array]';
+
+var _isObject = function (obj) {
+    return toString.call(obj) === OBJECT_TYPE
+};
+var _isArray = Object.isArray || function (obj) {
+        return toString.call(obj) === ARRAY_TYPE;
+    };
+
 function cloneWithModern(obj) {
     var result = null;
     try {
@@ -13,9 +24,8 @@ function cloneWithModern(obj) {
 }
 
 function cloneWithCompatible(obj, deep) {
-    var type = typeof obj;
-    var isObject = type === 'object' && !!obj;
-    var isArray = isObject && obj.constructor === Array;
+    var isObject = _isObject(obj);
+    var isArray = _isArray(obj);
 
     if (!(isArray || isObject)) {
         return obj;
@@ -37,9 +47,11 @@ function cloneWithCompatible(obj, deep) {
 }
 
 function clone(obj, deep) {
-    if (deep && JSON && JSON.parse) {
-        return cloneWithModern(obj)
-    }
+    // 使用JSON.parse,如果内容中有DOM对象就惨了
+    // 所以还是用递归吧
+    // if (deep && JSON && JSON.parse) {
+    //     return cloneWithModern(obj)
+    // }
     return cloneWithCompatible(obj, deep)
 }
 

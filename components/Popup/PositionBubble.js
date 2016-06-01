@@ -1,96 +1,158 @@
 /**
  * Created by xcp on 2016/4/30.
- * 参数
- * target
- * onMount
- *
- * 返回对象
- * hide
- * open
- * show
  */
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-var noop = require('../../com/noop');
-var Popup = require('./Popup');
 var Bubble = require('./Bubble');
+var PopupWrap = require('./PopupWrap');
+
+var noop = require('../../com/noop');
+var body = require('../../com/DOM/DOMBody');
+var absolutePosition = require('../../com/absolutePosition');
+var POPUP_GAP = 5;
 
 var PositionBubble = React.createClass({
 
-    getDefaultProps: function () {
-        return {
-            placement: 'top',
-            trigger: 'click',
-            bubbleStyle: {},
-            symbolStyle: {left: '50%', marginLeft: -10},
-            baseElement: null,
-            onUnMount: noop,
-            onMount: noop
-        }
-    },
-
     getInitialState: function () {
         return {
-            bubbleStyle: null,
-            symbolStyle: null
-        }
+            visible: false,
+            baseElement: body
+        };
+    },
+
+    getDefaultProps: function () {
+        return {
+            visible: false,
+            baseElement: body,
+            onUnMount: noop,
+            onMount: noop,
+            getContent: function (props, state, inst) {
+                var style = {left: '50%', marginLeft: -10};
+                return <Bubble
+                    placement="top"
+                    symbolStyle={style}
+                    onMount={inst.onMount}/>
+            }
+        };
     },
 
     componentWillMount: function () {
         this.setState({
-            bubbleStyle: this.props.bubbleStyle,
-            symbolStyle: this.props.symbolStyle
+            visible: this.props.visible,
+            baseElement: this.props.baseElement
         })
     },
 
-    unMount: function () {
-        this._popup.hide();
-    },
-
-    show: function () {
-        if (this.isMounted()) {
-            this._popup.showPopup();
+    componentDidUpdate: function (prevProps, prevState) {
+        var fn = noop;
+        if (prevState.visible !== this.state.visible) {
+            fn = function () {
+                var fn = this.state.visible ? 'startAnimate' : 'backToTheStart';
+                this._animation[fn]()
+            }.bind(this)
         }
+        this.refs.popupWrap.recompute(fn)
     },
 
-    onMount: function (inst) {
-        this._popup = inst;
+    computePosition: function () {
+        var props = this.props;
+        var target = this.state.baseElement;
+        var pos = absolutePosition(target);
+        var placement = props.placement;
+        var w = target.offsetWidth;
+        var h = target.offsetHeight;
+
+        switch (placement) {
+            case "top":
+                pos.y = pos.y - POPUP_GAP;
+                break;
+            case "right":
+                pos.x = pos.x + w + POPUP_GAP;
+                break;
+            case "bottom":
+                pos.y = pos.y + h + POPUP_GAP;
+                break;
+            case "left":
+                pos.x = pos.x - POPUP_GAP;
+                break;
+        }
+        return pos;
     },
 
-    onBubbleMount: function (wrap, inst) {
+    shouldHide: function () {
+        return false
+    },
+
+    update: function (props) {
+        this.setState(props)
+    },
+
+    updateBaseElement: function (elem) {
+        if (elem === this.state.baseElement) return;
+        this._animation.backToTheStart(function () {
+            this.setState({visible: false}, function () {
+                this.setState({
+                    visible: true,
+                    baseElement: elem
+                })
+            })
+        }.bind(this));
+    },
+
+    onMount: function (wrap, inst) {
         this.props.onMount(wrap, inst);
     },
 
-    componentWillUnmount: function () {
-        this.props.onUnMount()
+    onWrapMount: function (inst) {
+        this._animation = inst.__animate;
     },
 
-    _unmount: function () {
-        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode)
+    show: function () {
+        this.setState({visible: true})
+    },
+
+    hide: function () {
+        this.setState({visible: false})
+    },
+
+    unMount: function () {
+        if (this.__isUnmount) return;
+
+        var fn = function () {
+            this.__isUnmount = true;
+            ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode)
+        }.bind(this);
+
+        if (this.state.visible) {
+            this._animation.backToTheStart(fn)
+        } else {
+            fn()
+        }
     },
 
     render: function () {
         var props = this.props;
-        var state = this.state;
-        var content = <Bubble
-            symbolStyle={state.symbolStyle}
-            style={state.bubbleStyle}
-            onComponentMount={this.onBubbleMount}/>;
-        return <Popup
-            placement={props.placement}
-            trigger={props.trigger}
-            onHide={this._unmount}
-            onMount={this.onMount}
-            shouldHide={noop}
-            baseElement={props.baseElement}
-            content={content}/>
+        var pos = this.computePosition();
+        var style = {
+            top: pos.y,
+            left: pos.x,
+            position: 'absolute'
+        };
+        return <PopupWrap
+            ref="popupWrap"
+            shouldHide={this.shouldHide}
+            style={style}
+            baseElement={this.state.baseElement}
+            visible={this.state.visible}
+            onMount={this.onWrapMount}>
+            {props.getContent(props, this.state, this)}
+        </PopupWrap>
     }
 
 });
 
 module.exports = function (target, props) {
-    var body = document && document.body;
     if (!body) return {};
 
     props = typeof props === 'object' && props ?
