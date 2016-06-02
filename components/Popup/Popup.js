@@ -97,7 +97,7 @@ var Popup = React.createClass({
 
     componentDidUpdate: function (prevProps, prevState) {
         if (this.state.visible !== prevState.visible
-            && !!this.props.shouldUpdate()) {
+            || !!this.props.shouldUpdate()) {
             this.renderPopup();
             this.props.onChange();
         }

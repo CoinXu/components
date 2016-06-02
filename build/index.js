@@ -4177,7 +4177,7 @@ this["EssaComponents"] =
 	    },
 
 	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-	        if (this.state.visible !== prevState.visible && !!this.props.shouldUpdate()) {
+	        if (this.state.visible !== prevState.visible || !!this.props.shouldUpdate()) {
 	            this.renderPopup();
 	            this.props.onChange();
 	        }
