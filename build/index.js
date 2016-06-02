@@ -4776,7 +4776,8 @@ this["EssaComponents"] =
 	    },
 
 	    updateBaseElement: function updateBaseElement(elem) {
-	        if (elem === this.state.baseElement) return;
+	        if (elem === this.state.baseElement && this.state.visible) return;
+
 	        this._animation.backToTheStart(function () {
 	            this.setState({ visible: false }, function () {
 	                this.setState({
