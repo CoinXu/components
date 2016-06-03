@@ -35,7 +35,6 @@ var setStyle = function (node, style) {
     }
 };
 
-
 if (!runtimeIsNode) {
 
     var mountNodeWrap = document.createElement('div');

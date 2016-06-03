@@ -13,19 +13,22 @@ var Message = React.createClass({
 
     mixins: [AutoUnmountMixin],
 
+    onMount: function (animation) {
+        this.animateDidMount(animation);
+        animation.startAnimate(this.props.closeable ?
+            noop :
+            this.autoUnmount)
+    },
+
     render: function () {
         var props = this.props;
-        var onComplete = props.closeable ?
-            noop :
-            this.autoUnmount;
 
         return <Animate
             component={props.animate.component}
             from={props.animate.from}
             to={props.animate.to}
             during={props.animate.during}
-            onMount={this.animateDidMount}
-            onComplete={onComplete}>
+            onMount={this.onMount}>
             <div className="inline-block">
                 <div className="bub-bill">
                     <div className="util-bill-pd">{props.message}</div>

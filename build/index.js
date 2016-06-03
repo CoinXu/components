@@ -3621,17 +3621,20 @@ this["EssaComponents"] =
 
 	    mixins: [AutoUnmountMixin],
 
+	    onMount: function onMount(animation) {
+	        this.animateDidMount(animation);
+	        animation.startAnimate(this.props.closeable ? noop : this.autoUnmount);
+	    },
+
 	    render: function render() {
 	        var props = this.props;
-	        var onComplete = props.closeable ? noop : this.autoUnmount;
 
 	        return React.createElement(Animate, {
 	            component: props.animate.component,
 	            from: props.animate.from,
 	            to: props.animate.to,
 	            during: props.animate.during,
-	            onMount: this.animateDidMount,
-	            onComplete: onComplete }, React.createElement('div', { className: 'inline-block' }, React.createElement('div', { className: 'bub-bill' }, React.createElement('div', { className: 'util-bill-pd' }, props.message))));
+	            onMount: this.onMount }, React.createElement('div', { className: 'inline-block' }, React.createElement('div', { className: 'bub-bill' }, React.createElement('div', { className: 'util-bill-pd' }, props.message))));
 	    }
 	});
 
@@ -3683,15 +3686,11 @@ this["EssaComponents"] =
 	    },
 
 	    unmount: function unmount() {
-	        var mountNode = ReactDOM.findDOMNode(this).parentNode;
 	        if (typeof this.__backToTheStart === 'function') {
-	            this.__backToTheStart(function () {
-	                ReactDOM.unmountComponentAtNode(mountNode);
-	            });
+	            this.__backToTheStart(this.props.onUnmout);
 	        } else {
-	            ReactDOM.unmountComponentAtNode(mountNode);
+	            this.props.onUnmout();
 	        }
-	        this.props.onUnmout();
 	    },
 
 	    autoUnmount: function autoUnmount() {

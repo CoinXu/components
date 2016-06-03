@@ -38,15 +38,12 @@ module.exports = {
     },
 
     unmount: function () {
-        var mountNode = ReactDOM.findDOMNode(this).parentNode;
         if (typeof this.__backToTheStart === 'function') {
-            this.__backToTheStart(function () {
-                ReactDOM.unmountComponentAtNode(mountNode);
-            })
+            this.__backToTheStart(this.props.onUnmout)
         } else {
-            ReactDOM.unmountComponentAtNode(mountNode)
+            this.props.onUnmout();
         }
-        this.props.onUnmout();
+
     },
 
     autoUnmount: function () {
