@@ -11,7 +11,6 @@ var elementAbsPosition = require('../../com/absolutePosition');
 var Slider = React.createClass({
     getInitialState: function () {
         return {
-            currentValue: 0,
             disabled: false,
             left: 0,
             right: 100,
@@ -28,7 +27,8 @@ var Slider = React.createClass({
             min: 0,
             max: 100,
             step: 2,
-            defaultValue: 0,
+            left: 0,
+            right: 100,
             disabled: false,
             onChange: noop
         }
@@ -43,7 +43,8 @@ var Slider = React.createClass({
         this.setState({
             disabled: props.disabled,
             step: _step,
-            currentValue: props.defaultValue
+            left: props.left,
+            right: props.right
         });
     },
 

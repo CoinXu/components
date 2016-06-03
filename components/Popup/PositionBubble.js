@@ -136,6 +136,8 @@ var PositionBubble = React.createClass({
     render: function () {
         var props = this.props;
         var pos = this.computePosition();
+        var content = props.getContent(props, this.state, this);
+
         var style = {
             top: pos.y,
             left: pos.x,
@@ -143,12 +145,13 @@ var PositionBubble = React.createClass({
         };
         return <PopupWrap
             ref="popupWrap"
+            placement={content.props.placement}
             shouldHide={this.shouldHide}
             style={style}
             baseElement={this.state.baseElement}
             visible={this.state.visible}
             onMount={this.onWrapMount}>
-            {props.getContent(props, this.state, this)}
+            {content}
         </PopupWrap>
     }
 

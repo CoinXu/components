@@ -4821,6 +4821,8 @@ this["EssaComponents"] =
 	    render: function render() {
 	        var props = this.props;
 	        var pos = this.computePosition();
+	        var content = props.getContent(props, this.state, this);
+
 	        var style = {
 	            top: pos.y,
 	            left: pos.x,
@@ -4828,11 +4830,12 @@ this["EssaComponents"] =
 	        };
 	        return React.createElement(PopupWrap, {
 	            ref: 'popupWrap',
+	            placement: content.props.placement,
 	            shouldHide: this.shouldHide,
 	            style: style,
 	            baseElement: this.state.baseElement,
 	            visible: this.state.visible,
-	            onMount: this.onWrapMount }, props.getContent(props, this.state, this));
+	            onMount: this.onWrapMount }, content);
 	    }
 
 	});
@@ -4899,7 +4902,6 @@ this["EssaComponents"] =
 
 	    getInitialState: function getInitialState() {
 	        return {
-	            currentValue: 0,
 	            disabled: false,
 	            left: 0,
 	            right: 100,
@@ -4916,7 +4918,8 @@ this["EssaComponents"] =
 	            min: 0,
 	            max: 100,
 	            step: 2,
-	            defaultValue: 0,
+	            left: 0,
+	            right: 100,
 	            disabled: false,
 	            onChange: noop
 	        };
@@ -4931,7 +4934,8 @@ this["EssaComponents"] =
 	        this.setState({
 	            disabled: props.disabled,
 	            step: _step,
-	            currentValue: props.defaultValue
+	            left: props.left,
+	            right: props.right
 	        });
 	    },
 
