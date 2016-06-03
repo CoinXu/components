@@ -4925,6 +4925,18 @@ this["EssaComponents"] =
 	        };
 	    },
 
+	    componentWillReceiveProps: function componentWillReceiveProps(props) {
+	        var state = {};
+	        var hasOwn = state.hasOwnProperty;
+	        var s = this.state;
+
+	        Object.keys(props).forEach(function (name) {
+	            if (hasOwn.call(s, name)) state[name] = props[name];
+	        });
+
+	        return state;
+	    },
+
 	    componentWillMount: function componentWillMount() {
 	        var props = this.props;
 	        // 将最大值和最小值的区间数均分为100份
