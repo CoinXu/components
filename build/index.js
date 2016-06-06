@@ -4934,7 +4934,7 @@ this["EssaComponents"] =
 	            if (hasOwn.call(s, name)) state[name] = props[name];
 	        });
 
-	        return state;
+	        this.setState(state);
 	    },
 
 	    componentWillMount: function componentWillMount() {

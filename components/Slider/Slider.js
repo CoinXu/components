@@ -44,7 +44,7 @@ var Slider = React.createClass({
                 state[name] = props[name]
         });
 
-        return state;
+        this.setState(state)
     },
 
     componentWillMount: function () {
