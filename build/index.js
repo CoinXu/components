@@ -4903,11 +4903,16 @@ this["EssaComponents"] =
 	    getInitialState: function getInitialState() {
 	        return {
 	            disabled: false,
-	            left: 0,
-	            right: 100,
-	            median: 50,
-	            min: 0,
-	            max: 100,
+	            step: 1,
+
+	            leftPos: 0, // left position
+	            rightPos: 100, // right position
+
+	            leftStart: 0, // left range
+	            leftEnd: 50,
+	            rightStart: 0, // right range
+	            rightEnd: 100,
+
 	            base: { x: 0, y: 0, w: 0 },
 	            rightStyle: {}
 	        };
@@ -4917,39 +4922,76 @@ this["EssaComponents"] =
 	        return {
 	            min: 0,
 	            max: 100,
-	            step: 2,
-	            left: 0,
-	            right: 100,
+	            step: 1,
+
 	            disabled: false,
+
+	            leftValue: 0, // left value
+	            rightValue: 100, // right value
+
+	            leftStart: 0, // left range
+	            leftEnd: 50,
+	            rightStart: 50, // right range
+	            rightEnd: 100,
+
+	            precision: 2, // float number precision
 	            onChange: noop
 	        };
 	    },
 
-	    componentWillReceiveProps: function componentWillReceiveProps(props) {
-	        var state = {};
-	        var hasOwn = state.hasOwnProperty;
+	    copyProps: function copyProps(props) {
+	        var nextState = {};
+	        var hasOwn = nextState.hasOwnProperty;
 	        var s = this.state;
 
 	        Object.keys(props).forEach(function (name) {
-	            if (hasOwn.call(s, name)) state[name] = props[name];
+	            if (hasOwn.call(s, name)) nextState[name] = props[name];
 	        });
+	        return nextState;
+	    },
 
-	        this.setState(state);
+	    transPropsToState: function transPropsToState(props) {
+	        var p = this.parseFloat;
+	        var r = function r(s) {
+	            return s - props.min;
+	        };
+	        var state = this.copyProps(props);
+	        // 将最大值和最小值的区间数均分为100份
+	        var step = this._step = p(r(props.max) / 100);
+	        // 计算props.step约为多少份
+	        // 将真实step转为滑动器step
+	        // 滑动器一直取两位有效小数
+	        state.step = p(props.step / step, 2) || 1;
+	        // 将初始数据转换为滑块的位置
+	        state.leftPos = p(r(props.leftValue) / step);
+	        state.rightPos = p(r(props.rightValue) / step);
+
+	        // 将左右滑块的取值范围转为位置
+	        state.leftStart = p(r(props.leftStart) / step);
+	        state.leftEnd = p(r(props.leftEnd) / step);
+	        state.rightStart = p(r(props.rightStart) / step);
+	        state.rightEnd = p(r(props.rightEnd) / step);
+
+	        return state;
 	    },
 
 	    componentWillMount: function componentWillMount() {
-	        var props = this.props;
-	        // 将最大值和最小值的区间数均分为100份
-	        this._step = (props.max - props.min) / 100;
-	        // 计算props.step约为多少份
-	        var _step = parseInt(props.step / this._step) || 1;
-	        this.setState({
-	            disabled: props.disabled,
-	            step: _step,
-	            left: props.left,
-	            right: props.right
-	        });
+	        this.setState(this.transPropsToState(this.props));
 	    },
+
+	    parseFloat: function (_parseFloat) {
+	        function parseFloat(_x, _x2) {
+	            return _parseFloat.apply(this, arguments);
+	        }
+
+	        parseFloat.toString = function () {
+	            return _parseFloat.toString();
+	        };
+
+	        return parseFloat;
+	    }(function (num, f) {
+	        return parseFloat(num.toFixed(f !== undefined ? f : this.props.precision));
+	    }),
 
 	    componentDidMount: function componentDidMount() {
 	        var base = this.refs.wrap;
@@ -4962,49 +5004,67 @@ this["EssaComponents"] =
 	        this.setState({
 	            base: pos,
 	            // 右边的元素不能超出窗口范围
-	            rightStyle: { marginLeft: -parseInt(right.clientWidth / 2) }
+	            rightStyle: { marginLeft: -right.clientWidth }
 	        });
 	    },
 
 	    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
 	        var state = this.state;
-	        if (prevState.left !== this.state.left || prevState.right !== this.state.right) {
-	            this.props.onChange(state.left, state.right, (state.left || 1) * this._step, (state.right || 1) * this._step);
+	        var props = this.props;
+	        var p = this.parseFloat;
+
+	        // 边界的值可能会损失精度
+	        var left = state.leftPos === state.leftStart ? props.leftStart : state.leftPos === state.leftEnd ? props.leftEnd : p(state.leftPos * this._step + props.min);
+
+	        var right = state.rightPos === state.rightStart ? props.rightStart : state.rightPos === state.rightEnd ? props.rightEnd : p(state.rightPos * this._step + props.min);
+
+	        if (prevState.leftPos !== state.leftPos || prevState.rightPos !== state.rightPos) {
+	            props.onChange(state.leftPos, state.rightPos, left, right);
 	        }
 	    },
 
-	    leftMove: function leftMove(pos) {
-	        this.setState({ left: pos });
+	    componentWillReceiveProps: function componentWillReceiveProps(props) {
+	        this.setState(this.transPropsToState(props));
 	    },
 
-	    rightMove: function rightMove(pos) {
-	        this.setState({ right: pos });
+	    shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	        return Object.keys(this.state).some(function (name) {
+	            return nextState[name] !== this.state[name];
+	        }, this);
+	    },
+
+	    onLeftMove: function onLeftMove(pos) {
+	        this.setState({ leftPos: pos });
+	    },
+
+	    onRightMove: function onRightMove(pos) {
+	        this.setState({ rightPos: pos });
 	    },
 
 	    render: function render() {
 	        var state = this.state;
 	        var rangeStyle = {
-	            width: state.right - state.left + '%',
-	            left: state.left + '%'
+	            width: state.rightPos - state.leftPos + '%',
+	            left: state.leftPos + '%'
 	        };
 
 	        return React.createElement('div', { className: 'li' }, React.createElement('div', { className: 'price-move', ref: 'wrap' }, React.createElement('div', { className: 'move-bg', style: rangeStyle }), React.createElement(Slipper, {
 	            base: state.base,
 	            type: 'left',
-	            min: state.min,
-	            max: state.median,
-	            start: state.left,
+	            min: state.leftStart,
+	            max: state.leftEnd,
+	            start: state.leftPos,
 	            step: state.step,
-	            onMove: this.leftMove }), React.createElement(Slipper, {
+	            onMove: this.onLeftMove }), React.createElement(Slipper, {
 	            style: state.rightStyle,
 	            base: state.base,
 	            ref: 'right',
 	            type: 'right',
-	            min: state.median,
-	            max: state.max,
-	            start: state.right,
+	            min: state.rightStart,
+	            max: state.rightEnd,
+	            start: state.rightPos,
 	            step: state.step,
-	            onMove: this.rightMove })));
+	            onMove: this.onRightMove })));
 	    }
 	});
 
@@ -5169,8 +5229,8 @@ this["EssaComponents"] =
 	        if (gap === curPos) {
 	            return;
 	        }
-
-	        console.log('base=%s, gap=%s, step=%s', JSON.stringify(state.base), gap, props.step);
+	        // console.log('base=%s, gap=%s, step=%s',
+	        //     JSON.stringify(state.base), gap, props.step);
 
 	        this.setState({ pos: gap });
 	        this.props.onMove(gap);

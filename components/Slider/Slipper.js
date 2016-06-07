@@ -153,9 +153,8 @@ var Slipper = React.createClass({
         if (gap === curPos) {
             return;
         }
-
-        console.log('base=%s, gap=%s, step=%s',
-            JSON.stringify(state.base), gap, props.step);
+        // console.log('base=%s, gap=%s, step=%s',
+        //     JSON.stringify(state.base), gap, props.step);
 
         this.setState({pos: gap});
         this.props.onMove(gap)
