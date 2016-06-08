@@ -54,8 +54,8 @@ var Dialog = React.createClass({
         })
     },
 
-    onAnimateMount: function (animate) {
-        this.__animate = animate;
+    onAnimateMount: function (inst) {
+        this.__animate = inst.__animate;
     },
 
     onHidden: function () {

@@ -4630,8 +4630,8 @@ this["EssaComponents"] =
 	        });
 	    },
 
-	    onAnimateMount: function onAnimateMount(animate) {
-	        this.__animate = animate;
+	    onAnimateMount: function onAnimateMount(inst) {
+	        this.__animate = inst.__animate;
 	    },
 
 	    onHidden: function onHidden() {
