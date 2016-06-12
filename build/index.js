@@ -2167,7 +2167,7 @@ this["EssaComponents"] =
 	            defaultSelectedValue: 1,
 	            onSelect: noop,
 	            validate: getTruth,
-	            getSelectorContent: getSelectorContent(null),
+	            getSelectorContent: getSelectorContent,
 	            getItemContent: getItemContent,
 	            disabled: false,
 	            rejectValue: '10+'
@@ -2240,7 +2240,7 @@ this["EssaComponents"] =
 	        var selectorContent = React.createElement(DropDown.Selector, {
 	            onSelect: self.onSelect,
 	            defaultSelectedValue: state.currentSelectedValue,
-	            getSelectorContent: getSelectorContent(props, state, self.onChange) });
+	            getSelectorContent: props.getSelectorContent(props, state, self.onChange) });
 
 	        var panelContent = React.Children.map(props.itemList, function (value, index) {
 	            return React.createElement(DropDown.Item, {

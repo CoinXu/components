@@ -49,7 +49,7 @@ var Importable = React.createClass({
             defaultSelectedValue: 1,
             onSelect: noop,
             validate: getTruth,
-            getSelectorContent: getSelectorContent(null),
+            getSelectorContent: getSelectorContent,
             getItemContent: getItemContent,
             disabled: false,
             rejectValue: '10+'
@@ -126,7 +126,7 @@ var Importable = React.createClass({
         var selectorContent = <DropDown.Selector
             onSelect={self.onSelect}
             defaultSelectedValue={state.currentSelectedValue}
-            getSelectorContent={getSelectorContent(props, state, self.onChange)}/>;
+            getSelectorContent={props.getSelectorContent(props, state, self.onChange)}/>;
 
         var panelContent = React.Children.map(
             props.itemList,
