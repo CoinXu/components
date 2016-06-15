@@ -1404,7 +1404,6 @@ this["EssaComponents"] =
 	    },
 
 	    onSelect: function onSelect(value) {
-	        this.props.onSelect(value);
 	        this.__selector.onSelect(value);
 	        if (this.__selectable) {
 	            this.__selectable.onSelect(value);
@@ -1437,6 +1436,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(Selectable, {
+	            onSelect: props.onSelect,
 	            disabled: this.state.disabled,
 	            wrapClassName: props.wrapClassName,
 	            selectorBindEvent: props.selectorBindEvent,
@@ -1579,12 +1579,16 @@ this["EssaComponents"] =
 	    },
 
 	    onSelect: function onSelect(item) {
-	        this.props.onSelect(item);
-	        this.__animate.backToTheStart(this.onHide);
+	        // 动画结束时执行 props.onSelect
+	        this.__animate.backToTheStart(function () {
+	            this.onHide(function () {
+	                this.props.onSelect(item);
+	            }.bind(this));
+	        }.bind(this));
 	    },
 
-	    onHide: function onHide() {
-	        this.setState({ visible: false });
+	    onHide: function onHide(fn) {
+	        this.setState({ visible: false }, fn);
 	    },
 
 	    shouldHide: function shouldHide() {
@@ -2238,7 +2242,6 @@ this["EssaComponents"] =
 	        var state = self.state;
 
 	        var selectorContent = React.createElement(DropDown.Selector, {
-	            onSelect: self.onSelect,
 	            defaultSelectedValue: state.currentSelectedValue,
 	            getSelectorContent: props.getSelectorContent(props, state, self.onChange) });
 
@@ -2250,6 +2253,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(DropDown, {
+	            onSelect: self.onSelect,
 	            disabled: props.disabled,
 	            selectorBindEvent: this.queryBindEvent(),
 	            selectorContent: selectorContent,
@@ -2336,11 +2340,11 @@ this["EssaComponents"] =
 	        var props = self.props;
 	        var panelContent = props.itemList.map(props.getItemContent);
 	        var selector = React.createElement(DropDown.Selector, {
-	            onSelect: self.onSelect,
-	            defaultSelectedValue: props.defaultSelectedValue,
+	            defaultSelectedValue: this.state.currentSelectedValue,
 	            getSelectorContent: props.getSelectorContent });
 
 	        return React.createElement(DropDown, {
+	            onSelect: self.onSelect,
 	            disabled: this.state.disabled,
 	            selectorContent: selector,
 	            panelContent: panelContent });
@@ -2452,11 +2456,11 @@ this["EssaComponents"] =
 
 	    onSelect: function onSelect(value) {
 	        var self = this;
-	        self.setState({ currentSelectedValue: value }, function () {
-	            self.props.onSelect(value);
-	        });
 	        self.__animate.backToTheStart(function () {
 	            self.onHide();
+	            self.setState({ currentSelectedValue: value }, function () {
+	                self.props.onSelect(value);
+	            });
 	        });
 	    },
 
@@ -2682,14 +2686,6 @@ this["EssaComponents"] =
 
 	'use strict';
 
-	var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-	    return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	} : function (obj) {
-	    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-	};
-
 	/**
 	 * Created by xcp on 2016/3/23.
 	 */
@@ -2723,14 +2719,7 @@ this["EssaComponents"] =
 	    },
 
 	    onSelect: function onSelect(value) {
-	        var self = this;
-	        if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value.target) {
-	            self.props.onSelect(value.target.value);
-	        } else {
-	            self.setState({ currentSelectedValue: value }, function () {
-	                self.props.onSelect(value);
-	            });
-	        }
+	        this.props.onSelect(value);
 	    },
 
 	    componentWillMount: function componentWillMount() {
@@ -2756,7 +2745,6 @@ this["EssaComponents"] =
 	        var props = self.props;
 
 	        var selectorContent = React.createElement(DropDown.Selector, {
-	            onSelect: self.onSelect,
 	            defaultSelectedValue: self.state.currentSelectedValue,
 	            getSelectorContent: props.getSelectorContent });
 
@@ -2768,6 +2756,7 @@ this["EssaComponents"] =
 	        });
 
 	        return React.createElement(DropDown, {
+	            onSelect: self.onSelect,
 	            disabled: this.state.disabled,
 	            getItemWrap: props.getItemWrap,
 	            wrapClassName: props.wrapClassName,

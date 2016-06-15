@@ -57,12 +57,16 @@ var Selectable = React.createClass({
     },
 
     onSelect: function (item) {
-        this.props.onSelect(item);
-        this.__animate.backToTheStart(this.onHide)
+        // 动画结束时执行 props.onSelect
+        this.__animate.backToTheStart(function () {
+            this.onHide(function () {
+                this.props.onSelect(item);
+            }.bind(this));
+        }.bind(this))
     },
 
-    onHide: function () {
-        this.setState({visible: false});
+    onHide: function (fn) {
+        this.setState({visible: false}, fn);
     },
 
     shouldHide: function () {

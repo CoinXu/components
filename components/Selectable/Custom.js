@@ -30,14 +30,7 @@ var Custom = React.createClass({
     },
 
     onSelect: function (value) {
-        var self = this;
-        if (typeof value === 'object' && value.target) {
-            self.props.onSelect(value.target.value);
-        } else {
-            self.setState({currentSelectedValue: value}, function () {
-                self.props.onSelect(value);
-            });
-        }
+        this.props.onSelect(value)
     },
 
     componentWillMount: function () {
@@ -65,7 +58,6 @@ var Custom = React.createClass({
         var props = self.props;
 
         var selectorContent = <DropDown.Selector
-            onSelect={self.onSelect}
             defaultSelectedValue={self.state.currentSelectedValue}
             getSelectorContent={props.getSelectorContent}/>;
 
@@ -78,6 +70,7 @@ var Custom = React.createClass({
             });
 
         return <DropDown
+            onSelect={self.onSelect}
             disabled={this.state.disabled}
             getItemWrap={props.getItemWrap}
             wrapClassName={props.wrapClassName}

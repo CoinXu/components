@@ -85,11 +85,11 @@ var Diff = React.createClass({
         var props = self.props;
         var panelContent = props.itemList.map(props.getItemContent);
         var selector = <DropDown.Selector
-            onSelect={self.onSelect}
-            defaultSelectedValue={props.defaultSelectedValue}
+            defaultSelectedValue={this.state.currentSelectedValue}
             getSelectorContent={props.getSelectorContent}/>;
 
         return <DropDown
+            onSelect={self.onSelect}
             disabled={this.state.disabled}
             selectorContent={selector}
             panelContent={panelContent}/>

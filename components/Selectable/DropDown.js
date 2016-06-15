@@ -36,7 +36,6 @@ var DropDown = React.createClass({
     },
 
     onSelect: function (value) {
-        this.props.onSelect(value);
         this.__selector.onSelect(value);
         if (this.__selectable) {
             this.__selectable.onSelect(value)
@@ -72,6 +71,7 @@ var DropDown = React.createClass({
         });
 
         return <Selectable
+            onSelect={props.onSelect}
             disabled={this.state.disabled}
             wrapClassName={props.wrapClassName}
             selectorBindEvent={props.selectorBindEvent}

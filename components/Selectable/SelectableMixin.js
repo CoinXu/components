@@ -36,11 +36,11 @@ module.exports = {
 
     onSelect: function (value) {
         var self = this;
-        self.setState({currentSelectedValue: value}, function () {
-            self.props.onSelect(value);
-        });
         self.__animate.backToTheStart(function () {
-            self.onHide()
+            self.onHide();
+            self.setState({currentSelectedValue: value}, function () {
+                self.props.onSelect(value);
+            });
         })
     },
 

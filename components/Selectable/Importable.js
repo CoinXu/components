@@ -124,7 +124,6 @@ var Importable = React.createClass({
         var state = self.state;
 
         var selectorContent = <DropDown.Selector
-            onSelect={self.onSelect}
             defaultSelectedValue={state.currentSelectedValue}
             getSelectorContent={props.getSelectorContent(props, state, self.onChange)}/>;
 
@@ -138,6 +137,7 @@ var Importable = React.createClass({
             });
 
         return <DropDown
+            onSelect={self.onSelect}
             disabled={props.disabled}
             selectorBindEvent={this.queryBindEvent()}
             selectorContent={selectorContent}
