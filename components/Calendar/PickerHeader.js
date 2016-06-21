@@ -24,7 +24,8 @@ const PickerHeader = React.createClass({
 
     getInitialState: function () {
         return {
-            currentTime: null
+            currentTime: null,
+            monthList: []
         }
     },
 
@@ -38,12 +39,63 @@ const PickerHeader = React.createClass({
         }
     },
 
+    month: function (time) {
+        var currentMonth = time.month() + 1;
+        var props = this.props;
+        var year = time.year();
+        var startTimeYear = props.startTime[0];
+        var endTimeYear = props.endTime[0];
+        var startTimeMonth = props.startTime[1] + 1;
+        var endTimeMonth = props.endTime[1] + 1;
+
+        var monthList = new Array(12)
+            .fill(1)
+            .map(function (v, i) {
+                return i + 1
+            });
+
+        // 生成每一年的月份的时候,该月需要大于start,小于end
+        var list = monthList.filter(function (v) {
+            // 当前年和开始年相同
+            // 则判断月份是否相同
+            if (year === startTimeYear) {
+                return v >= startTimeMonth
+            } else if (year === endTimeYear) {
+                return v <= endTimeMonth
+            }
+            return true;
+        });
+
+        // 如果当前年 + 上一次时间月份超出了endTime
+        // 则将endTime的月份设置为合法的第一个月
+        var month = currentMonth;
+        // 如果当前月小于月份的最小值,则取最小值
+        // 如果当前月份大于月份的最大值,则取最大值
+
+        if (currentMonth < list[0]) {
+            month = list[0]
+        }
+        else if (currentMonth > list[list.length - 1]) {
+            month = list[list.length - 1]
+        }
+
+        return {
+            month: month - 1,
+            monthList: list
+        }
+    },
+
     setTime: function (time) {
         this.setState({currentTime: time})
     },
 
     setYear: function (time) {
-        this.setTime(time.clone().month(this.state.currentTime.month()))
+        var month = this.month(time);
+        this.setState({
+            currentTime: time.clone().month(month.month),
+            monthList: month.monthList
+        });
+        // this.setTime(time.clone().month(this.state.currentTime.month()))
     },
 
     setMonth: function (month) {
@@ -83,22 +135,23 @@ const PickerHeader = React.createClass({
             yearList.push(start.clone().add(s++, 'year'))
         }
 
-        var monthList = new Array(12).fill(1).map(function (v, i) {
-            return i + 1
-        });
-
         this.__yearList = yearList;
-        this.__monthList = monthList;
+
+        var month = this.month(moment(props.currentTime));
 
         this.setState({
-            currentTime: this.props.currentTime
+            currentTime: this.props.currentTime,
+            monthList: month.monthList
         })
     },
 
     shouldComponentUpdate: function (nextProps, nextState) {
         if (nextState.currentTime.year() !== this.state.currentTime.year() ||
             nextState.currentTime.month() !== this.state.currentTime.month()) {
-            this.props.onChange(nextState.currentTime.year(), nextState.currentTime.month());
+            this.props.onChange(
+                nextState.currentTime.year(),
+                nextState.currentTime.month()
+            );
             return true;
         }
         return false;
@@ -122,7 +175,7 @@ const PickerHeader = React.createClass({
             <Selectable.Importable
                 defaultSelectedValue={this.state.currentTime.month() + 1}
                 onSelect={this.setMonth}
-                itemList={this.__monthList}/>
+                itemList={this.state.monthList}/>
 
             <span style={iconStyle}
                   className="icon-img icon-img icon-tran-black-l util-v-m comp-icon-gap"

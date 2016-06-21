@@ -64,7 +64,7 @@ var HideOnBodyClick = React.createClass({
     },
 
     onHide: function () {
-        this.props.onHide()
+        this.props.onHide();
     },
 
     onMount: function (animate) {

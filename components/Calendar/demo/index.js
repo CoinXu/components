@@ -10,6 +10,8 @@ var moment = require('moment');
 
 // 全部使用默认值渲染
 ReactDOM.render(<Calendar
+        startTime={[2014, 6, 1]}
+        endTime={[2017,0,1]}
         onSelect={function(time){console.log(time.format())}}
         onChange={function(c, p){console.log(c.format(), p.format())}}/>,
     document.getElementById('demo')
@@ -18,6 +20,8 @@ ReactDOM.render(<Calendar
 // 不要日期，只要年月
 ReactDOM.render(<Calendar
         onlyShowMonth
+        startTime={[2014, 6, 1]}
+        endTime={[2020,0,1]}
         onSelect={function(time){console.log(time.format())}}
         onChange={function(c, p){console.log(c.format(), p.format())}}/>,
     document.getElementById('demo-only-show-month')

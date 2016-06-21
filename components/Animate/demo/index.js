@@ -24,11 +24,13 @@ ReactDOM.render(
     <Animate
         from={{left:0}}
         to={{left:400}}
+        onMount={function(inst){inst.startAnimate()}}
         style={{position:'absolute', background: 'red'}}>
         <AnimateChild name="Animate Child" key="animate-child"/>
     </Animate>,
     document.getElementById('demo')
 );
+
 
 // 传入参数
 ReactDOM.render(
