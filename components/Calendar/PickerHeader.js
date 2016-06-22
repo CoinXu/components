@@ -39,7 +39,7 @@ const PickerHeader = React.createClass({
         }
     },
 
-    month: function (time) {
+    getMonth: function (time) {
         var currentMonth = time.month() + 1;
         var props = this.props;
         var year = time.year();
@@ -89,9 +89,17 @@ const PickerHeader = React.createClass({
         this.setState({currentTime: time})
     },
 
+    // 确定 time 是否在 startTime 和 endTime 范围内
+    timeInRange: function (time) {
+        var cur = time.valueOf();
+        var start = moment(this.props.startTime).valueOf();
+        var end = moment(this.props.endTime).valueOf();
+        return cur <= end && cur >= start;
+    },
+
     setYear: function (time) {
         var currentMonth = this.state.currentTime.month();
-        var month = this.month(time.clone().month(currentMonth));
+        var month = this.getMonth(time.clone().month(currentMonth));
         this.setState({
             currentTime: time.clone().month(month.month),
             monthList: month.monthList
@@ -104,20 +112,24 @@ const PickerHeader = React.createClass({
 
     nextMonth: function () {
         var nextTime = this.state.currentTime.clone().add(1, 'month');
-        var month = this.month(nextTime);
-        this.setState({
-            currentTime: nextTime.clone().month(month.month),
-            monthList: month.monthList
-        });
+        if (this.timeInRange(nextTime)) {
+            var month = this.getMonth(nextTime);
+            this.setState({
+                currentTime: nextTime.clone().month(month.month),
+                monthList: month.monthList
+            });
+        }
     },
 
     previousMonth: function () {
         var nextTime = this.state.currentTime.clone().add(-1, 'month');
-        var month = this.month(nextTime);
-        this.setState({
-            currentTime: nextTime.clone().month(month.month),
-            monthList: month.monthList
-        });
+        if (this.timeInRange(nextTime)) {
+            var month = this.getMonth(nextTime);
+            this.setState({
+                currentTime: nextTime.clone().month(month.month),
+                monthList: month.monthList
+            });
+        }
     },
 
     nextYear: function () {
@@ -136,7 +148,10 @@ const PickerHeader = React.createClass({
         var sl = start.year();
         var el = end.year();
 
-        assert(sl <= el, 'start year need less than end year');
+        assert(
+            start.valueOf() <= end.valueOf(),
+            'start year need to be less than end year'
+        );
 
         // 年间距
         var yearList = [];
@@ -147,7 +162,7 @@ const PickerHeader = React.createClass({
 
         this.__yearList = yearList;
 
-        var month = this.month(moment(props.currentTime));
+        var month = this.getMonth(moment(props.currentTime));
 
         this.setState({
             currentTime: this.props.currentTime,
