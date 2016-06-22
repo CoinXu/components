@@ -90,12 +90,12 @@ const PickerHeader = React.createClass({
     },
 
     setYear: function (time) {
-        var month = this.month(time);
+        var currentMonth = this.state.currentTime.month();
+        var month = this.month(time.clone().month(currentMonth));
         this.setState({
             currentTime: time.clone().month(month.month),
             monthList: month.monthList
         });
-        // this.setTime(time.clone().month(this.state.currentTime.month()))
     },
 
     setMonth: function (month) {
@@ -103,11 +103,21 @@ const PickerHeader = React.createClass({
     },
 
     nextMonth: function () {
-        this.setTime(this.state.currentTime.clone().add(1, 'month'))
+        var nextTime = this.state.currentTime.clone().add(1, 'month');
+        var month = this.month(nextTime);
+        this.setState({
+            currentTime: nextTime.clone().month(month.month),
+            monthList: month.monthList
+        });
     },
 
     previousMonth: function () {
-        this.setTime(this.state.currentTime.clone().add(-1, 'month'))
+        var nextTime = this.state.currentTime.clone().add(-1, 'month');
+        var month = this.month(nextTime);
+        this.setState({
+            currentTime: nextTime.clone().month(month.month),
+            monthList: month.monthList
+        });
     },
 
     nextYear: function () {
