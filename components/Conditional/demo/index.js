@@ -32,3 +32,38 @@ ReactDOM.render(
 
     document.getElementById('demo')
 );
+
+// 某一项可以多次选择的情况
+var price = {
+    a: {name: 'price', value: 0},
+    b: {name: 'price', value: 1}
+};
+
+var list = [
+    {value: 'a', children: 'a'},
+    {
+        value: function (cur) {
+            var is_a = cur === price.a;
+            return {
+                // 当前选中的值
+                value: is_a ? price.a : price.b,
+                // 下一个值
+                next: is_a ? price.b : price.a
+            };
+        },
+        children: function (props, state) {
+            var className = state.checkedItemValue === price.a ? 'd' : 't';
+
+            return <span>
+                Price
+                <i className={`icon-img icon-arrow-black-${className}`}/>
+            </span>
+        }
+    },
+    {value: 'b', children: 'b'}
+];
+
+ReactDOM.render(
+    <Condition itemList={list} onChange={log} onSelect={log}/>,
+    document.getElementById('demo-multiple')
+);

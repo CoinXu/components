@@ -7,6 +7,9 @@ var assert = require('../../com/assert');
 var noop = require('../../com/noop');
 var ConditionItem = require('./ConditionItem');
 var ConditionMixin = require('./ConditionMixin');
+var isFunction = function (any) {
+    return Object.prototype.toString.call(any) === '[object Function]'
+};
 
 var Conditional = React.createClass({
 
@@ -23,6 +26,7 @@ var Conditional = React.createClass({
             itemList: [],
             onChecked: noop,
             onChange: noop,
+            getChildren: noop,
             className: 'conditional',
             itemClassName: 'cond-item',
             checkedClassName: 'checked',
@@ -44,19 +48,45 @@ var Conditional = React.createClass({
 
     componentWillMount: function () {
         var def = this.props.defaultChecked;
-        this.setState({checkedItemValue: def !== null ? def : this.props.itemList[0].value});
+        var next = def;
+        var first = null;
+
+        if (def === null) {
+            first = this.props.itemList[0];
+            next = isFunction(first.value) ?
+                first.value(this.state.checkedItemValue) :
+                first.value;
+        }
+
+        this.setState({
+            checkedItemValue: next
+        });
     },
 
     render: function () {
         var props = this.props;
+        var state = this.state;
+        var value = null;
+        var next = null;
+        var temp = null;
 
-        var items = props.itemList.map(function (item) {
+        var items = props.itemList.map(function (item, index) {
+            if (isFunction(item.value)) {
+                temp = item.value(state.checkedItemValue);
+                value = temp.value;
+                next = temp.next;
+            } else {
+                value = next = item.value
+            }
+
             return (<ConditionItem
-                key={item.value}
-                isChecked={this.state.checkedItemValue === item.value}
+                key={index}
+                isChecked={this.state.checkedItemValue === value}
                 onChecked={this.onChecked}
-                value={item.value}>
-                {item.children}
+                value={next}>
+                {isFunction(item.children) ?
+                    item.children(props, this.state) :
+                    item.children}
             </ConditionItem>);
         }, this);
 

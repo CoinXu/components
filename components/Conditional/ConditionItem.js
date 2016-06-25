@@ -39,7 +39,8 @@ var ConditionItem = React.createClass({
     },
 
     onChecked: function () {
-        this.setState({isChecked: !this.state.isChecked}, function () {
+        // 只要是点击状态,都是处于选中状态
+        this.setState({isChecked: true}, function () {
             this.props.onChecked(this.state.isChecked, this.props.value);
         });
     },
