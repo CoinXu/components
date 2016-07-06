@@ -21,9 +21,11 @@ const query = require('./lib/query');
 module.exports = BaseWebExcel.extend({
 
   STATUS: {
-    COVER_HIDE: 0,
-    COVER_SHOW: 1,
     PARENT_ID: 'PARENT_ID'
+  },
+
+  PROPS: {
+    SEPARATOR_VALUE: ':'
   },
 
   defaultsConfig: {
@@ -41,14 +43,16 @@ module.exports = BaseWebExcel.extend({
     this.wrapper = this.parent;
 
     var wrap = dom.DOM.div({
-      style: 'overflow:hidden;position:relative;'
+      style: 'overflow:hidden;position:relative;padding:1px;'
     });
 
     this.parent = dom.DOM.div({
       id: this.STATUS.PARENT_ID,
-      style: 'width:100%;overflow-x:auto;margin-bottom:64px;;'
+      style: 'overflow-x:auto;margin-bottom:64px;margin-right:20px;'
     });
 
+    this.header_node = dom.DOM.div({className: 'clearfix'});
+    this.parent.appendChild(this.header_node);
     wrap.appendChild(this.parent);
 
     this.wrapper.appendChild(wrap);
@@ -66,15 +70,13 @@ module.exports = BaseWebExcel.extend({
     var html = ['<div class="web-excel-point"></div>'];
 
     html.push('<div class="bub bub-dir-t" style="position: absolute;');
-    html.push('bottom:-52px;width:50px;right:0;margin-right:-24px;">');
+    html.push('bottom:-46px;width:40px;right:0;margin-right:-20px;">');
     html.push('<span class="bub-symbol icon-img icon-arrow-blue-t"');
     // 21*10
     html.push('style="left:50%;margin-left:-10px;">');
     html.push('</span>');
-    html.push('<div class="bub-con bub-all-pd">');
-    html.push('<ul class="list list-inline list-st util-line-s">');
-    html.push(`<li id="${contentId}"></li>`);
-    html.push('</ul>');
+    html.push('<div class="bub-con" style="padding:6px;">');
+    html.push(`<span id="${contentId}"></span>`);
     html.push('</div>');
     html.push('</div>');
 
@@ -159,15 +161,69 @@ module.exports = BaseWebExcel.extend({
   afterRender: function () {
     var total = 0;
     var w = 0;
+    var props = this.model.props;
+    var header_num = lang.map(props.header, function (item) {
+      w = w + item.fieldList.length;
+      return w;
+    });
+
+    var header_node = [];
+    var pos = -1;
+    var count = 0;
+    var t = 0;
+    var padding = 0;
 
     this.__super__.afterRender(this.node);
 
-    lang.forEach(this.getRows(0), function (cell) {
+    // 确定header的内容。
+
+
+    lang.forEach(this.getRows(0), function (cell, index) {
       w = cell.node.offsetWidth;
+      count = count + w;
       total = total + w;
+      t = index + 1;
+      pos = header_num.indexOf(t);
+
+      // 找到所有的header（位置对应）
+
+      // 头两列为固定内容,不生成
+      if (pos === 0) {
+        padding = count;
+        total = 0;
+      } else if (pos > -1) {
+        header_node.push(this.generateHeader(
+            total, props.header[pos].name,
+            t - header_num[pos - 1], t
+        ));
+        total = 0;
+      }
+
       cell.node.style.cssText = `width:${w}px`;
-    });
+
+    }, this);
+
+    this.header_node.style.cssText = `width:${count - padding}px;
+    margin-left:${padding}px;`;
+    this.header_node.innerHTML = header_node.join('');
 
     this.operateCover();
+  },
+
+  generateHeader: function (w, name, start, end) {
+    return `<div class="pull-left" style="width:${w}px">
+        <div style="margin-right: 4px;">
+          <div class="widget-marker util-line-s clearfix">
+            <div class="pull-left">
+                <span class="icon-img icon-search-a util-v-t"></span>
+                <strong class="util-font-16 util-pd-area-l">${name}</strong>
+            </div>
+            <div class="pull-right">
+                <span class="icon-img icon-close-c util-v-m" 
+                  data-region="${start}${this.PROPS.SEPARATOR_VALUE}${end}"></span>
+            </div>
+          </div>
+        </div>
+    </div>`
   }
 });

@@ -156,7 +156,7 @@ module.exports = Component.extend({
         return this;
       }
 
-      var prev = this.model[this.name];
+      var prev = '' + this.model[this.name];
       this.model[this.name] = val;
       this.replaceToValue(val);
       this.status = this.STATUS.BLUR;
