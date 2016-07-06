@@ -18,6 +18,7 @@ module.exports = {
     getInitialState: function () {
         return {
             panelStateIsShow: false,
+            itemList: [],
             currentSelectedValue: null
         }
     },
@@ -70,6 +71,9 @@ module.exports = {
     },
 
     componentWillMount: function () {
-        this.setState({currentSelectedValue: this.props.defaultSelectedValue});
+        this.setState({
+            currentSelectedValue: this.props.defaultSelectedValue,
+            itemList: this.props.itemList
+        });
     }
 };

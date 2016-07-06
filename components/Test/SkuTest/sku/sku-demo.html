@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./sku-all.js" type="text/javascript"></script>
+    <script src="./models.js" type="text/javascript"></script>
+    <link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="demo"></div>
+<div id="way"></div>
+</body>
+<script type="text/javascript">
+    var conf = {
+        wrapper: document.getElementById('demo'),
+        originData: MODELS,
+        wayWrapper: document.getElementById(('way'))
+    };
+    var Sku = new SkuRender(conf);
+    Sku.init()
+</script>
+</html>

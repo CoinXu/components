@@ -1,12 +1,10 @@
 var lang = require('./lib/lang');
-var Component = require('./Component');
 var Cell = require('./cell');
-var query = require('./lib/query');
 var dom = require('./lib/dom');
 var ZeroClipboard = require('./lib/ZeroClipboard');
 
 ZeroClipboard.config({
-    swfPath: '/react-components/components/WebExcel/lib/ZeroClipboard.swf'
+    swfPath: '/components/components/WebExcel/lib/ZeroClipboard.swf'
 });
 
 module.exports = Component.extend({
@@ -115,7 +113,9 @@ module.exports = Component.extend({
         this.node.appendChild(this.zeroClipboardNode);
         this.node.appendChild(this.zeroClipboardTarget);
 
-        var clipboard = this.zeroClipboard = new ZeroClipboard(this.zeroClipboardNode);
+        var clipboard =
+            this.zeroClipboard =
+                new ZeroClipboard(this.zeroClipboardNode);
 
         clipboard.on('ready', function () {
             clipboard.on('aftercopy', function (event) {
@@ -154,7 +154,9 @@ module.exports = Component.extend({
      * @returns {*}
      */
     renderOne: function (model, index) {
-        var div = dom.DOM.div({className: 'row'}), cell = null, cells = [];
+        var div = dom.DOM.div({className: 'row'}),
+            cell = null,
+            cells = [];
         var config = this.config, className = null,
             con = config.activeCellClassName,
             ci = config.indexColumnCellClassName,

@@ -84,8 +84,18 @@ ReactDOM.render(
 );
 
 // 自定义下拉菜单-货柜详情列表
+const add = function () {
+    this.addOne()
+};
+
+const remove = function (item) {
+    this.removeOne(item)
+};
+
 ReactDOM.render(
     <Selector.Container
+        add={add}
+        remove={remove}
         itemList={[{index:0, percent:0.8},{index:1, percent:0.23}]}
         onSelect={log}/>,
     document.getElementById('wrap-container')

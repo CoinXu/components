@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../scripts/PathFinder.js" type="text/javascript"></script>
+    <script src="../scripts/SkuDataParse.js" type="text/javascript"></script>
+    <script src="../scripts/SkuRender.js" type="text/javascript"></script>
+    <script src="./models.js" type="text/javascript"></script>
+    <link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="http://192.168.1.165:8012/bportal-dpl/css/all-buyer.css">
+</head>
+<body>
+<div class="pd-view-sku">
+    <div id="demo"></div>
+</div>
+<h2 style="padding-top: 200px;">ways</h2>
+<div id="way"></div>
+</body>
+<script type="text/javascript">
+    var conf = {
+        wrapper: document.getElementById('demo'),
+        originData: MODELS,
+        wayWrapper: document.getElementById(('way')),
+        selectCallback: function (data) {
+            console.log(data);
+        },
+        template: function (maps, light) {
+            var html = [], name, id,
+                    parse = this.parse,
+                    category_name = '';
+
+            var map = {
+                0: this.classNameMap.disabled,
+                1: this.classNameMap.normal,
+                2: this.classNameMap.current
+            };
+
+            html.push('<div class="sku-info">');
+
+            maps.forEach(function (m, i) {
+                // 尼玛UI在没有放category_name地方?
+                // 我真是哔了dog了!
+                // category_name = this.getCategoriesNameWithChildId(m[0]);
+
+                html.push('<div class="li">');
+                m.forEach(function (v, j) {
+                    html.push('<span data-id="' + v + '" ' +
+                            'class="' + map[light[i][j]] + '">'
+                            + parse.attributesMap[v]
+                            + '<i class="icon-img icon-checked-d"></i></span>');
+                });
+                html.push('</div>');
+            }, this);
+
+            html.push('</div>');
+
+            return html.join('')
+        },
+
+        bind: function () {
+            var classMap = this.classNameMap;
+            this.wrapper.addEventListener('click', function (e) {
+                // 因html结构问题,选中时会产生一个icon
+                // 用户极有可能点上icon
+                // 所以此处要判断是否是点击的icon
+                // 如果点击的是icon
+                // 则要将target指向其父级
+
+                var t = e.target,
+                        c = t.className,
+                        v = t.dataset['id'];
+
+                var is_item = c.indexOf(classMap.normal) > -1;
+
+                if (!is_item) {
+                    t = t.parentNode;
+                    c = t.className;
+                }
+
+                if (c.indexOf(classMap.normal) > -1 &&
+                        c.indexOf(classMap.disabled) < 0) {
+                    // active status
+                    this.parse[c.indexOf(classMap.current) > -1 ? 'remove' : 'add'](v);
+                    this.rendUi();
+                    this.selectCallback(this.parse.getSkuData());
+                }
+            }.bind(this), true);
+        }
+
+    };
+    var Sku = new SkuRender(conf);
+    Sku.init()
+</script>
+</html>

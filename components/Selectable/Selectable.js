@@ -107,7 +107,7 @@ var Selectable = React.createClass({
                 onHide={this.onHide}
                 onMount={this.onAnimateMount}
                 shouldHide={this.shouldHide}>
-                <div className="comp-select-panel">
+                <div className="comp-select-panel util-text-clamp">
                     {props.panelContent}
                 </div>
             </HideOnBodyClick>

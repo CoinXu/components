@@ -15,12 +15,7 @@ var Container = React.createClass({
     mixins: [SelectableMixin, ContainerMixin],
 
     reRender: function (itemList) {
-        var mountNode = ReactDOM.findDOMNode(this).parentNode;
-        ReactDOM.render(<Container
-                itemList={itemList}
-                onSelect={this.props.onSelect}
-                defaultSelectedValue={this.props.defaultSelectedValue}/>,
-            mountNode)
+        this.setState({itemList: itemList})
     },
 
     render: function () {
@@ -38,12 +33,13 @@ var Container = React.createClass({
             progressText
         );
 
-        var itemList = this.props.itemList.map(function (item) {
+        var itemList = this.state.itemList.map(function (item) {
             return <li className="comp-panel-item" key={item.index}>
                 <strong className="comp-icon-gap">{item.index}</strong>
                 <div className="comp-select-progress comp-icon-gap"
                      onClick={this.onSelect.bind(this, item)}>
-                    <span className={this.getProgressClassName(item.percent, progressText)}/>
+                    <span
+                        className={this.getProgressClassName(item.percent, progressText)}/>
                 </div>
                 <span
                     className="icon-img icon-close util-v-m"
@@ -69,7 +65,8 @@ var Container = React.createClass({
                     <ol className="comp-select-m-t">
                         {itemList}
                         <li className="comp-panel-title util-text-center">
-                            <span className="icon-img icon-plus util-v-m" onClick={this.props.add}/>
+                            <span className="icon-img icon-plus util-v-m"
+                                  onClick={this.props.add.bind(this)}/>
                         </li>
                     </ol>
                 </div>

@@ -150,12 +150,18 @@ module.exports = Component.extend({
         val = val || (this.inputNode && this.inputNode.value);
         this.$node.removeClass('on-focus');
         if (val) {
-            if (this.status < this.STATUS.EDIT) {
-                return this;
-            }
-            this.model[this.name] = val;
-            this.replaceToValue(val);
-            this.status = this.STATUS.BLUR;
+          if (this.status < this.STATUS.EDIT) {
+            return this;
+          }
+
+          var prev = this.model[this.name];
+          this.model[this.name] = val;
+          this.replaceToValue(val);
+          this.status = this.STATUS.BLUR;
+
+          if (prev !== val) {
+            this.emit('onCellChange', val)
+          }
         }
         return val;
     },

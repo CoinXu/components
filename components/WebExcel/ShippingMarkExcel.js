@@ -6,12 +6,12 @@ const BaseWebExcel = require('./BaseWebExcel');
 const dom = require('./lib/dom');
 const query = require('./lib/query');
 const WebExcelModel = require('./WebExcelModel');
-const css = require('./assets/excel.css');
+// const css = require('./assets/excel.css');
 const lang = require('./lib/lang');
 
 // todo 应该将Cover写成四条边线，不然没办法用鼠标操作Input
 // todo 添加方向键移动框
-// todo 添加回国键向下移动
+// todo 添加回车键向下移动
 // todo 添加除方向键和回车键之外，其他按键时直接输入到当前选中框
 // todo 添加点击复制功能【有些麻烦，事件冲突，需要缓存上一次copy的内容】
 // todo 添加每一个输入框blur时保存数据

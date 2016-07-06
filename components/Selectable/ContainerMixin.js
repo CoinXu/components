@@ -13,22 +13,35 @@ module.exports = {
         }
     },
 
-    addOne: function () {
+    addOne: function (percent) {
         var index = 0;
-        this.props.itemList.forEach(function (item) {
+        var clone = this.state.itemList.slice();
+
+        clone.forEach(function (item) {
             if (item.index > index)
                 index = item.index
         });
 
-        this.props.itemList.push({percent: 0, index: index + 1});
-        this.reRender(this.props.itemList);
+        // NaN
+        percent = parseInt(percent) || 0;
+        percent = percent < 0 ? 0 : percent;
+
+        clone.push({percent: percent, index: index + 1});
+        this.reRender(clone);
     },
 
     removeOne: function (item) {
-        var index = this.props.itemList.indexOf(item);
+        // 删除一条后,要更新其他的item.
+        var clone = this.state.itemList.slice();
+        var index = clone.indexOf(item);
+
         if (index !== -1) {
-            this.props.itemList.splice(index, 1);
-            this.reRender(this.props.itemList);
+            clone.splice(index, 1);
+            clone = clone.map(function (item, i) {
+                item.index = i;
+                return item;
+            });
+            this.reRender(clone);
         }
     },
 
