@@ -29,7 +29,12 @@ module.exports = BaseWebExcel.extend({
   },
 
   defaultsConfig: {
-    hasIndex: true,
+    // 禁用区域
+    // y 行
+    // x 列
+    disabledRegion: function (y, x) {
+      return x < 2 || y < 1
+    },
     cellWidth: 'auto',
     defaultSelect: [1, 1]
   },
@@ -84,6 +89,7 @@ module.exports = BaseWebExcel.extend({
 
     this.parent.appendChild(region);
     query('#' + contentId)[0].appendChild(this.zeroClipboardNode);
+
     // todo 粘贴按钮，暂时用ctrl+v代替
     //query('#' + copyId).on('click', null, function (e, target) {
     //    excel.setCellsValueFromClipboard();
@@ -194,7 +200,7 @@ module.exports = BaseWebExcel.extend({
       } else if (pos > -1) {
         header_node.push(this.generateHeader(
             total, props.header[pos].name,
-            t - header_num[pos - 1], t
+            header_num[pos - 1], header_num[pos]
         ));
         total = 0;
       }
@@ -204,10 +210,25 @@ module.exports = BaseWebExcel.extend({
     }, this);
 
     this.header_node.style.cssText = `width:${count - padding}px;
-    margin-left:${padding}px;`;
+      margin-left:${padding}px;`;
     this.header_node.innerHTML = header_node.join('');
 
     this.operateCover();
+
+    this.removeBehavior();
+  },
+
+  removeBehavior: function () {
+    var $node = query(this.header_node);
+    $node.on('click', '.icon-close-c', function (event, target) {
+      var values = target.dataset.region.split(this.PROPS.SEPARATOR_VALUE);
+      values = lang.map(values, function (v) {
+        return parseInt(v)
+      }, null);
+      // TODO 验证所属的内容是否全部为空,为空才能删除
+      console.log(this.model.data);
+      this.model.remove(values[0], values[1]);
+    }.bind(this))
   },
 
   generateHeader: function (w, name, start, end) {

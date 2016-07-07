@@ -56,6 +56,16 @@
     border-color: #c6c6c6;
 }
 
+.web-excel-wrapper .web-excel-img{
+    margin-left:4px;
+    width:10px;
+    height:10px;
+}
+
+.web-excel-wrapper .web-excel-img-addtion {
+    padding-left: 4px;
+}
+
 .web-excel-point {
     width: 7px;
     height: 7px;

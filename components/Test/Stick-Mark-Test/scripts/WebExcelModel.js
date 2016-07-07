@@ -42,22 +42,21 @@ ExcelModel.prototype.initialize = function () {
   rows = this.getRows(props.rows);
 
   // 数据太少,复制几份以作测试
-  this.data = [header].concat(this.keys.map(function () {
-    return lang.clone(rows, true)[0]
-  }));
+  this.data = [header].concat(rows);
 
-  this.contentHooks = {
+  this.hooks = {};
+  this.hooks[this.keys[0]] = {
     // keys的值为键
-    0: {
-      get: function (value) {
-        return DOM.DOM.div(null,
-            DOM.DOM.img({src: value.fileUrl}),
-            DOM.DOM.span({innerText: value.skuNo})
-        )
-      },
-      set: function (value) {
-
-      }
+    get: function (model, name, x, y) {
+      if (y === 0)
+        return `<span>${model[name]}</span>`;
+      return `<div>
+        <img class="web-excel-img" src="${model[name].fileUrl}" alt="">
+        <span class="web-excel-img-addtion">${model[name].skuNo}</span>
+       </div>`;
+    }.bind(this),
+    set: function (model, name, x, y) {
+      return null;
     }
   };
 
@@ -153,11 +152,12 @@ ExcelModel.prototype.removeColumn = function (start, end, silent) {
   if (lang.isNumber(start) || lang.isNumber(end)) {
     var props = this.props;
     var cur_rows = props.rows;
-    var items = 0;
+    // 头两列不计算
+    var items = 2;
 
     props.rows = lang.filter(cur_rows, function (list) {
       // 单行
-      items = 0;
+      items = 2;
       list.stiMarkList = lang.filter(list.stiMarkList, function (field) {
         field.fieldList = lang.filter(field.fieldList, function () {
           var ret = items < start || items >= end;
@@ -210,10 +210,7 @@ ExcelModel.prototype.onChange = function (silent) {
   this.keys = this.getKeys(this.props.header);
   var rows = this.getRows(this.props.rows);
   var header = this.getHeader(this.props.header);
-
-  this.data = this.data = [header].concat(this.keys.map(function () {
-    return lang.clone(rows, true)[0]
-  }));
+  this.data = this.data = [header].concat(rows);
 
   if (!silent)
     this.props.onChange();

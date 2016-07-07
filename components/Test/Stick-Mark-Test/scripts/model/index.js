@@ -82,6 +82,413 @@ module.exports = {
             "type": "m"
           }
         ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
+      },
+      {
+        "fileUrl": "https://www.baidu.com/img/bd_logo1.png",
+        "id": 1,
+        "skuBarCode": "SKU条码",
+        "skuName": "我都不知道这个应该起啥名儿了",
+        "skuNo": "SKU编号",
+        "stiMarkList": [
+          {
+            "fieldList": [
+              {"fieldInterId": 11, "fieldValue": 11},
+              {"fieldInterId": 12, "fieldValue": 12}
+            ],
+            "stimarkId": "",
+            "type": "s"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 21, "fieldValue": 21},
+              {"fieldInterId": 22, "fieldValue": 22},
+              {"fieldInterId": 23, "fieldValue": 23},
+              {"fieldInterId": 24, "fieldValue": 24}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          },
+          {
+            "fieldList": [
+              {"fieldInterId": 31, "fieldValue": 31},
+              {"fieldInterId": 32, "fieldValue": 32},
+              {"fieldInterId": 33, "fieldValue": 33},
+              {"fieldInterId": 34, "fieldValue": 34}
+            ],
+            "stimarkId": "",
+            "type": "m"
+          }
+        ]
       }
     ]
   },

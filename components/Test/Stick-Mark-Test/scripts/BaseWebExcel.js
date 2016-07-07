@@ -33,6 +33,9 @@ module.exports = Component.extend({
    * @type {Object}
    */
   defaultsConfig: {
+    disabledRegion: function (x, y) {
+      return false;
+    },
     hasIndex: false,
     copyText: '复制',
     // 单元格class
@@ -175,13 +178,26 @@ module.exports = Component.extend({
       // 每一行第一列为 index
       // 其他为内容区域
 
-      className = config.hasIndex ?
-          index === 0 ? ri :
-              idx === 0 ? ci : con : con;
+      var className = [];
+      // 是否禁用
+      // index 行
+      // idx 列
+      if (!config.disabledRegion(index, idx)) {
+        className.push(con)
+      }
+
+      // 是否有表头
+      if (config.hasIndex) {
+        className.push(index === 0 ? ri : idx === 0 ? ci : con)
+      }
+
+      className = className.join(' ');
 
       cell = new Cell({
-        y: index, x: idx, width: config.cellWidth,
+        y: index, x: idx,
+        width: config.cellWidth,
         model: model, name: prop,
+        contentHooks: this.model.hooks[prop],
         nodeAttr: {
           className: className + cn,
           'data-cell-name': prop,

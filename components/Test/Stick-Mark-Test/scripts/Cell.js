@@ -33,6 +33,8 @@ module.exports = Component.extend({
 
   nodeAttr: {},
 
+  contentHooks: null,
+
   doc: document,
 
   /**
@@ -44,7 +46,7 @@ module.exports = Component.extend({
   initialize: function (options) {
 
     this.name = options.name;
-
+    this.contentHooks = options.contentHooks;
     this.inputNode = null;
     this.textNode = null;
     this._preveText = null;
@@ -68,10 +70,20 @@ module.exports = Component.extend({
    * @returns {string}
    */
   render: function () {
-    var text = this._preveText = this.model[this.name];
     this.$cellNode.empty();
-    this.textNode = dom.DOM.text(text);
-    this.cellNode.appendChild(this.textNode);
+    if (!this.contentHooks) {
+      var text = this._preveText = this.model[this.name];
+      this.textNode = dom.DOM.text(text);
+      this.cellNode.appendChild(this.textNode);
+    } else {
+      this.$cellNode.html(this.contentHooks.get(
+          this.model,
+          this.name,
+          this.x,
+          this.y
+      ));
+    }
+
     this.emit('cellRender', this);
     return this;
   },
@@ -82,11 +94,21 @@ module.exports = Component.extend({
    * @returns {*}
    */
   replaceToValue: function (val) {
-    if (val) {
-      this.setModelValue(val);
+
+    this.setModelValue(val);
+
+    if (this.contentHooks) {
+      this.$cellNode.html(this.contentHooks.set(
+          this.model,
+          this.name,
+          this.x,
+          this.y
+      ))
+    } else {
       this.cellNode.removeChild(this.inputNode);
       this.cellNode.appendChild(this.textNode);
     }
+
     return val;
   },
 
@@ -96,9 +118,6 @@ module.exports = Component.extend({
    * @returns {string}
    */
   setModelValue: function (val) {
-    if (!val) {
-      return this;
-    }
 
     if (val !== this._preveText) {
       this.textNode.nodeValue = val;
@@ -106,6 +125,8 @@ module.exports = Component.extend({
       this._preveText = val;
       this.model[this.name] = val;
     }
+
+    return this;
   },
 
   /**
@@ -151,20 +172,20 @@ module.exports = Component.extend({
   onBlur: function (val) {
     val = val || (this.inputNode && this.inputNode.value);
     this.$node.removeClass('on-focus');
-    if (val) {
-      if (this.status < this.STATUS.EDIT) {
-        return this;
-      }
 
-      var prev = '' + this.model[this.name];
-      this.model[this.name] = val;
-      this.replaceToValue(val);
-      this.status = this.STATUS.BLUR;
-
-      if (prev !== val) {
-        this.emit('onCellChange', val)
-      }
+    if (this.status < this.STATUS.EDIT) {
+      return this;
     }
+
+    var prev = '' + this.model[this.name];
+    this.model[this.name] = val;
+    this.replaceToValue(val);
+    this.status = this.STATUS.BLUR;
+
+    if (prev !== val) {
+      this.emit('onCellChange', val)
+    }
+
     return val;
   },
 
