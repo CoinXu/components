@@ -73,8 +73,7 @@ var Bias = React.createClass({
             <span className={classNames.symbolClass + symbolClassName}
                   style={this.props.symbolStyle}/>
                 <div className="bub-bias-con" ref="wrap">
-                    <div
-                        className="bub-bias-con-text inline-block">{this.props.children}</div>
+                    <div className="bub-bias-con-text inline-block">{this.props.children}</div>
                     {closeElement}
                 </div>
             </div>);

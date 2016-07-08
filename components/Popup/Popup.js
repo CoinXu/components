@@ -201,7 +201,7 @@ var Popup = React.createClass({
         var props = {ref: 'targetNode'};
         props[this.getTrigger()] = this.showPopup;
         if (props.onMouseEnter) {
-            props.onMouseLeave = this.hide
+            props.onMouseLeave = this.onHide
         }
 
         return React.cloneElement(

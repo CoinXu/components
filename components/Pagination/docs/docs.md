@@ -13,15 +13,15 @@
 + onSelect(pageNo, itemsInOnePage) - `React.PropTypes.func` - 某一页码选中后的回调 - noop
   > 传入一个参数 `num`，为当前页码编号
 + getPage - `React.PropTypes.fun` - 自定义页码内容函数
-```JavaScript
-// 默认值如下
-function (num, isCurrent) {
-    return <span className={'page-item' + (isCurrent ? ' focus' : '')}>{num}</span>
-}
-// 生成页码时调用，传入两个参数：
-// `num` - 当前页码数
-// `isCurrent` - 当前页码是否被选中
-```
+    ```JavaScript
+    // 默认值如下
+    function (num, isCurrent) {
+        return <span className={'page-item' + (isCurrent ? ' focus' : '')}>{num}</span>
+    }
+    // 生成页码时调用，传入两个参数：
+    // `num` - 当前页码数
+    // `isCurrent` - 当前页码是否被选中
+    ```
 + importable - 是否可输入页码 - true
 + itemsConfigurable - 是否可选择每一页包含多少条数据 - true
 + configurableList - `itemsConfigurable` 可选择的值 - [200, 100, 60]

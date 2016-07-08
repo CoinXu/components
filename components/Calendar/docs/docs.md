@@ -13,25 +13,24 @@
 + `startTime` - 开始时间 - [2010, 1, 1]
 + `endTime` - 结束时间 - [2020, 1, 1]
 + `defaultTime` - 默认选中时间 - new Date() * 1
-+ `showDays` - 显示多少个日期 - 6 * 7
++ `showDays` - 显示多少个日期 - 42
 + `weekDaysMin` - 星期的简写，多语言处理时传不同的参数 - ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 + `startWeek` - 日期列表从星期几开始排 - 0 - [0-6]
 + `format` - 格式化，用于组件内部处理返回日期格式 - 'YYYY-MM-DD HH:mm:ss'
 + `onlyShowMonth` - 只显示年、月选择器 - false
 + `disabledDate` - 禁用的日期 - `function(time){return time.isBefore(new Date(), 'day')}`
 + `diffDate` - 外层容器class 
-```JavaScript
-function (base, comp) {
-    return !(base.isSame(comp, 'month') && base.isSame(comp, 'year'))
-}
-```
+    ```JavaScript
+    function (base, comp) {
+        return !(base.isSame(comp, 'month') && base.isSame(comp, 'year'))
+    }
+    ```
 + `onChange(current, prev)` - 前后选择发生变化时回调 - noop
 + `onSelect(selected)` - 选择某个日期的回调 - noop
 + `shouldUpdate()` - 外部定义是否更新组件 - noop
 
 ### Methods
 + `today` - 设置选中的日期为当前系统时间
-
 
 
 ### 简单的渲染

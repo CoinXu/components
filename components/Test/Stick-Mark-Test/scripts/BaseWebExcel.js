@@ -173,11 +173,6 @@ module.exports = Component.extend({
 
     lang.forEach(this.model.keys, function (prop, idx) {
 
-      // 如果有索引，则
-      // 第一行为 header
-      // 每一行第一列为 index
-      // 其他为内容区域
-
       var className = [];
       // 是否禁用
       // index 行

@@ -166,6 +166,7 @@ var Slider = React.createClass({
             <div className="price-move" ref="wrap">
                 <div className="move-bg" style={rangeStyle}></div>
                 <Slipper
+                    style={state.rightStyle}
                     base={state.base}
                     type="left"
                     min={state.leftStart}

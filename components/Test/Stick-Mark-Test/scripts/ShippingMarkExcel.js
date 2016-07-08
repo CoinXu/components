@@ -36,7 +36,7 @@ module.exports = BaseWebExcel.extend({
       return x < 2 || y < 1
     },
     cellWidth: 'auto',
-    defaultSelect: [1, 1]
+    defaultSelect: [2, 1]
   },
 
   initialize: function (options) {
