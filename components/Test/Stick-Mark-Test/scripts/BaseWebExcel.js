@@ -360,13 +360,59 @@ module.exports = Component.extend({
     if (lang.getLength(this.focusCells) < 1) {
       return this;
     }
+
     content = this.parseStringFromExcel(content, this.focusCells);
-    var index = 0, coords;
+
+    // update:2016-07-17
+    // 复制时以 `行->行,列->列` 这样的对应关系复制
+    // 而非此前的 `先满足行,再满足列` 这样的规则
+
+    var rows_index = 0,
+        cols_index = 0,
+        coords,
+        col_len = content[0].length,
+        row_len = content.length,
+        pre_row = -1,
+        pre_col = -1,
+        diff_row;
+
+    // 挑选出与复制的值的个数相同的单元格
+    // 规则如上所述: `行->行,列->列`
+    // 因 this.focusCells 保存的顺序为 `[[row_1], [row_2]]`
+    // 所以可以直接循环取
+    // TODO 其实可以将focusCells写成一个二维数据,就不用这么麻烦了
+    // 可以去 `computedRegion` 函数内修改
+    // 为了最少的改动其他地方,所以这次改动方式使用修改该函数
+
+    var update_cells = lang.filter(this.focusCells, function (coords) {
+
+      diff_row = coords.y !== pre_row;
+
+      // 换行
+      if (diff_row) {
+        cols_index = 0;
+        rows_index = rows_index + 1;
+      }
+
+      // 换列
+      if (coords.x !== pre_col) {
+        cols_index = cols_index + 1
+      }
+
+      pre_row = coords.y;
+      pre_col = coords.x;
+
+      return rows_index <= row_len && cols_index <= col_len
+
+    }, this);
+
+    var index = 0;
+
     lang.forEach(content, function (row) {
 
       if (lang.isArray(row)) {
         lang.forEach(row, function (v) {
-          coords = this.focusCells[index++];
+          coords = update_cells[index++];
           if (!coords) {
             return true;
           }
@@ -520,19 +566,21 @@ module.exports = Component.extend({
 
     focusCells = focusCells || [];
 
-    var pre_row = focusCells[0].y, pre_col = focusCells[0].x,
-        focus_data = [], cell;
+    var pre_row = focusCells[0].y,
+        pre_col = focusCells[0].x,
+        focus_data = [], cell, diff_row;
 
     lang.forEach(focusCells || [], function (coords) {
 
       cell = this.getCellsWithCoords(coords.x, coords.y);
 
+      diff_row = coords.y !== pre_row;
       // 换行
-      if (coords.y !== pre_row) {
+      if (diff_row) {
         focus_data.push('\n');
       }
-      // 换列
-      if (coords.x !== pre_col) {
+      // 换列:换行的时候不添加换列标识
+      if (coords.x !== pre_col && !diff_row) {
         focus_data.push('\t');
       }
 
@@ -542,6 +590,8 @@ module.exports = Component.extend({
       pre_col = coords.x;
 
     }, this);
+
+    console.log(focus_data);
 
     return focus_data.join('');
   },
