@@ -5,18 +5,22 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const Animate = require('../index');
+const log = function (mark) {
+  return function () {
+    console.log.apply(
+        console,
+        [mark].concat(Array.prototype.slice.call(arguments))
+    )
+  }
+};
 const AnimateController = React.createClass({
 
   getInitialState: function () {
     return {entrance: true}
   },
 
-  entry: function () {
-    this.setState({entrance: true})
-  },
-
-  leave: function () {
-    this.setState({entrance: false})
+  toggle: function () {
+    this.setState({entrance: !this.state.entrance})
   },
 
   render(){
@@ -25,13 +29,13 @@ const AnimateController = React.createClass({
           from={{left:0}}
           to={{left:400}}
           style={{position:'absolute'}}
-          entrance={this.state.entrance}>
+          entrance={this.state.entrance}
+          onComplete={log('1: is entrance: ')}>
         <div>I'am Animate first child</div>
       </Animate>
       <button
           style={{marginTop:100}}
-          onMouseLeave={this.leave}
-          onMouseEnter={this.entry}>
+          onClick={this.toggle}>
         Hover me to toggle
       </button>
     </div>
@@ -40,7 +44,7 @@ const AnimateController = React.createClass({
 
 var TWEEN = require('../../../com/tween');
 
-// 最简单的调用
+// 外部控制出场入场
 ReactDOM.render(
     <AnimateController/>,
     document.getElementById('demo')
@@ -52,9 +56,10 @@ ReactDOM.render(
         from={{left:0}}
         to={{left:400}}
         style={{position:'absolute'}}
-        during={200}
-        repeat={3}>
-      <div>I'am Animate first child. I'll repeat triple</div>
+        during={1000}
+        repeat={3}
+        onComplete={log('2: is entrance: ')}>
+      <div>I'am Animate child. I'll repeat triple</div>
     </Animate>,
     document.getElementById('demo-1')
 );

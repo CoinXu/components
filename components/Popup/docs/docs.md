@@ -27,7 +27,10 @@
  + `unMountOnHide` - 组件隐藏时是否卸载 - true <div class="info">新增属性</div>
 
 ### Methods
-+ hide
++ hide - 隐藏组件,如果 `props.unMountOnHide` 为真值,组件会被卸载;
+  上一版本该函数名为 `autoVisible`,当前版本依然保留该函数,下一版本删除。
++ show - 显示组件,上一版本的该函数名为 `showPopup`;
+  当前版本依然保留该函数,下一版本删除。
 + unMount - 卸载组件
 
 ## 最简单的调用
@@ -37,7 +40,7 @@
 ```Javascript
 var React = require('react');
 var ReactDOM = require('react-dom');
-var Popup = require('react-components-s');
+var Popup = require('react-components');
 var Popup = Popup.Popup;
 var Bubble = Popup.Bubble;
 ```

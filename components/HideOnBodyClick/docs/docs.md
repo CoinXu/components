@@ -15,7 +15,10 @@
   <div class="error">
      已废弃,请用 `onMount` 代替
   <div>
-+ onMount - `Function` - 当动画组件完成时调用，传入的参数为动画组件的实例对象
++ onMount - `Function` - 当动画组件完成时调用，传入的参数为动画组件的实例对象。
+  <div class="error">
+     已废弃
+  <div>
 + triggerHide - `Function` - 每调用卸载函数时，会先调用该函数，
   若该函数返回的值不为真值，则不会触发卸载。
   <div class="error">
@@ -30,7 +33,7 @@
 ```Javascript
 var React = require('react');
 var ReactDOM = require('react-dom');
-var HideOnBodyClick = require('react-components-s').HideOnBodyClick;
+var HideOnBodyClick = require('react-components').HideOnBodyClick;
 ```
 
 2. 调用

@@ -11,87 +11,87 @@ var noop = require('../../com/noop');
 var assert = require('../../com/assert');
 
 var shouldHide = function () {
-    return true;
+  return true;
 };
 
 var HideOnBodyClick = React.createClass({
 
-    getInitialState: function () {
-        return {
-            visible: true
-        }
-    },
-
-    getDefaultProps: function () {
-        return {
-            component: 'div',
-            refTarget: null,
-            style: {},
-            visible: true,
-            onHide: noop,
-            onMount: noop,
-            shouldHide: shouldHide
-        }
-    },
-
-    componentWillMount: function () {
-        this.setState({visible: this.props.visible})
-    },
-
-    componentDidMount: function () {
-
-        this.__bodyHandle = function (e) {
-            var target = e.target || e.srcElement;
-            var mountNode = ReactDOM.findDOMNode(this);
-            var props = this.props;
-
-            if (!props.shouldHide()
-                || (props.refTarget && contains(props.refTarget, target))
-                || contains(mountNode, target)) {
-                return
-            }
-
-            if (this.__animate && this.__animate.backToTheStart) {
-                this.__animate.backToTheStart(this.onHide);
-            }
-        }.bind(this);
-
-        DOMEvent.on(body, 'click', this.__bodyHandle, false);
-    },
-
-    componentWillUnmount: function () {
-        DOMEvent.off(body, 'click', this.__bodyHandle, false);
-    },
-
-    onHide: function () {
-        this.props.onHide();
-    },
-
-    onMount: function (animate) {
-        this.__animate = animate;
-        this.props.onMount(this);
-        if (this.state.visible) {
-            animate.startAnimate();
-        }
-    },
-
-    render: function () {
-        var props = this.props;
-        var Components = props.component;
-        assert(props.children, 'children required in HideOnBodyClick');
-
-        return <Components style={{background: '#fff'}}>
-            <Animate
-                style={props.style}
-                component={props.component}
-                from={{opacity:0}}
-                to={{opacity:1}}
-                during={200}
-                onMount={this.onMount}>
-                {props.children}
-            </Animate>
-        </Components>
+  getInitialState: function () {
+    return {
+      visible: true
     }
+  },
+
+  getDefaultProps: function () {
+    return {
+      component: 'div',
+      refTarget: null,
+      style: {},
+      visible: true,
+      onHide: noop,
+      onMount: noop,
+      shouldHide: shouldHide
+    }
+  },
+
+  componentWillMount: function () {
+    this.setState({visible: this.props.visible})
+  },
+
+  componentDidMount: function () {
+
+    this.__bodyHandle = function (e) {
+      var target = e.target || e.srcElement;
+      var mountNode = ReactDOM.findDOMNode(this);
+      var props = this.props;
+
+      if (!props.shouldHide()
+          || (props.refTarget && contains(props.refTarget, target))
+          || contains(mountNode, target)) {
+        return
+      }
+
+      this.setState({visible: false})
+
+    }.bind(this);
+
+    DOMEvent.on(body, 'click', this.__bodyHandle, false);
+  },
+
+  componentWillReceiveProps: function (props) {
+    this.setState({visible: props.visible})
+  },
+
+  componentWillUnmount: function () {
+    DOMEvent.off(body, 'click', this.__bodyHandle, false);
+  },
+
+  onHide: function () {
+    this.props.onHide();
+  },
+
+  onComplete: function (entrance) {
+    if (!entrance) this.onHide()
+  },
+
+  render: function () {
+    var props = this.props;
+    var Components = props.component;
+    assert(props.children, 'children required in HideOnBodyClick');
+
+    return <Components style={{background: '#fff'}}>
+      <Animate
+          entrance={this.state.visible}
+          style={props.style}
+          component={props.component}
+          from={{opacity:0}}
+          to={{opacity:1}}
+          during={200}
+          onComplete={this.onComplete}>
+        {props.children}
+      </Animate>
+    </Components>
+  }
 });
 
 module.exports = HideOnBodyClick;

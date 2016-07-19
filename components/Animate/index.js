@@ -49,7 +49,7 @@ const Animate = React.createClass({
       during: 1000,
       delay: 0,
       repeat: 0,
-      onTweenComplete: noop,
+      onComplete: noop,
       onMount: noop,
       getContent: noop,
       easing: TWEEN.Easing.Linear.None
@@ -115,7 +115,7 @@ const Animate = React.createClass({
     });
 
     tween.onComplete(function () {
-      typeof callback === 'function' && callback();
+      typeof callback === 'function' && callback(props.entrance);
       cancelAnimate();
       self._onComplete();
     });
@@ -150,10 +150,9 @@ const Animate = React.createClass({
     // TODO 此处是等待完成,还是直接stop?
     // stop 是比较简单的,如果等待完成的话,就需要追加回调
     // 追加回调有点麻烦
-    if (this._running)
-      this.stop();
+    if (this._running) this.stop();
 
-    this[`_${props.entrance ? 'entrance' : 'leave'}`](props.onTweenComplete)
+    this[`_${props.entrance ? 'entrance' : 'leave'}`](props.onComplete)
   },
 
   stop: function () {
@@ -176,6 +175,11 @@ const Animate = React.createClass({
     if (prevProps.entrance !== props.entrance) {
       this._begin(props)
     }
+  },
+
+  // 遭遇外部暴力卸载时,停止动画
+  componentWillUnmount: function () {
+    if (this._running) this.stop()
   },
 
   render: function () {

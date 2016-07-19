@@ -7,46 +7,36 @@ var noop = require('../../com/noop');
 
 module.exports = {
 
-    getInitialState: function () {
-        return {visible: true}
-    },
+  getInitialState: function () {
+    return {entrance: true}
+  },
 
-    getDefaultProps: function () {
-        this.__backToTheStart = noop;
-        return {
-            message: '',
-            during: 3000,
-            closeable: false,
-            onMount: noop,
-            onUnmout: noop,
-            animate: {
-                component: 'span',
-                from: {opacity: 0},
-                to: {opacity: 1},
-                during: 500
-            }
-        }
-    },
-
-    // export animate
-    animateDidMount: function (animate) {
-        this.__backToTheStart = animate.backToTheStart;
-    },
-
-    componentDidMount: function () {
-        this.props.onMount(this)
-    },
-
-    unmount: function () {
-        if (typeof this.__backToTheStart === 'function') {
-            this.__backToTheStart(this.props.onUnmout)
-        } else {
-            this.props.onUnmout();
-        }
-
-    },
-
-    autoUnmount: function () {
-        setTimeout(this.unmount, this.props.during)
+  getDefaultProps: function () {
+    return {
+      message: '',
+      during: 3000,
+      closeable: false,
+      onMount: noop,
+      onUnmout: noop,
+      animate: {
+        component: 'span',
+        from: {opacity: 0},
+        to: {opacity: 1},
+        during: 500
+      }
     }
+  },
+
+
+  componentDidMount: function () {
+    this.props.onMount(this)
+  },
+
+  unmount: function () {
+    this.setState({visisble: false})
+  },
+
+  autoUnmount: function () {
+    setTimeout(this.unmount, this.props.during)
+  }
 };

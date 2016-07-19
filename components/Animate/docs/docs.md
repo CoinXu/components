@@ -1,5 +1,6 @@
 ## Animate - 动画组件
 + props
+  + entrance: React.PropTypes.bool <div class="info">新属性</div>
   + component `React.PropTypes.string`
   + style `React.PropTypes.object`
   + from `React.PropTypes.object`
@@ -8,44 +9,60 @@
   + delay `React.PropTypes.number`
   + repeat `React.PropTypes.number` 
   + easing `React.PropTypes.func`
+  + onComplete(entrance) `React.PropTypes.func` - 每一次动画完成后执行该函数,
+    参数 `entrance` 表示当前是入场还是出场动画
   + className `React.PropTypes.string`
-  + onMount(inst) `React.PropTypes.string` - 组件挂载后的回调
+  + onMount(inst) `React.PropTypes.string` - 组件挂载后的回调 <div
+  class="error">已废弃</div>
 
-## 最简单的调用
+## 外部控制出场入场
 1. 引入
 ```JavaScript
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Animate = require('react-components-s').Animate;
+const React = require('react');
+const ReactDOM = require('react-dom');
+const Animate = require('react-components').Animate;
+const log = function (mark) {
+  return function () {
+    console.log.apply(
+        console,
+        [mark].concat(Array.prototype.slice.call(arguments))
+    )
+  }
+};
 ```
  
-2. 创建一个 `AnimateChild`
+2. 创建一个 `AnimateController`
 ```JavaScript
-var AnimateChild = React.createClass({
-    render(){
-        var parent = this.props.parent;
-        return (
-            <div>
-                <p>{this.props.name}</p>
-                <button onClick={parent.backToTheStart.bind(parent, null)}>出场</button>
-            </div>
-        )
-    }
+const AnimateController = React.createClass({
+  getInitialState: function () {
+    return {entrance: true}
+  },
+  toggle: function () {
+    this.setState({entrance: !this.state.entrance})
+  },
+  render(){
+    return <div style={{position:'relative'}}>
+      <Animate
+          from={{left:0}}
+          to={{left:400}}
+          style={{position:'absolute'}}
+          entrance={this.state.entrance}
+          onComplete={log('1: is entrance: ')}>
+        <div>I'am Animate first child</div>
+      </Animate>
+      <button
+          style={{marginTop:100}}
+          onClick={this.toggle}>
+        Hover me to toggle
+      </button>
+    </div>
+  }
 });
 ```
-当然也可以直接写 `React.Element` 作为 `child`，这里只是为了演示 `animate.backToTheStart` 方法
- 
+
 3. 调用
 ```JavaScript
-ReactDOM.render(
-    <Animate
-        from={{left:0}}
-        to={{left:400}}
-        style={{position:'absolute', background: 'red'}}>
-        <AnimateChild name="Animate Child" key="animate-child"/>
-    </Animate>,
-    mountNode
-);
+ReactDOM.render(<AnimateController/>, mountNode);
 ```
 
 ## 传入参数
@@ -53,14 +70,12 @@ ReactDOM.render(
 ReactDOM.render(
     <Animate
         from={{left:0}}
-        during={500}
-        repeat={2}
-        delay={300}
-        component="div"
         to={{left:400}}
-        easing={TWEEN.Easing.Back.InOut}
-        style={{position:'absolute', background: 'red', overflow: 'hidden', top: 50}}>
-        <AnimateChild name="Animate Child 1" key="animate-child-1-1"/>
+        style={{position:'absolute'}}
+        during={1000}
+        repeat={3}
+        onComplete={log('2: is entrance: ')}>
+      <div>I'am Animate child. I'll repeat triple</div>
     </Animate>,
     mountNode
 );
