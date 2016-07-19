@@ -146,6 +146,10 @@ const Animate = React.createClass({
   },
 
   _begin: function (props) {
+
+    // TODO 此处是等待完成,还是直接stop?
+    // stop 是比较简单的,如果等待完成的话,就需要追加回调
+    // 追加回调有点麻烦
     if (this._running)
       this.stop();
 
@@ -170,9 +174,6 @@ const Animate = React.createClass({
     let props = this.props;
 
     if (prevProps.entrance !== props.entrance) {
-      // TODO 此处是等待完成,还是直接stop?
-      // stop 是比较简单的,如果等待完成的话,就需要追加回调
-      // 追加回调有点麻烦
       this._begin(props)
     }
   },

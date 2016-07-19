@@ -11,7 +11,7 @@ let _path = function (name) {
 };
 
 module.exports = {
-    // Animate: _path('Animate'),
+    Animate: _path('Animate'),
     // Conditional: _path('Conditional'),
     // Popup: _path('Popup'),
     // HideOnBodyClick: _path('HideOnBodyClick'),
@@ -22,5 +22,5 @@ module.exports = {
     // Calendar: _path('Calendar'),
     // Slider: _path('Slider'),
     // Pagination: _path('Pagination'),
-    WebExcel: path.join(process.cwd(), './components/Test/Stick-Mark-Test/index')
+    // WebExcel: path.join(process.cwd(), './components/Test/Stick-Mark-Test/index')
 };
