@@ -2,48 +2,59 @@
  * Created by xcp on 2016/3/12.
  */
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Animate = require('../index');
-var AnimateChild = React.createClass({
-    render(){
-        var parent = this.props.parent;
-        return (
-            <div>
-                <p>{this.props.name}</p>
-                <button onClick={parent.backToTheStart.bind(parent, null)}>出场</button>
-            </div>
-        )
-    }
+const React = require('react');
+const ReactDOM = require('react-dom');
+const Animate = require('../index');
+const AnimateController = React.createClass({
+
+  getInitialState: function () {
+    return {entrance: true}
+  },
+
+  entry: function () {
+    this.setState({entrance: true})
+  },
+
+  leave: function () {
+    this.setState({entrance: false})
+  },
+
+  render(){
+    return <div style={{position:'relative'}}>
+      <Animate
+          from={{left:0}}
+          to={{left:400}}
+          style={{position:'absolute'}}
+          entrance={this.state.entrance}>
+        <div>I'am Animate first child</div>
+      </Animate>
+      <button
+          style={{marginTop:100}}
+          onMouseLeave={this.leave}
+          onMouseEnter={this.entry}>
+        Hover me to toggle
+      </button>
+    </div>
+  }
 });
 
 var TWEEN = require('../../../com/tween');
 
 // 最简单的调用
 ReactDOM.render(
-    <Animate
-        from={{left:0}}
-        to={{left:400}}
-        onMount={function(inst){inst.startAnimate()}}
-        style={{position:'absolute', background: 'red'}}>
-        <AnimateChild name="Animate Child" key="animate-child"/>
-    </Animate>,
+    <AnimateController/>,
     document.getElementById('demo')
 );
-
 
 // 传入参数
 ReactDOM.render(
     <Animate
         from={{left:0}}
-        during={500}
-        repeat={2}
-        delay={300}
-        component="div"
         to={{left:400}}
-        easing={TWEEN.Easing.Back.InOut}
-        style={{position:'absolute', background: 'red', overflow: 'hidden', top: 50}}>
-        <AnimateChild name="Animate Child 1" key="animate-child-1-1"/>
+        style={{position:'absolute'}}
+        during={200}
+        repeat={3}>
+      <div>I'am Animate first child. I'll repeat triple</div>
     </Animate>,
     document.getElementById('demo-1')
 );

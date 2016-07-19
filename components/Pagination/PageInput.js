@@ -21,7 +21,7 @@ var PageInput = React.createClass({
             validate: getTruth,
             current: 1,
             max: Math.MAX_VALUE,
-            min: 0,
+            min: 1,
             validateFailedMark: -1
         }
     },
