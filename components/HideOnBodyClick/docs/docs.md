@@ -5,8 +5,8 @@
 ### Props
 + component - `String` - 组件 type
 + visible - `Boolean` - 默认是否隐藏。
-  <div class="warning">
-    用于以后扩展,当前版本不可用。
+  <div class="info">
+    新属性
   </div>
 + refTarget - `Node` - 当refTarget被点击是，不会触发卸载函数
 + onHide - `Function` - 卸载时调用的函数
@@ -26,6 +26,11 @@
   </div>
 + shouldHide - `Function` - 每调用卸载函数时，会先调用该函数，
   若该函数返回的值不为真值，则不会触发卸载。
++ onStateChange(entrance) - `Function` - 每次动画出场入场状态交替时触发,
+  参数`entrance`表示当前状态是出场`(false)`还是入场`(true)`
+  <div class="info">
+    新属性
+  </div>
 
 ## 最简单的调用
 

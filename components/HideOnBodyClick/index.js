@@ -1,20 +1,20 @@
 /**
  * Created by xcp on 2016/3/22.
  */
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Animate = require('../Animate');
-var contains = require('../../com/DOM/contains');
-var DOMEvent = require('../../com/DOM/DOMEvent');
-var body = require('../../com/DOM/DOMBody');
-var noop = require('../../com/noop');
-var assert = require('../../com/assert');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const Animate = require('../Animate');
+const contains = require('../../com/DOM/contains');
+const DOMEvent = require('../../com/DOM/DOMEvent');
+const body = require('../../com/DOM/DOMBody');
+const noop = require('../../com/noop');
+const assert = require('../../com/assert');
 
-var shouldHide = function () {
+const shouldHide = function () {
   return true;
 };
 
-var HideOnBodyClick = React.createClass({
+const HideOnBodyClick = React.createClass({
 
   getInitialState: function () {
     return {
@@ -28,8 +28,7 @@ var HideOnBodyClick = React.createClass({
       refTarget: null,
       style: {},
       visible: true,
-      onHide: noop,
-      onMount: noop,
+      onStateChange: noop,
       shouldHide: shouldHide
     }
   },
@@ -41,9 +40,9 @@ var HideOnBodyClick = React.createClass({
   componentDidMount: function () {
 
     this.__bodyHandle = function (e) {
-      var target = e.target || e.srcElement;
-      var mountNode = ReactDOM.findDOMNode(this);
-      var props = this.props;
+      let target = e.target || e.srcElement;
+      let mountNode = ReactDOM.findDOMNode(this);
+      let props = this.props;
 
       if (!props.shouldHide()
           || (props.refTarget && contains(props.refTarget, target))
@@ -66,17 +65,13 @@ var HideOnBodyClick = React.createClass({
     DOMEvent.off(body, 'click', this.__bodyHandle, false);
   },
 
-  onHide: function () {
-    this.props.onHide();
-  },
-
   onComplete: function (entrance) {
-    if (!entrance) this.onHide()
+    this.props.onStateChange(entrance);
   },
 
   render: function () {
-    var props = this.props;
-    var Components = props.component;
+    const props = this.props;
+    const Components = props.component;
     assert(props.children, 'children required in HideOnBodyClick');
 
     return <Components style={{background: '#fff'}}>

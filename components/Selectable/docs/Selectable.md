@@ -9,11 +9,13 @@
    组件包起来。
 
 ### Props
-+ onSelect - noop -默认给 `content` 中的元素被选中时调用，
-  通过将实例传给 `onComponentMount` 实现外部组件调用。
++ wrapClassName - 包装容器自定义CSS class。
++ onSelect(item) - noop - `panelContent`中的某一项被选择时触发,
+  参数 `item` 为该项存储的值。
 + onComponentMount - noop - 组件挂载时调用，参数为组件实例。
-  <div class="error">将要被废弃,请用 `onMount` 代替</div>
-+ onMount - noop - 组件挂载时调用，参数为组件实例。
+  <div class="error">已废弃 `onMount` 代替</div>
++ onMount - noop - 组件挂载时调用，参数为组件实例。 <div class="error">已废弃</div>
 + selectorBindEvent - true - 是否给 `selector` 绑定事件(显示组件事件)。
 + selectorContent - null - `selector` 内容。
-+ panelContent - null - `conte+++nt` 内容。
++ panelContent - null - 弹出面板内容。
++ disabled - false - 是否禁用 `selector`。

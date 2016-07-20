@@ -66,6 +66,10 @@ var PopupWrap = React.createClass({
     this.recompute();
   },
 
+  onStateChange: function (entrance) {
+    if (!entrance) this.props.onHide()
+  },
+
   render: function () {
     var props = this.props;
     var style = {
@@ -89,7 +93,7 @@ var PopupWrap = React.createClass({
         refTarget={props.refTarget}
         style={props.style}
         shouldHide={props.shouldHide}
-        onHide={props.onHide}>
+        onStateChange={this.onStateChange}>
       {children}
     </HideOnBodyClick>)
   }
