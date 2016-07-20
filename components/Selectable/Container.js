@@ -2,77 +2,69 @@
  * Created by xcp on 2016/3/23.
  */
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var HideOnBodyClick = require('../HideOnBodyClick');
-var classNames = require('classnames');
+const React = require('react');
+const Custom = require('./Custom');
+const noop = require('../../com/noop');
+const ContainerMixin = require('./ContainerMixin');
 
-var SelectableMixin = require('./SelectableMixin');
-var ContainerMixin = require('./ContainerMixin');
+const Container = React.createClass({
 
-var Container = React.createClass({
+  mixins: [ContainerMixin],
 
-    mixins: [SelectableMixin, ContainerMixin],
+  _getSelector: function (current) {
+    let progressText = 'progress-bar-text';
+    let progressClassName = this.getProgressClassName(
+        current ? current.percent : 0,
+        progressText
+    );
 
-    reRender: function (itemList) {
-        this.setState({itemList: itemList})
-    },
+    return <div className="comp-select-selector">
+      <div className="comp-select-progress">
+        <span className={progressClassName}/>
+      </div>
+      <span className="icon-img icon-tran-black-d"/>
+    </div>
+  },
 
-    render: function () {
-        var panelClassName = {
-            'comp-custom-select': true,
-            'comp-show-panel': this.state.panelStateIsShow
-        };
+  _getItem: function (value, props) {
+    let className = this.getProgressClassName(
+        value.percent,
+        'progress-bar-text'
+    );
 
-        var progressText = 'progress-bar-text';
+    let items = <div className="comp-select-progress comp-icon-gap">
+      <span className={className}/>
+    </div>;
 
-        var progressClassName = this.getProgressClassName(
-            this.state.currentSelectedValue ?
-                this.state.currentSelectedValue.percent :
-                0,
-            progressText
-        );
+    items = React.cloneElement(items, props);
 
-        var itemList = this.state.itemList.map(function (item) {
-            return <li className="comp-panel-item" key={item.index}>
-                <strong className="comp-icon-gap">{item.index}</strong>
-                <div className="comp-select-progress comp-icon-gap"
-                     onClick={this.onSelect.bind(this, item)}>
-                    <span
-                        className={this.getProgressClassName(item.percent, progressText)}/>
-                </div>
-                <span
-                    className="icon-img icon-close util-v-m"
-                    onClick={this.props.remove.bind(this, item)}/>
-            </li>
-        }, this);
+    return <li className="comp-panel-item" key={value.index}>
+      <strong className="comp-icon-gap">{value.index}</strong>
+      {items}
+      <span className="icon-img icon-close util-v-m"
+            onClick={this.props.remove.bind(this, value)}/>
+    </li>;
 
-        return (<div className={classNames(panelClassName)} ref="selectable">
-            <div className="comp-select-selector-pd">
-                <div className="comp-select-selector" onClick={this.showPanel}>
-                    <div className="comp-select-progress">
-                        <span className={progressClassName}/>
-                    </div>
-                    <span className="icon-img icon-tran-black-d"/>
-                </div>
-            </div>
-            <HideOnBodyClick
-                refTarget={this.refs.selectable}
-                onHide={this.onHide}
-                onMount={this.onAnimateMount}
-                shouldHide={this.shouldHide}>
-                <div className="comp-select-panel comp-progress-panel">
-                    <ol className="comp-select-m-t">
-                        {itemList}
-                        <li className="comp-panel-title util-text-center">
-                            <span className="icon-img icon-plus util-v-m"
-                                  onClick={this.props.add.bind(this)}/>
-                        </li>
-                    </ol>
-                </div>
-            </HideOnBodyClick>
-        </div>)
-    }
+  },
+
+  _getWrap: function (panel, props, state, inst) {
+    return <ol className="comp-select-m-t">
+      {panel}
+      <li className="comp-panel-title util-text-center">
+        <span className="icon-img icon-plus util-v-m"
+              onClick={this.props.add.bind(this)}/>
+      </li>
+    </ol>
+  },
+
+  render: function () {
+    return <Custom
+        itemList={this.state.itemList}
+        onSelect={this.props.onSelect}
+        getItemWrap={this._getWrap}
+        getSelectorContent={this._getSelector}
+        getItemContent={this._getItem}/>
+  }
 });
 
 module.exports = Container;

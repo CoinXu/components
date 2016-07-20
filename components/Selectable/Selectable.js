@@ -37,7 +37,7 @@ var Selectable = React.createClass({
   componentWillReceiveProps: function (nextProps) {
     this.setState({disabled: nextProps.disabled})
   },
-
+  
   show: function () {
     this.setState({visible: true, selected: false})
   },
@@ -95,7 +95,7 @@ var Selectable = React.createClass({
       selector = props.selectorContent;
     }
 
-    return (<div className={classNames(className)} ref="wrap">
+    return (<div className={className} ref="wrap">
       <div className="comp-select-selector-pd">
         <NotAllowSelect>
           {selector}

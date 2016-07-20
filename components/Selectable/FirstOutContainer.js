@@ -17,7 +17,7 @@ var FOContainer = React.createClass({
         firstOut: React.PropTypes.array
     },
 
-    mixins: [SelectableMixin, ContainerMixin],
+    // mixins: [SelectableMixin, ContainerMixin],
 
     getDefaultProps: function () {
         return {firstOut: []}

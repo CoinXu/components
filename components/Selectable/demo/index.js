@@ -10,23 +10,23 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var log = function () {
-    console.info(arguments)
+  console.info(arguments)
 };
 
 // 自定义属性值
 // 自定义selector
 var getSelector = function (currentSelectedValue) {
-    return <div className="comp-select-selector">
-        <span className="util-font-12">{currentSelectedValue.text}</span>
-        <span className="icon-img icon-tran-black-d"/>
-    </div>
+  return <div className="comp-select-selector">
+    <span className="util-font-12">{currentSelectedValue.text}</span>
+    <span className="icon-img icon-tran-black-d"/>
+  </div>
 };
 
 var getItem = function (value, props) {
-    var item = <li className="comp-panel-item" key={value.code}>
-        <strong>{value.text}</strong>
-    </li>;
-    return React.cloneElement(item, props);
+  var item = <li className="comp-panel-item" key={value.code}>
+    <strong>{value.text}</strong>
+  </li>;
+  return React.cloneElement(item, props);
 };
 
 ReactDOM.render(
@@ -40,12 +40,12 @@ ReactDOM.render(
 
 // 输入内容验证
 var validation = function (val, input, inst) {
-    if (!/^[0-9]+$/.test(val)) {
-        console.log('请输入数字');
-        input.value = inst.getCurrent();
-        return false;
-    }
-    return true;
+  if (!/^[0-9]+$/.test(val)) {
+    console.log('请输入数字');
+    input.value = inst.getCurrent();
+    return false;
+  }
+  return true;
 };
 
 ReactDOM.render(
@@ -85,11 +85,11 @@ ReactDOM.render(
 
 // 自定义下拉菜单-货柜详情列表
 const add = function () {
-    this.addOne()
+  this.addOne()
 };
 
 const remove = function (item) {
-    this.removeOne(item)
+  this.removeOne(item)
 };
 
 ReactDOM.render(
@@ -103,22 +103,23 @@ ReactDOM.render(
 
 // 自定义下拉菜单-先出货柜
 var containers = [
-    {index: 0, percent: 0.8},
-    {index: 1, percent: 0.23},
-    {index: 2, percent: 0.23},
-    {index: 12, percent: 0.83}
+  {index: 0, percent: 0.8},
+  {index: 1, percent: 0.23},
+  {index: 2, percent: 0.23},
+  {index: 12, percent: 0.83}
 ];
 
-ReactDOM.render(
-    <Selector.FOContainer
-        firstOut={[containers[2]]}
-        itemList={containers}
-        onSelect={log}/>,
-    document.getElementById('fo-container')
-);
+// ReactDOM.render(
+//     <Selector.FOContainer
+//         firstOut={[containers[2]]}
+//         itemList={containers}
+//         onSelect={log}/>,
+//     document.getElementById('fo-container')
+// );
 
 ReactDOM.render(
     <Selector.MiniContainer
+        add={add}
         selectorStyle={{padding:0}}
         itemList={containers}
         onSelect={log}/>,
@@ -129,61 +130,61 @@ ReactDOM.render(
 // 模拟搜索列表中的选项
 
 var checkboxItemList = function () {
-    return new Array(10).fill(1).map(function (v, i) {
-        return {
-            value: i,
-            content: {name: 'name-' + i, widget: '(123' + i + ')'}
-        }
-    })
+  return new Array(10).fill(1).map(function (v, i) {
+    return {
+      value: i,
+      content: {name: 'name-' + i, widget: '(123' + i + ')'}
+    }
+  })
 }();
 
 
 // 多选
 var CheckWrap = React.createClass({
 
-    getDefaultProps: function () {
-        return {
-            maxChecked: 1
-        }
-    },
-
-    holdCheckbox: function (checkbox) {
-        this._checkbox = checkbox;
-    },
-
-    cleanup: function () {
-        this._checkbox.cleanup()
-    },
-
-    checkAll: function () {
-        this._checkbox.checkAll()
-    },
-
-    getCheckedValue: function () {
-        console.log(this._checkbox.getCheckedValue())
-    },
-
-    render: function () {
-        return <div className="msg-condition">
-            <div className="condition-title">
-                <a className="color-green" onClick={this.checkAll}>All</a>
-                <a className="a-link" onClick={this.cleanup}>Clear</a>
-            </div>
-            <div className="condition-padding msg-common-checkbox">
-                <Checkbox
-                    maxChecked={this.props.maxChecked}
-                    itemList={checkboxItemList}
-                    onComponentMount={this.holdCheckbox}
-                    onOutOfBounds={log}
-                    onChange={log}
-                    checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>
-            </div>
-            <button className="btn btn-default btn-xs"
-                    onClick={this.getCheckedValue}>
-                点击log当前选中的值
-            </button>
-        </div>
+  getDefaultProps: function () {
+    return {
+      maxChecked: 1
     }
+  },
+
+  holdCheckbox: function (checkbox) {
+    this._checkbox = checkbox;
+  },
+
+  cleanup: function () {
+    this._checkbox.cleanup()
+  },
+
+  checkAll: function () {
+    this._checkbox.checkAll()
+  },
+
+  getCheckedValue: function () {
+    console.log(this._checkbox.getCheckedValue())
+  },
+
+  render: function () {
+    return <div className="msg-condition">
+      <div className="condition-title">
+        <a className="color-green" onClick={this.checkAll}>All</a>
+        <a className="a-link" onClick={this.cleanup}>Clear</a>
+      </div>
+      <div className="condition-padding msg-common-checkbox">
+        <Checkbox
+            maxChecked={this.props.maxChecked}
+            itemList={checkboxItemList}
+            onComponentMount={this.holdCheckbox}
+            onOutOfBounds={log}
+            onChange={log}
+            checkedList={[checkboxItemList[0], checkboxItemList[1]]}/>
+      </div>
+      <button className="btn btn-default btn-xs"
+              onClick={this.getCheckedValue}>
+        点击log当前选中的值
+      </button>
+    </div>
+  }
 });
 
 // 可全选
