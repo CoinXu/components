@@ -109,13 +109,14 @@ var containers = [
   {index: 12, percent: 0.83}
 ];
 
-// ReactDOM.render(
-//     <Selector.FOContainer
-//         firstOut={[containers[2]]}
-//         itemList={containers}
-//         onSelect={log}/>,
-//     document.getElementById('fo-container')
-// );
+ReactDOM.render(
+    <Selector.FOContainer
+        add={add}
+        firstOut={[containers[2]]}
+        itemList={containers}
+        onSelect={log}/>,
+    document.getElementById('fo-container')
+);
 
 ReactDOM.render(
     <Selector.MiniContainer

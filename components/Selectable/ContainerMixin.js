@@ -8,6 +8,7 @@ module.exports = {
 
   getDefaultProps: function () {
     return {
+      firstOut: [],
       itemList: [],
       add: noop,
       remove: noop,

@@ -2,113 +2,114 @@
  * Created by xcp on 2016/3/23.
  */
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var HideOnBodyClick = require('../HideOnBodyClick');
-var classNames = require('classnames');
-var noop = require('../../com/noop');
+const React = require('react');
+const Custom = require('./Custom');
+const noop = require('../../com/noop');
+const ContainerMixin = require('./ContainerMixin');
+const DropDown = require('./DropDown');
 
-var SelectableMixin = require('./SelectableMixin');
-var ContainerMixin = require('./ContainerMixin');
+const FOContainer = React.createClass({
 
-var FOContainer = React.createClass({
+  mixins: [ContainerMixin],
 
-    propTypes: {
-        firstOut: React.PropTypes.array
-    },
+  _getSelector: function (current) {
+    let progressText = 'progress-bar-text';
+    let progressClassName = this.getProgressClassName(
+        current ? current.percent : 0,
+        progressText
+    );
 
-    // mixins: [SelectableMixin, ContainerMixin],
+    return <div className="comp-select-selector">
+      <div className="comp-select-progress">
+        <span className={progressClassName}/>
+      </div>
+      <span className="icon-img icon-tran-black-d"/>
+    </div>
+  },
 
-    getDefaultProps: function () {
-        return {firstOut: []}
-    },
+  _getItem: function (value, props) {
+    let className = this.getProgressClassName(
+        value.percent,
+        'progress-bar-text'
+    );
 
-    reRender: function (itemList) {
-        var mountNode = ReactDOM.findDOMNode(this).parentNode;
-        ReactDOM.render(<FOContainer
-                itemList={itemList}
-                firstOut={this.props.firstOut}
-                onSelect={this.props.onSelect}
-                defaultSelectedValue={this.props.defaultSelectedValue}/>,
-            mountNode)
-    },
+    let items = <div className="comp-select-progress comp-icon-gap">
+      <span className={className}/>
+    </div>;
 
-    getItemElement: function (item) {
-        return (<li className="comp-panel-item" key={item.index}>
-            <strong className="comp-icon-gap">{item.index}</strong>
-            <div className="comp-select-progress comp-icon-gap"
-                 onClick={this.onSelect.bind(this, item)}>
-                <span className={this.getProgressClassName(item.percent, 'progress-bar-text')}/>
-            </div>
-            <span className="icon-img icon-close util-v-m" onClick={this.props.remove.bind(this, item)}/>
-        </li>)
-    },
+    items = React.cloneElement(items, props);
 
-    render: function () {
-        var panelClassName = {
-            'comp-custom-select': true,
-            'comp-show-panel': this.state.panelStateIsShow
-        };
+    return <li className="comp-panel-item" key={value.index}>
+      <strong className="comp-icon-gap">{value.index}</strong>
+      {items}
+      <span className="icon-img icon-close util-v-m"
+            onClick={this.props.remove.bind(this, value)}/>
+    </li>;
+  },
 
-        var progressText = 'progress-bar-text';
+  _getItemContent: function (value, index) {
+    return <DropDown.Item
+        value={value}
+        key={index}
+        getItemContent={this._getItem}/>
+  },
 
-        var progressClassName = this.getProgressClassName(
-            this.state.currentSelectedValue ?
-                this.state.currentSelectedValue.percent :
-                0,
-            progressText
-        );
+  _getItems: function (props, state, inst) {
+    const Fo = this.props.firstOut;
+    const State = this.state;
 
-        var props = this.props;
+    const items = State.itemList.filter(function (item) {
+      return Fo.indexOf(item) === -1
+    });
 
-        var itemList = props.itemList
-            .filter(function (item) {
-                return props.firstOut.indexOf(item) === -1
-            }, this)
-            .map(this.getItemElement, this);
+    const item_list = items.map(this._getItemContent, this);
 
-        var firstOutList = props.firstOut.map(this.getItemElement, this);
+    const fo_list = Fo.map(this._getItemContent, this);
 
-        return (<div className={classNames(panelClassName)} ref="selectable">
-            <div className="comp-select-selector-pd">
-                <div className="comp-select-selector" onClick={this.showPanel}>
-                    <div className="comp-select-progress">
-                        <span className={progressClassName}/>
-                    </div>
-                    <span className="icon-img icon-tran-black-d"/>
-                </div>
-            </div>
-            <HideOnBodyClick
-                refTarget={this.refs.selectable}
-                onHide={this.onHide}
-                onMount={this.onAnimateMount}
-                shouldHide={this.shouldHide}>
-                <div className="comp-select-panel comp-progress-panel">
-                    <div className="bub-bd-b">
-                        <div className="bub-pd-l-lg bub-pd-r-lg">
-                            <span className="color-selection comp-neg-m-l comp-icon-gap">先出货柜</span>
-                            <span className="icon-img icon-qa-normal util-v-text-t"/>
-                        </div>
-                        <div className="bub-pd-b">
-                            <ol className="comp-select-m-t bub-pd-t">
-                                {firstOutList}
-                            </ol>
-                        </div>
-                    </div>
-                    <ol className="comp-select-m-t bub-pd-t">
-                        <li className="comp-panel-title util-line-14">
-                            <span className="color-selection comp-neg-m-l comp-icon-gap">其他货柜</span>
-                            <span className="icon-img icon-qa-normal util-v-text-t"/>
-                        </li>
-                        {itemList}
-                        <li className="comp-panel-title util-text-center">
-                            <span className="icon-img icon-plus util-v-m" onClick={this.props.add}/>
-                        </li>
-                    </ol>
-                </div>
-            </HideOnBodyClick>
-        </div>)
-    }
+    this._list = {items: item_list.length, fo: fo_list.length};
+    return item_list.concat(fo_list);
+  },
+
+  _getWrap: function (items, props, state, inst) {
+    const Fo = items.slice(-this._list.fo);
+    const Items = items.slice(0, this._list.items);
+
+    return <div className="comp-progress-panel">
+      <div className="bub-bd-b">
+        <div className="bub-pd-l-lg bub-pd-r-lg">
+          <span
+              className="color-selection comp-neg-m-l comp-icon-gap">先出货柜</span>
+          <span className="icon-img icon-qa-normal util-v-text-t"/>
+        </div>
+        <div className="bub-pd-b">
+          <ol className="comp-select-m-t bub-pd-t">
+            {Fo}
+          </ol>
+        </div>
+      </div>
+      <ol className="comp-select-m-t bub-pd-t">
+        <li className="comp-panel-title util-line-14">
+          <span
+              className="color-selection comp-neg-m-l comp-icon-gap">其他货柜</span>
+          <span className="icon-img icon-qa-normal util-v-text-t"/>
+        </li>
+        {Items}
+        <li className="comp-panel-title util-text-center">
+          <span className="icon-img icon-plus util-v-m"
+                onClick={this.props.add.bind(this)}/>
+        </li>
+      </ol>
+    </div>
+  },
+
+  render: function () {
+    return <Custom
+        itemList={this.state.itemList}
+        onSelect={this.props.onSelect}
+        getItemWrap={this._getWrap}
+        getSelectorContent={this._getSelector}
+        getItemsContent={this._getItems}/>
+  }
 });
 
 module.exports = FOContainer;
