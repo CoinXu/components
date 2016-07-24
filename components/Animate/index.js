@@ -190,9 +190,7 @@ const Animate = React.createClass({
     let ret = props.getContent(props, this.state, self);
 
     if (ret === undefined) {
-      ret = <Components
-          className={props.className}
-          style={this._currentProps()}>
+      ret = <Components className={props.className} style={this._currentProps()}>
         {children}
       </Components>
     }

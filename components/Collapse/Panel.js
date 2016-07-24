@@ -86,20 +86,22 @@ const Panel = React.createClass({
     const state = this.state;
     const Components = props.components;
 
-    let ret = props.getContent(props, this.state, this);
-    let style = {overflow: 'hidden'};
+    const ret = props.getContent(props, this.state, this);
+    const style = assign({overflow: 'hidden'}, state.wrapStyle);
 
-    return <Components className={props.className} ref="wrap">
+    return <Components className={props.className}>
       {React.cloneElement(props.title)}
       <Animate
-          style={assign(style, state.wrapStyle)}
+          style={style}
           component="div"
           entrance={!state.collapse}
           from={state.from}
           to={state.to}
           during={200}
           onComplete={this.onComplete}>
-        {ret || props.children}
+        <div ref="wrap">
+          {React.isValidElement(ret) ? ret : props.children}
+        </div>
       </Animate>
     </Components>;
   }
