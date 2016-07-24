@@ -3,6 +3,6 @@
  */
 
 module.exports = {
-    Slider: require('./Slider'),
-    Slipper: require('./Slipper')
+  Slider: require('./Slider'),
+  Slipper: require('./Slipper')
 };
