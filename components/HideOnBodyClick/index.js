@@ -28,6 +28,7 @@ const HideOnBodyClick = React.createClass({
       refTarget: null,
       style: {},
       visible: true,
+      effect: true,
       onStateChange: noop,
       shouldHide: shouldHide
     }
@@ -81,7 +82,7 @@ const HideOnBodyClick = React.createClass({
           component={props.component}
           from={{opacity:0}}
           to={{opacity:1}}
-          during={200}
+          during={props.effect ? 200 : 0}
           onComplete={this.onComplete}>
         {props.children}
       </Animate>

@@ -31,6 +31,11 @@
   <div class="info">
     新属性
   </div>
++ effect - `Boolean` - `true` - 是否需要动画特效,需要注意的是,就算值为`false`,
+  也会触发 `onStateChange` 属性。
+  <div class="info">
+     新属性
+  </div>
 
 ## 最简单的调用
 
@@ -42,10 +47,22 @@ var HideOnBodyClick = require('react-components').HideOnBodyClick;
 ```
 
 2. 调用
+
+### 有动画
 ```Javascript
 ReactDOM.render(
     <HideOnBodyClick>
         <span className="widget-bg-text">点body其他地方，我就不见了...Biu~Biu~Biu~</span>
+    </HideOnBodyClick>,
+    document.getElementById('demo')
+);
+```
+
+### 无动画
+```Javascript
+ReactDOM.render(
+    <HideOnBodyClick effect={false}>
+      <span className="widget-bg-text">这是一个没有动画的HideOnBodyClick</span>
     </HideOnBodyClick>,
     document.getElementById('demo')
 );
