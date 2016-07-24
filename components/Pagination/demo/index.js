@@ -7,11 +7,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var onChange = function () {
-    console.log(arguments)
+  console.log(arguments)
 };
 
 ReactDOM.render(
     <Pagination
+        keepPages={2}
         defaultCurrent={10}
         total={1000}
         onSelect={onChange}

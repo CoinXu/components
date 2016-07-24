@@ -84,8 +84,6 @@ var Selectable = React.createClass({
 
     className = classNames(className);
 
-    console.log(className, state.visible);
-
     var selector = null;
     if (props.selectorBindEvent && !state.disabled) {
       selector = <div onClick={this.show}>
