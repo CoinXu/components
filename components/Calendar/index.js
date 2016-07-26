@@ -59,7 +59,10 @@ const Calendar = React.createClass({
       onChange: noop,
       onSelect: noop,
       onMount: noop,
-      shouldUpdate: noop
+      shouldUpdate: noop,
+      getContent: function (time) {
+        return <div>{time.date()}</div>
+      }
     }
   },
 
@@ -193,7 +196,8 @@ const Calendar = React.createClass({
                   disabledDate={props.disabledDate}
                   diffDate={props.diffDate}
                   format={props.format}
-                  time={time}/>
+                  time={time}
+                  getContent={props.getContent}/>
             </td>
           })}
         </tr>

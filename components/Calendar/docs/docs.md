@@ -28,6 +28,12 @@
 + `onChange(current, prev)` - 前后选择发生变化时回调 - noop
 + `onSelect(selected)` - 选择某个日期的回调 - noop
 + `shouldUpdate()` - 外部定义是否更新组件 - noop
++ `getContent` - 获取每一个日期的内容
+    ```JavaScript
+    function (time) {
+        return <div>{time.date()}</div>
+    }
+    ```
 
 ### Methods
 + `today` - 设置选中的日期为当前系统时间
@@ -35,12 +41,27 @@
 
 ### 简单的渲染
 ```JavaScript
-var Calendar = require('../index');
-var ReactDOM = require('react-dom');
-var noop = function(){};
-var moment = require('moment');
+const Calendar = require('../index');
+const ReactDOM = require('react-dom');
+const noop = function(){};
+const moment = require('moment');
+const current_date = moment().date();
+const getContent = function (time) {
+  const date = time.date();
+  const content = <div>{date}</div>;
+  if (date === current_date) {
+    return <Popup
+        trigger="hover"
+        placement="top"
+        content={horizontal(date)}>
+      {content}
+    </Popup>
+  }
+  return content;
+};
 // 全部使用默认值渲染
 ReactDOM.render(<Calendar
+        getContent={getContent}
         onSelect={function(time){console.log(time.format())}}
         onChange={function(c, p){console.log(c.format(), p.format())}}/>,
     document.getElementById('demo')

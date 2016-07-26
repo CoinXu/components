@@ -20,7 +20,10 @@ const DatePicker = React.createClass({
       format: 'YYYY-MM-DD HH:mm:ss',
       onSelect: noop,
       disabledDate: noop,
-      diffDate: noop
+      diffDate: noop,
+      getContent: function (date) {
+        return <span>{date}</span>
+      }
     }
   },
 
@@ -46,7 +49,7 @@ const DatePicker = React.createClass({
     return <div
         className={classnames(className)}
         onClick={disabled ? noop : this.onSelect}>
-      {props.time.date()}
+      {props.getContent(props.time)}
     </div>
   }
 });
