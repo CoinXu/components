@@ -10,6 +10,7 @@ var getSelectorContent = function (props, state, onChange) {
     return function (value) {
         if (state.inputState) {
             return <input
+                autoFocus
                 ref="inputNode"
                 onChange={onChange}
                 className="input-default"

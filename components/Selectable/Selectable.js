@@ -37,7 +37,7 @@ var Selectable = React.createClass({
   componentWillReceiveProps: function (nextProps) {
     this.setState({disabled: nextProps.disabled})
   },
-  
+
   show: function () {
     this.setState({visible: true, selected: false})
   },
