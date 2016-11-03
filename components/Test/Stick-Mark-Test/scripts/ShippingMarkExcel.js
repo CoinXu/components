@@ -40,11 +40,6 @@ module.exports = BaseWebExcel.extend({
   },
 
   initialize: function (options) {
-
-    this.on('onCellChange', function (val) {
-      console.log('onCellChange', val)
-    });
-
     this.wrapper = this.parent;
 
     var wrap = dom.DOM.div({
@@ -65,6 +60,10 @@ module.exports = BaseWebExcel.extend({
     this.__super__.initialize(lang.defaults(options || {}, this.defaultsConfig))
   },
 
+  /**
+   * 创建选择区域遮罩
+   * @returns {*}
+   */
   createCover: function () {
     var contentId = 'operate-wrap-' + lang.randomRange(10, 10, 100).join('');
     var copyId = 'copy-wrap-' + lang.randomRange(10, 10, 100).join('');
@@ -104,6 +103,9 @@ module.exports = BaseWebExcel.extend({
     return region;
   },
 
+  /**
+   * 选择区域操作相关:
+   */
   operateCover: function () {
     // 注册事件监听
     // 单元格改变事件
@@ -122,6 +124,9 @@ module.exports = BaseWebExcel.extend({
     var region = this.region = this.createCover();
     var $region = query(region);
 
+    /**
+     *
+     */
     this.on('change', function (oldVal, newVal, cell) {
       console.log('cell\'s value changed: ', oldVal, newVal, cell.x, cell.y);
     });
@@ -164,6 +169,10 @@ module.exports = BaseWebExcel.extend({
     return `width:${w + 2}px;height:${h + 2}px;top:${y - 1}px;left:${x - 1}px;`
   },
 
+  beforeRender: function () {
+    this.createWatcher();
+  },
+
   afterRender: function () {
     var total = 0;
     var w = 0;
@@ -173,6 +182,8 @@ module.exports = BaseWebExcel.extend({
       return w;
     });
 
+
+    // 保存贴纸唛头的名称[贴纸一号...]
     var header_node = [];
     var pos = -1;
     var count = 0;
@@ -181,9 +192,8 @@ module.exports = BaseWebExcel.extend({
 
     this.__super__.afterRender(this.node);
 
-    // 确定header的内容。
-
-
+    // table 生成后,查询表头单元格的宽度
+    // 并将其宽度写入style属性,用以限制当前列的宽度。
     lang.forEach(this.getRows(0), function (cell, index) {
       w = cell.node.offsetWidth;
       count = count + w;
@@ -192,12 +202,12 @@ module.exports = BaseWebExcel.extend({
       pos = header_num.indexOf(t);
 
       // 找到所有的header（位置对应）
-
       // 头两列为固定内容,不生成
       if (pos === 0) {
         padding = count;
         total = 0;
       } else if (pos > -1) {
+        // 生成贴纸唛头的名称[贴纸一号...]
         header_node.push(this.generateHeader(
             total, props.header[pos].name,
             header_num[pos - 1], header_num[pos]
@@ -216,8 +226,41 @@ module.exports = BaseWebExcel.extend({
     this.operateCover();
 
     this.removeBehavior();
+
   },
 
+  /**
+   * 创建关联单元格监视器
+   */
+  createWatcher: function () {
+    var excel = this;
+    var wachter = excel._watcher = [];
+
+    wachter.push([{x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}]);
+    wachter.push([{x: 3, y: 2}, {x: 4, y: 2}, {x: 5, y: 2}]);
+
+    this.on('change', function (prev, current, cell) {
+      var x = cell.x, y = cell.y;
+
+      // 遍历每一个watcher组,查找该组是否包含该单元格
+      lang.forEach(wachter, function (list, index) {
+        var has = lang.some(list, function (coords) {
+          return coords.x === x && coords.y === y
+        });
+
+        // 如果包含cell,那么更新整组的值
+        if (has) {
+          lang.forEach(list, function (cell) {
+            excel.getCellsWithCoords(cell.x, cell.y).setModelValue(current, true)
+          })
+        }
+      });
+    })
+  },
+
+  /**
+   * 删除贴纸或唛头
+   */
   removeBehavior: function () {
     var $node = query(this.header_node);
     $node.on('click', '.icon-close-c', function (event, target) {
@@ -225,6 +268,7 @@ module.exports = BaseWebExcel.extend({
       values = lang.map(values, function (v) {
         return parseInt(v)
       }, null);
+
       // TODO 验证所属的内容是否全部为空,为空才能删除
       console.log(this.model.data);
       this.model.remove(values[0], values[1]);

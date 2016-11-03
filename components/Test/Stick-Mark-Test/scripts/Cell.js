@@ -33,6 +33,9 @@ module.exports = Component.extend({
 
   nodeAttr: {},
 
+  /**
+   * 生成内容的勾子函数,可不传
+   */
   contentHooks: null,
 
   doc: document,
@@ -115,13 +118,17 @@ module.exports = Component.extend({
   /**
    * 选择状态更新model
    * @param val
+   * @param silent
    * @returns {string}
    */
-  setModelValue: function (val) {
+  setModelValue: function (val, silent) {
 
     if (val !== this._preveText) {
       this.textNode.nodeValue = val;
-      this.emit('change', this._preveText, val, this);
+      if (!silent) {
+        this.emit('change', this._preveText, val, this);
+      }
+
       this._preveText = val;
       this.model[this.name] = val;
     }
@@ -183,7 +190,7 @@ module.exports = Component.extend({
     this.status = this.STATUS.BLUR;
 
     if (prev !== val) {
-      this.emit('onCellChange', val)
+      this.emit('onCellChange', val, this)
     }
 
     return val;

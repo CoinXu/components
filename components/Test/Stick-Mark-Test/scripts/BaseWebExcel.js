@@ -209,7 +209,6 @@ module.exports = Component.extend({
           });
         }
       });
-
       cells.push(cell);
       div.appendChild(cell.render().node);
     }, this);
@@ -446,7 +445,6 @@ module.exports = Component.extend({
    * @param focusCells
    * @returns {Array|*}
    */
-
   parseStringFromExcel: function (str, focusCells) {
     //var splitter = /[\v\r\f\t\n]+/;
     var cellSplitter = /\t/;

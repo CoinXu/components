@@ -12,7 +12,7 @@ const lang = require('./lib/lang');
 const DOM = require('./lib/dom');
 const noop = lang.noop;
 
-function ExcelModel(props) {
+function ExcelModel (props) {
 
   this.origin = {
     onChange: props.onChange,
@@ -36,14 +36,19 @@ ExcelModel.prototype.initialize = function () {
     ]
   });
 
+  // header 的 key
   this.keys = this.getKeys(props.header);
 
+  // 将后端数据的header转为excel组件需要的格式{key:value}或[]
   header = this.getHeader(props.header);
+  // 将后端数据的行数据转为excel组件需要的格式
   rows = this.getRows(props.rows);
 
   // 数据太少,复制几份以作测试
   this.data = [header].concat(rows);
 
+  // 如果某一列的单元格需要自定义生成内容
+  // 可以通过注册勾子的方法来实现
   this.hooks = {};
   this.hooks[this.keys[0]] = {
     // keys的值为键
@@ -105,6 +110,7 @@ ExcelModel.prototype.getRows = function (list) {
   var keys = this.keys;
 
   lang.forEach(list, function (item, index) {
+    // 头两列是固定内容
     start = 2;
     row = [];
     column[index] = row;
@@ -120,6 +126,11 @@ ExcelModel.prototype.getRows = function (list) {
   return column;
 };
 
+/**
+ * 添加header
+ * @param header
+ * @param silent 如果 silent 为真值,则不会触发UI变化
+ */
 ExcelModel.prototype.addHeader = function (header, silent) {
   if (lang.isArray(header) && header.length) {
     this.props.header = this.props.header.concat(header);
@@ -206,6 +217,10 @@ ExcelModel.prototype.remove = function (start, end) {
   this.removeColumn(start, end, false);
 };
 
+/**
+ * model 发生变化时,需要重新生成 key
+ * @param silent
+ */
 ExcelModel.prototype.onChange = function (silent) {
   this.keys = this.getKeys(this.props.header);
   var rows = this.getRows(this.props.rows);
